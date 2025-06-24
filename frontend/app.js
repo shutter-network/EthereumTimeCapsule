@@ -468,8 +468,8 @@ function validateStep1() {
   const tags = document.getElementById('entry-actual-tags').value.trim(); // Actual tags
   const image = document.getElementById('entry-image').files[0];
   
-  if (!userName || !entryTitle || !story || !image) {
-    alert('Please fill in all required fields and select an image');
+  if (!userName || !entryTitle || !story) {
+    alert('Please fill in all required fields (name, title, and story). Image is optional.');
     return false;
   }
   
@@ -477,7 +477,7 @@ function validateStep1() {
   capsuleData.title = entryTitle;     // Title of the entry
   capsuleData.tags = tags || entryTitle;  // Use actual tags if provided, otherwise use title
   capsuleData.story = story;
-  capsuleData.image = image;
+  capsuleData.image = image; // Can be null if no image is uploaded
   capsuleData.userName = userName;    // Store the user name separately
   
   return true;
@@ -529,71 +529,74 @@ function populatePreview() {
     tagElement.textContent = `#${tag}`;
     tagsContainer.appendChild(tagElement);
   });
-
   // Create pixelated image preview
+  const canvas = document.getElementById('preview-canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  
+  img.onload = function() {
+    // Set canvas size to match the container
+    const containerWidth = 350;
+    const containerHeight = 200;
+    canvas.width = containerWidth;
+    canvas.height = containerHeight;
+    
+    // Clear canvas with light gray background
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(0, 0, containerWidth, containerHeight);
+    
+    // Calculate aspect ratio preserving dimensions
+    const imgAspectRatio = img.width / img.height;
+    const containerAspectRatio = containerWidth / containerHeight;
+    
+    let drawWidth, drawHeight, offsetX, offsetY;
+    
+    // Always fit the image within the container, never stretch
+    if (imgAspectRatio > containerAspectRatio) {
+      // Image is wider - fit to width
+      drawWidth = containerWidth;
+      drawHeight = containerWidth / imgAspectRatio;
+      offsetX = 0;
+      offsetY = (containerHeight - drawHeight) / 2;
+    } else {
+      // Image is taller - fit to height
+      drawHeight = containerHeight;
+      drawWidth = containerHeight * imgAspectRatio;
+      offsetX = (containerWidth - drawWidth) / 2;
+      offsetY = 0;
+    }
+    
+    // Create pixelated effect
+    const pixelSize = 4;
+    const pixelWidth = Math.ceil(drawWidth / pixelSize);
+    const pixelHeight = Math.ceil(drawHeight / pixelSize);
+    
+    // Create temporary canvas for pixelation
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = pixelWidth;
+    tempCanvas.height = pixelHeight;
+    
+    // Disable image smoothing for crisp pixels
+    tempCtx.imageSmoothingEnabled = false;
+    tempCtx.drawImage(img, 0, 0, pixelWidth, pixelHeight);
+    
+    // Disable smoothing on main canvas
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(tempCanvas, offsetX, offsetY, drawWidth, drawHeight);
+  };
+  
+  // Load the uploaded image or default image
   if (capsuleData.image) {
-    const canvas = document.getElementById('preview-canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    
-    img.onload = function() {
-      // Set canvas size to match the container
-      const containerWidth = 350;
-      const containerHeight = 200;
-      canvas.width = containerWidth;
-      canvas.height = containerHeight;
-      
-      // Clear canvas with light gray background
-      ctx.fillStyle = '#f0f0f0';
-      ctx.fillRect(0, 0, containerWidth, containerHeight);
-      
-      // Calculate aspect ratio preserving dimensions
-      const imgAspectRatio = img.width / img.height;
-      const containerAspectRatio = containerWidth / containerHeight;
-      
-      let drawWidth, drawHeight, offsetX, offsetY;
-      
-      // Always fit the image within the container, never stretch
-      if (imgAspectRatio > containerAspectRatio) {
-        // Image is wider - fit to width
-        drawWidth = containerWidth;
-        drawHeight = containerWidth / imgAspectRatio;
-        offsetX = 0;
-        offsetY = (containerHeight - drawHeight) / 2;
-      } else {
-        // Image is taller - fit to height
-        drawHeight = containerHeight;
-        drawWidth = containerHeight * imgAspectRatio;
-        offsetX = (containerWidth - drawWidth) / 2;
-        offsetY = 0;
-      }
-      
-      // Create pixelated effect
-      const pixelSize = 4;
-      const pixelWidth = Math.ceil(drawWidth / pixelSize);
-      const pixelHeight = Math.ceil(drawHeight / pixelSize);
-      
-      // Create temporary canvas for pixelation
-      const tempCanvas = document.createElement('canvas');
-      const tempCtx = tempCanvas.getContext('2d');
-      tempCanvas.width = pixelWidth;
-      tempCanvas.height = pixelHeight;
-      
-      // Disable image smoothing for crisp pixels
-      tempCtx.imageSmoothingEnabled = false;
-      tempCtx.drawImage(img, 0, 0, pixelWidth, pixelHeight);
-      
-      // Disable smoothing on main canvas
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(tempCanvas, offsetX, offsetY, drawWidth, drawHeight);
-    };
-    
     // Load the uploaded image
     const reader = new FileReader();
     reader.onload = function(e) {
       img.src = e.target.result;
     };
     reader.readAsDataURL(capsuleData.image);
+  } else {
+    // Load default image
+    img.src = 'default.jpg';
   }
 
   // Start encryption in the background
@@ -628,12 +631,27 @@ async function startEncryptionInBackground() {
     document.getElementById('preview-encryption-progress').style.width = '10%';    // 1. Get Shutter identity and encryption metadata from backend
     document.getElementById('preview-encryption-status').textContent = 'Getting encryption parameters...';
     const revealTimestamp = Math.floor(Date.now() / 1000) + REVEAL_TIME_CONFIG[REVEAL_TIME_CONFIG.current];
+      // Prepare image for encryption - use uploaded image or default
+    let imageToEncrypt = capsuleData.image;
+    
+    if (!imageToEncrypt) {
+      // Fetch default image and convert to File object
+      document.getElementById('preview-encryption-status').textContent = 'Loading default image...';
+      try {
+        const defaultImageResponse = await fetch('default.jpg');
+        const defaultImageBlob = await defaultImageResponse.blob();
+        imageToEncrypt = new File([defaultImageBlob], 'default.jpg', { type: defaultImageBlob.type });
+      } catch (error) {
+        console.error('Failed to load default image:', error);
+        throw new Error('Failed to load default image. Please upload your own image or ensure default.jpg is available.');
+      }
+    }
     
     const fd = new FormData();
     fd.append("title", capsuleData.title);
     fd.append("tags", capsuleData.tags);
     fd.append("story", capsuleData.story);
-    fd.append("image", capsuleData.image);
+    fd.append("image", imageToEncrypt);
     fd.append("revealTimestamp", revealTimestamp);
       const encResponse = await window.axios.post(`${getApiBaseUrl()}/submit_capsule`, fd, {
       headers: { "Content-Type": "multipart/form-data" }
@@ -662,10 +680,9 @@ async function startEncryptionInBackground() {
     );
     
     document.getElementById('preview-encryption-progress').style.width = '70%';
-    
-    // 4. Encrypt image
+      // 4. Encrypt image
     document.getElementById('preview-encryption-status').textContent = 'Encrypting image...';
-    const imgHex = await fileToHex(capsuleData.image);
+    const imgHex = await fileToHex(imageToEncrypt);
     const encryptedImg = await window.shutter.encryptData(
       imgHex,
       encResponse.data.shutterIdentity,
@@ -952,68 +969,71 @@ function populateCompletion() {
     tagElement.textContent = `#${tag}`;
     finalTagsContainer.appendChild(tagElement);
   });
-
   // Recreate pixelated image in final preview
+  const canvas = document.getElementById('final-preview-canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  
+  img.onload = function() {
+    // Set canvas size to match the container
+    const containerWidth = 350;
+    const containerHeight = 200;
+    canvas.width = containerWidth;
+    canvas.height = containerHeight;
+    
+    // Clear canvas with light gray background
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(0, 0, containerWidth, containerHeight);
+    
+    // Calculate aspect ratio preserving dimensions
+    const imgAspectRatio = img.width / img.height;
+    const containerAspectRatio = containerWidth / containerHeight;
+    
+    let drawWidth, drawHeight, offsetX, offsetY;
+    
+    if (imgAspectRatio > containerAspectRatio) {
+      drawWidth = containerWidth;
+      drawHeight = containerWidth / imgAspectRatio;
+      offsetX = 0;
+      offsetY = (containerHeight - drawHeight) / 2;
+    } else {
+      drawHeight = containerHeight;
+      drawWidth = containerHeight * imgAspectRatio;
+      offsetX = (containerWidth - drawWidth) / 2;
+      offsetY = 0;
+    }
+    
+    // Create pixelated effect
+    const pixelSize = 4;
+    const pixelWidth = Math.ceil(drawWidth / pixelSize);
+    const pixelHeight = Math.ceil(drawHeight / pixelSize);
+    
+    // Create temporary canvas for pixelation
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = pixelWidth;
+    tempCanvas.height = pixelHeight;
+    
+    // Disable image smoothing for crisp pixels
+    tempCtx.imageSmoothingEnabled = false;
+    tempCtx.drawImage(img, 0, 0, pixelWidth, pixelHeight);
+    
+    // Disable smoothing on main canvas
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(tempCanvas, offsetX, offsetY, drawWidth, drawHeight);
+  };
+  
+  // Load the uploaded image or default image
   if (capsuleData.image) {
-    const canvas = document.getElementById('final-preview-canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    
-    img.onload = function() {
-      // Set canvas size to match the container
-      const containerWidth = 350;
-      const containerHeight = 200;
-      canvas.width = containerWidth;
-      canvas.height = containerHeight;
-      
-      // Clear canvas with light gray background
-      ctx.fillStyle = '#f0f0f0';
-      ctx.fillRect(0, 0, containerWidth, containerHeight);
-      
-      // Calculate aspect ratio preserving dimensions
-      const imgAspectRatio = img.width / img.height;
-      const containerAspectRatio = containerWidth / containerHeight;
-      
-      let drawWidth, drawHeight, offsetX, offsetY;
-      
-      if (imgAspectRatio > containerAspectRatio) {
-        drawWidth = containerWidth;
-        drawHeight = containerWidth / imgAspectRatio;
-        offsetX = 0;
-        offsetY = (containerHeight - drawHeight) / 2;
-      } else {
-        drawHeight = containerHeight;
-        drawWidth = containerHeight * imgAspectRatio;
-        offsetX = (containerWidth - drawWidth) / 2;
-        offsetY = 0;
-      }
-      
-      // Create pixelated effect
-      const pixelSize = 4;
-      const pixelWidth = Math.ceil(drawWidth / pixelSize);
-      const pixelHeight = Math.ceil(drawHeight / pixelSize);
-      
-      // Create temporary canvas for pixelation
-      const tempCanvas = document.createElement('canvas');
-      const tempCtx = tempCanvas.getContext('2d');
-      tempCanvas.width = pixelWidth;
-      tempCanvas.height = pixelHeight;
-      
-      // Disable image smoothing for crisp pixels
-      tempCtx.imageSmoothingEnabled = false;
-      tempCtx.drawImage(img, 0, 0, pixelWidth, pixelHeight);
-      
-      // Disable smoothing on main canvas
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(tempCanvas, offsetX, offsetY, drawWidth, drawHeight);
-    };
-    
     // Load the uploaded image
     const reader = new FileReader();
     reader.onload = function(e) {
       img.src = e.target.result;
     };
     reader.readAsDataURL(capsuleData.image);
+  } else {
+    // Load default image
+    img.src = 'default.jpg';
   }
 
   // Enable final ciphertext copy functionality
