@@ -473,6 +473,12 @@ function validateStep1() {
     return false;
   }
   
+  // Check character limit for story
+  if (story.length > 280) {
+    alert('Your message is too long! Please keep it under 280 characters.');
+    return false;
+  }
+  
   // Save data (note: we're using entry-tags for the actual title, and entry-title for the user name)
   capsuleData.title = entryTitle;     // Title of the entry
   capsuleData.tags = tags || entryTitle;  // Use actual tags if provided, otherwise use title
@@ -1218,6 +1224,40 @@ function setupEventListeners() {
   // Navigation buttons
   document.getElementById('step1-next-btn').onclick = proceedFromStep1;
   document.getElementById('step2-confirm-btn').onclick = confirmPreview;
+  
+  // Character counter for story text
+  const storyTextarea = document.getElementById('entry-story');
+  const charCountElement = document.getElementById('story-char-count');
+  const charCountContainer = document.querySelector('.character-counter');
+  
+  if (storyTextarea && charCountElement) {
+    // Update character count on input
+    storyTextarea.addEventListener('input', function() {
+      const currentLength = this.value.length;
+      const maxLength = 280;
+      
+      charCountElement.textContent = currentLength;
+      
+      // Update styling based on character count
+      if (currentLength > maxLength * 0.9) { // 90% of limit (252 chars)
+        charCountContainer.classList.add('warning');
+        charCountContainer.classList.remove('error');
+      } else {
+        charCountContainer.classList.remove('warning', 'error');
+      }
+      
+      if (currentLength >= maxLength) {
+        charCountContainer.classList.add('error');
+        charCountContainer.classList.remove('warning');
+      }
+    });
+    
+    // Initialize character count on page load
+    const initialLength = storyTextarea.value.length;
+    charCountElement.textContent = initialLength;
+  }
+  
+  // ...existing code...
   
   // Completion step buttons
   const followXBtn = document.getElementById('follow-x-btn');

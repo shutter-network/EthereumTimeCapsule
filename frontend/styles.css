@@ -187,6 +187,21 @@ body {
   font-size: 0.9rem;
 }
 
+.character-counter {
+  text-align: right;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.character-counter.warning {
+  color: #f39c12;
+}
+
+.character-counter.error {
+  color: #e74c3c;
+}
+
 /* Preview Card */
 .preview-card {
   background: #f8f9fa;
