@@ -33,13 +33,27 @@ try:
         PINATA_ENABLED = False
         PINATA_VERSION = None
 except ImportError:
-    print("Warning: config.py not found, Pinata integration disabled")
-    PINATA_ENABLED = False
-    PINATA_VERSION = None
-    PINATA_API_KEY = None
-    PINATA_SECRET_API_KEY = None
-    PINATA_GATEWAY = ""
-    PINATA_JWT = None
+    print("Warning: config.py not found, trying environment variables...")
+    # Fallback to environment variables for Heroku deployment
+    PINATA_JWT = os.environ.get('PINATA_JWT')
+    PINATA_API_KEY = os.environ.get('PINATA_API_KEY')
+    PINATA_SECRET_API_KEY = os.environ.get('PINATA_SECRET_API_KEY')
+    PINATA_GATEWAY = os.environ.get('PINATA_GATEWAY', 'https://gateway.pinata.cloud')
+    
+    # Check for V3 API (JWT) first, then fall back to V2 API
+    if PINATA_JWT and PINATA_JWT != "your_pinata_jwt_token_here":
+        PINATA_ENABLED = True
+        PINATA_VERSION = "v3"
+        print("✅ Pinata V3 (JWT) configured from environment")
+    elif PINATA_API_KEY and PINATA_SECRET_API_KEY and PINATA_API_KEY != "your_pinata_api_key_here":
+        PINATA_ENABLED = True
+        PINATA_VERSION = "v2"
+        print("✅ Pinata V2 (API Keys) configured from environment")
+    else:
+        PINATA_ENABLED = False
+        PINATA_VERSION = None
+        print("❌ Pinata not configured - no valid credentials found")
+    
     IS_PRODUCTION = os.environ.get('HEROKU') is not None
 
 SHUTTER_API_BASE   = "https://shutter-api.chiado.staging.shutter.network/api"
