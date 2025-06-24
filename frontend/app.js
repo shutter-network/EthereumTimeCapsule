@@ -1120,31 +1120,46 @@ let selectedTags = [];
 const MAX_TAGS = 2;
 
 function initTagsDropdown() {
+  console.log('🏷️ Initializing tags dropdown...');
   const dropdown = document.getElementById('tags-dropdown');
   const dropdownMenu = document.getElementById('dropdown-menu');
   const selectedTagsContainer = document.getElementById('selected-tags');
   const hiddenInput = document.getElementById('entry-actual-tags');
   
+  console.log('Elements found:', {
+    dropdown: !!dropdown,
+    dropdownMenu: !!dropdownMenu,
+    selectedTagsContainer: !!selectedTagsContainer,
+    hiddenInput: !!hiddenInput
+  });
+  
   if (!dropdown || !dropdownMenu || !selectedTagsContainer || !hiddenInput) {
+    console.error('❌ Tags dropdown elements not found, skipping initialization');
     return; // Elements not found, skip initialization
   }
   
-  // Toggle dropdown
+  console.log('✅ All elements found, setting up event listeners...');
+    // Toggle dropdown
   dropdown.addEventListener('click', function(e) {
+    console.log('🖱️ Dropdown clicked');
     e.stopPropagation();
     const isOpen = dropdownMenu.classList.contains('show');
     
     if (isOpen) {
+      console.log('Closing dropdown');
       closeDropdown();
     } else {
+      console.log('Opening dropdown');
       openDropdown();
     }
   });
   
   // Handle tag selection
   dropdownMenu.addEventListener('click', function(e) {
+    console.log('🏷️ Tag clicked:', e.target);
     if (e.target.classList.contains('dropdown-item') && !e.target.classList.contains('disabled')) {
       const tag = e.target.getAttribute('data-tag');
+      console.log('Selected tag:', tag);
       toggleTag(tag);
       e.stopPropagation();
     }
@@ -1430,14 +1445,10 @@ function setupEventListeners() {
     };
     walletStatus.style.cursor = 'pointer';
   }
-  
-  // Progress step navigation
+    // Progress step navigation
   document.querySelectorAll('.progress-step').forEach((step, index) => {
     step.onclick = () => goToStep(index + 1);
   });
-  
-  // Tags dropdown initialization
-  initTagsDropdown();
 }
 
 // Expose functions globally for HTML onclick handlers
