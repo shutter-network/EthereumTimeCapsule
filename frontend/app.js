@@ -1115,6 +1115,155 @@ function viewAllCapsules() {
   window.location.href = 'gallery.html';
 }
 
+// =============  TAGS DROPDOWN FUNCTIONALITY  =============
+let selectedTags = [];
+const MAX_TAGS = 2;
+
+function initTagsDropdown() {
+  const dropdown = document.getElementById('tags-dropdown');
+  const dropdownMenu = document.getElementById('dropdown-menu');
+  const selectedTagsContainer = document.getElementById('selected-tags');
+  const hiddenInput = document.getElementById('entry-actual-tags');
+  
+  if (!dropdown || !dropdownMenu || !selectedTagsContainer || !hiddenInput) {
+    return; // Elements not found, skip initialization
+  }
+  
+  // Toggle dropdown
+  dropdown.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const isOpen = dropdownMenu.classList.contains('show');
+    
+    if (isOpen) {
+      closeDropdown();
+    } else {
+      openDropdown();
+    }
+  });
+  
+  // Handle tag selection
+  dropdownMenu.addEventListener('click', function(e) {
+    if (e.target.classList.contains('dropdown-item') && !e.target.classList.contains('disabled')) {
+      const tag = e.target.getAttribute('data-tag');
+      toggleTag(tag);
+      e.stopPropagation();
+    }
+  });
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!dropdown.contains(e.target)) {
+      closeDropdown();
+    }
+  });
+  
+  // Initialize display
+  updateTagsDisplay();
+  updateDropdownItems();
+}
+
+function openDropdown() {
+  const dropdown = document.getElementById('tags-dropdown');
+  const dropdownMenu = document.getElementById('dropdown-menu');
+  
+  dropdown.classList.add('active');
+  dropdownMenu.classList.add('show');
+  updateDropdownItems();
+}
+
+function closeDropdown() {
+  const dropdown = document.getElementById('tags-dropdown');
+  const dropdownMenu = document.getElementById('dropdown-menu');
+  
+  dropdown.classList.remove('active');
+  dropdownMenu.classList.remove('show');
+}
+
+function toggleTag(tag) {
+  const index = selectedTags.indexOf(tag);
+  
+  if (index === -1) {
+    // Add tag if not selected and under limit
+    if (selectedTags.length < MAX_TAGS) {
+      selectedTags.push(tag);
+    }
+  } else {
+    // Remove tag if already selected
+    selectedTags.splice(index, 1);
+  }
+  
+  updateTagsDisplay();
+  updateDropdownItems();
+  updateHiddenInput();
+}
+
+function removeTag(tag) {
+  const index = selectedTags.indexOf(tag);
+  if (index !== -1) {
+    selectedTags.splice(index, 1);
+    updateTagsDisplay();
+    updateDropdownItems();
+    updateHiddenInput();
+  }
+}
+
+function updateTagsDisplay() {
+  const selectedTagsContainer = document.getElementById('selected-tags');
+  if (!selectedTagsContainer) return;
+  
+  selectedTagsContainer.innerHTML = '';
+  
+  if (selectedTags.length === 0) {
+    const placeholder = document.createElement('span');
+    placeholder.className = 'tags-placeholder';
+    placeholder.textContent = 'Select tags...';
+    selectedTagsContainer.appendChild(placeholder);
+  } else {
+    selectedTags.forEach(tag => {
+      const tagBubble = document.createElement('div');
+      tagBubble.className = 'tag-bubble';
+      
+      const tagText = document.createElement('span');
+      tagText.textContent = tag;
+      
+      const removeBtn = document.createElement('span');
+      removeBtn.className = 'tag-remove';
+      removeBtn.textContent = '×';
+      removeBtn.onclick = (e) => {
+        e.stopPropagation();
+        removeTag(tag);
+      };
+      
+      tagBubble.appendChild(tagText);
+      tagBubble.appendChild(removeBtn);
+      selectedTagsContainer.appendChild(tagBubble);
+    });
+  }
+}
+
+function updateDropdownItems() {
+  const dropdownItems = document.querySelectorAll('.dropdown-item');
+  
+  dropdownItems.forEach(item => {
+    const tag = item.getAttribute('data-tag');
+    const isSelected = selectedTags.includes(tag);
+    const canSelect = selectedTags.length < MAX_TAGS || isSelected;
+    
+    if (!canSelect && !isSelected) {
+      item.classList.add('disabled');
+    } else {
+      item.classList.remove('disabled');
+    }
+  });
+}
+
+function updateHiddenInput() {
+  const hiddenInput = document.getElementById('entry-actual-tags');
+  if (hiddenInput) {
+    hiddenInput.value = selectedTags.join(', ');
+  }
+}
+
 // =============  HELPER FUNCTIONS  =============
 // Wait for Shutter WASM to be ready
 async function ensureShutterReady() {
@@ -1221,6 +1370,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 });
 
 function setupEventListeners() {
+  // Initialize tags dropdown
+  initTagsDropdown();
+  
   // Navigation buttons
   document.getElementById('step1-next-btn').onclick = proceedFromStep1;
   document.getElementById('step2-confirm-btn').onclick = confirmPreview;
@@ -1257,8 +1409,6 @@ function setupEventListeners() {
     charCountElement.textContent = initialLength;
   }
   
-  // ...existing code...
-  
   // Completion step buttons
   const followXBtn = document.getElementById('follow-x-btn');
   const shareXBtn = document.getElementById('share-x-btn');
@@ -1285,6 +1435,9 @@ function setupEventListeners() {
   document.querySelectorAll('.progress-step').forEach((step, index) => {
     step.onclick = () => goToStep(index + 1);
   });
+  
+  // Tags dropdown initialization
+  initTagsDropdown();
 }
 
 // Expose functions globally for HTML onclick handlers

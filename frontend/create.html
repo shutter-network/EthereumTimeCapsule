@@ -951,13 +951,155 @@
       font-size: 20px;
       background: var(--eth2);
       border-radius: 8px;
-    }
-
-    .wallet-name {
+    }    .wallet-name {
       color: var(--eth3);
       font-family: var(--small-button-font-family);
       font-size: 16px;
       font-weight: var(--small-button-font-weight);
+    }
+
+    /* Tags Dropdown Styles */
+    .tags-dropdown-container {
+      position: relative;
+    }
+
+    .tags-dropdown {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 44px;
+      transition: border-color 0.3s ease;
+    }
+
+    .tags-dropdown:hover {
+      border-color: #4F46E5;
+    }
+
+    .tags-dropdown.active {
+      border-color: #4F46E5;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .selected-tags {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .tags-placeholder {
+      color: #999;
+      font-size: 14px;
+    }
+
+    .tag-bubble {
+      background: #4F46E5;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag-remove {
+      cursor: pointer;
+      font-weight: bold;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+    }
+
+    .tag-remove:hover {
+      opacity: 1;
+    }
+
+    .dropdown-arrow {
+      font-size: 12px;
+      color: #666;
+      transition: transform 0.3s ease;
+    }
+
+    .tags-dropdown.active .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #4F46E5;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      border-bottom: none;
+      max-height: 240px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 12px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      font-size: 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .dropdown-item:hover {
+      background: #f8f9ff;
+    }
+
+    .dropdown-item.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #f9f9f9;
+    }
+
+    .dropdown-item.disabled:hover {
+      background: #f9f9f9;
+    }    /* Mobile optimizations */
+    @media (max-width: 480px) {
+      .dropdown-menu {
+        max-height: 200px;
+      }
+      
+      .dropdown-item {
+        padding: 14px 12px;
+        font-size: 14px;
+      }
+    }
+
+    /* Character Counter Styles */
+    .character-counter {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+      text-align: right;
+      transition: color 0.3s ease;
+    }
+
+    .character-counter.warning {
+      color: #f59e0b;
+    }
+
+    .character-counter.error {
+      color: #ef4444;
     }
   </style>
 </head>
@@ -1032,10 +1174,34 @@
               <div class="upload-subtext">max 2Mb, png, 16:9 - or we'll use a default image</div>
             </div>
             <input type="file" id="entry-image" class="upload-input" accept="image/*">
-          </div>
-            <div class="form-group">
+          </div>          <div class="form-group">
             <label class="form-label">Tags (up to 2)</label>
-            <input type="text" id="entry-actual-tags" class="form-input" placeholder="Enter tags...">
+            <div class="tags-dropdown-container">
+              <div class="tags-dropdown" id="tags-dropdown">
+                <div class="selected-tags" id="selected-tags">
+                  <span class="tags-placeholder">Select tags...</span>
+                </div>
+                <div class="dropdown-arrow">▼</div>
+              </div>
+              <div class="dropdown-menu" id="dropdown-menu">
+                <div class="dropdown-item" data-tag="Life & Family">👨‍👩‍👧‍👦 Life & Family</div>
+                <div class="dropdown-item" data-tag="Love & Relationships">💕 Love & Relationships</div>
+                <div class="dropdown-item" data-tag="Dreams & Goals">🌟 Dreams & Goals</div>
+                <div class="dropdown-item" data-tag="Travel & Adventure">✈️ Travel & Adventure</div>
+                <div class="dropdown-item" data-tag="Career & Success">💼 Career & Success</div>
+                <div class="dropdown-item" data-tag="Memories & Nostalgia">📷 Memories & Nostalgia</div>
+                <div class="dropdown-item" data-tag="Personal Growth">🌱 Personal Growth</div>
+                <div class="dropdown-item" data-tag="Technology & Future">🚀 Technology & Future</div>
+                <div class="dropdown-item" data-tag="Art & Creativity">🎨 Art & Creativity</div>
+                <div class="dropdown-item" data-tag="Health & Wellness">🏃‍♂️ Health & Wellness</div>
+                <div class="dropdown-item" data-tag="Wisdom & Advice">💡 Wisdom & Advice</div>
+                <div class="dropdown-item" data-tag="Friendship & Community">🤝 Friendship & Community</div>
+                <div class="dropdown-item" data-tag="Celebrations & Milestones">🎉 Celebrations & Milestones</div>
+                <div class="dropdown-item" data-tag="Hobbies & Interests">🎯 Hobbies & Interests</div>
+                <div class="dropdown-item" data-tag="Hopes & Wishes">🌈 Hopes & Wishes</div>
+              </div>
+            </div>
+            <input type="hidden" id="entry-actual-tags" value="">
           </div>
         </form>
       </div>
