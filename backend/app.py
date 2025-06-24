@@ -10,8 +10,7 @@ import hashlib
 from database import CapsuleDatabase
 from blockchain_sync import BlockchainSyncService
 
-# Import S3 storage service
-from s3_storage import s3_storage
+# Note: S3 storage removed - using IPFS + Pinata only
 
 # Import private config
 try:
@@ -281,23 +280,11 @@ def submit_capsule():
 
         # Use a random hex string as the preview filename
         preview_id = secrets.token_hex(16)
-        
-        # Save pixelated image locally (for backwards compatibility)
+          # Save pixelated image locally (for backwards compatibility)
         pixelated_dir = "pixelated"
         os.makedirs(pixelated_dir, exist_ok=True)
         pixelated_path = os.path.join(pixelated_dir, f"{preview_id}.png")
         pixelated.save(pixelated_path, format="PNG")
-        
-        # Also upload pixelated image to S3 for persistent storage
-        s3_pixelated_url = None
-        if s3_storage.is_available():
-            try:
-                s3_pixelated_url = s3_storage.upload_pixelated_image(preview_id, pixelated_data)
-                print(f"Uploaded pixelated image to S3: {s3_pixelated_url}")
-            except Exception as s3_error:
-                print(f"Failed to upload pixelated image to S3: {s3_error}")
-        else:
-            print("S3 storage not available, using local storage only")
 
         # 2) Register Shutter identity
         reveal_ts = int(request.form.get("revealTimestamp") or time.time() + 30)
@@ -461,28 +448,12 @@ def upload_ipfs():
 @app.route("/pixelated/<cid>")
 def pixelated(cid):
     """
-    Serve pixelated images from S3 or local storage
-    Priority: S3 > Local > Generate on-the-fly
+    Serve pixelated images from IPFS storage or local storage
+    Priority: Local > IPFS > Generate on-the-fly
     """
     print(f"Pixelated request for CID: {cid}")
-    print(f"S3 storage available: {s3_storage.is_available()}")
-      # First, try to get from S3 if available
-    if s3_storage.is_available():
-        try:
-            print(f"Attempting to download pixelated image directly from S3 for CID: {cid}")
-            # Try to download directly instead of checking if it exists first
-            s3_image_data = s3_storage.download_pixelated_image(cid)
-            if s3_image_data:
-                print(f"Successfully downloaded pixelated image from S3: {len(s3_image_data)} bytes")
-                return s3_image_data, 200, {'Content-Type': 'image/png'}
-            else:
-                print(f"Failed to download pixelated image from S3 (file may not exist)")
-        except Exception as s3_error:
-            print(f"Error accessing S3 for pixelated image: {s3_error}")
-    else:
-        print("S3 storage not available, skipping S3 check")
     
-    # Fallback to local storage
+    # First, try local storage
     local_path = os.path.join("pixelated", f"{cid}.png")
     print(f"Checking local pixelated file: {local_path}")
     
@@ -491,15 +462,6 @@ def pixelated(cid):
         try:
             with open(local_path, 'rb') as f:
                 file_data = f.read()
-            
-            # If S3 is available, upload this image for future use
-            if s3_storage.is_available():
-                try:
-                    s3_url = s3_storage.upload_pixelated_image(cid, file_data)
-                    print(f"Uploaded existing pixelated image to S3: {s3_url}")
-                except Exception as upload_error:
-                    print(f"Failed to upload existing pixelated image to S3: {upload_error}")
-            
             return file_data, 200, {'Content-Type': 'image/png'}
         except Exception as e:
             print(f"Error reading local pixelated file: {e}")
@@ -524,18 +486,8 @@ def pixelated(cid):
                 buf = io.BytesIO()
                 pixelated_image.save(buf, format="PNG")
                 pixelated_data = buf.getvalue()
-                  # Upload to S3 if available
-                if s3_storage.is_available():
-                    try:
-                        s3_url = s3_storage.upload_pixelated_image(cid, pixelated_data)
-                        print(f"Generated and uploaded pixelated image to S3: {s3_url}")
-                        # Serve the generated image directly instead of redirecting
-                        return pixelated_data, 200, {'Content-Type': 'image/png'}
-                    except Exception as s3_error:
-                        print(f"Failed to upload generated pixelated image to S3: {s3_error}")
-                        # Continue to serve locally if S3 upload fails
                 
-                # Save locally for backup
+                # Save locally for future requests
                 try:
                     os.makedirs("pixelated", exist_ok=True)
                     with open(local_path, 'wb') as f:
@@ -616,19 +568,9 @@ def save_pixelated():
         # Read the pixelated image data
         with open(src, 'rb') as f:
             pixelated_data = f.read()
-            
-        # Rename locally
+              # Rename locally
         os.rename(src, dst)
         print(f"Successfully renamed {src} to {dst}")
-        
-        # Upload to S3 if available
-        if s3_storage.is_available():
-            try:
-                s3_url = s3_storage.upload_pixelated_image(cid, pixelated_data)
-                print(f"Uploaded pixelated image to S3: {s3_url}")
-            except Exception as s3_error:
-                print(f"Failed to upload pixelated image to S3: {s3_error}")
-                # Don't fail the request if S3 upload fails
         
         return {"ok": True}
     except Exception as e:
@@ -896,49 +838,6 @@ def test_speed_comparison():
     except Exception as e:
         print("Error in /api/test/speed-comparison:", e)
         return {"error": str(e)}, 500
-
-@app.route("/debug/aws")
-def debug_aws():
-    """Debug AWS credentials and S3 configuration"""
-    if not IS_PRODUCTION:
-        return {"error": "Debug endpoint only available in production"}, 403
-    
-    debug_info = {
-        "aws_configured": bool(os.environ.get('AWS_ACCESS_KEY_ID')),
-        "aws_access_key_id": os.environ.get('AWS_ACCESS_KEY_ID', 'Not set')[:10] + "..." if os.environ.get('AWS_ACCESS_KEY_ID') else 'Not set',
-        "aws_secret_key_configured": bool(os.environ.get('AWS_SECRET_ACCESS_KEY')),
-        "aws_secret_key_length": len(os.environ.get('AWS_SECRET_ACCESS_KEY', '')) if os.environ.get('AWS_SECRET_ACCESS_KEY') else 0,
-        "aws_region": os.environ.get('AWS_REGION', 'Not set'),
-        "aws_bucket": os.environ.get('AWS_S3_BUCKET_NAME', 'Not set'),
-        "s3_storage_available": s3_storage is not None and s3_storage.is_available() if s3_storage else False,
-        "timestamp": int(time.time())
-    }
-      # Test S3 connectivity
-    if s3_storage and s3_storage.is_available():
-        try:
-            # Test using the same approach as our S3StorageService
-            import boto3
-            from botocore.config import Config
-            
-            config = Config(
-                retries={
-                    'max_attempts': 3,
-                    'mode': 'adaptive'
-                }
-            )
-            
-            # Use default credential chain like our service
-            client = boto3.client('s3', region_name=os.environ.get('AWS_REGION'), config=config)
-            response = client.list_objects_v2(Bucket=os.environ.get('AWS_S3_BUCKET_NAME'), MaxKeys=1)
-            debug_info["s3_test_result"] = "success"
-            debug_info["s3_test_objects"] = response.get('KeyCount', 0)
-        except Exception as e:
-            debug_info["s3_test_result"] = "failed"
-            debug_info["s3_test_error"] = str(e)
-    else:
-        debug_info["s3_test_result"] = "storage_unavailable"
-    
-    return jsonify(debug_info)
 
 @app.route("/debug/contract")
 def debug_contract():

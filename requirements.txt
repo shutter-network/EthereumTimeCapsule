@@ -4,5 +4,4 @@ Pillow==10.0.1
 requests==2.31.0
 web3==6.11.0
 gunicorn==21.2.0
-boto3==1.35.36
 urllib3==1.26.18

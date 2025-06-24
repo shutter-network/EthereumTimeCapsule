@@ -35,8 +35,8 @@ Ethereum Time Capsule is a mobile-first DApp that lets anyone lock an image and 
 * **Private fields:** story text + image; both threshold-encrypted via **Shutter Network**.
 * **Storage:**
   * Encrypted story → on-chain (bytes) in the `TimeCapsule` contract.
-  * Encrypted image → IPFS with local storage and optional Pinata pinning.
-  * Pixelated preview generated server-side for immediate viewing.
+  * Encrypted image → IPFS with local storage and Pinata cloud pinning.
+  * Pixelated preview → IPFS with local storage and Pinata cloud pinning.
 * **Reveal:** When Shutter's keyper network publishes the decryption key (July 30, 2025), anyone can reveal capsules; the story becomes permanent public data on the contract.
 * **User Experience:** Modern mobile-first interface with 4-step submission flow and comprehensive gallery.
 
@@ -81,8 +81,8 @@ The result is a censorship-resistant, provably time-locked "digital bottle in th
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
 | **Smart Contract**       | Solidity ^0.8.0 • Gnosis Chain (Mainnet ID 100)                                                                  |
 | **Threshold Encryption** | Shutter Network BLST implementation • Custom WASM integration                                                     |
-| **Backend**              | Python 3.11+ • Flask 2.x • SQLite Database • Pillow • ipfshttpclient • Pinata SDK                               |
-| **Storage**              | Local IPFS daemon + Pinata cloud pinning • Local file system caching                                             |
+| **Backend**              | Python 3.11+ • Flask 2.x • SQLite Database • Pillow • requests • Pinata integration                            |
+| **Storage**              | IPFS (local daemon) + Pinata cloud pinning • Local file system caching                                          |
 | **Frontend**             | **Mobile-First Design** • Vanilla HTML/CSS/JS • Figma-inspired UI<br>Ethers.js 5 • BLST WASM • WalletConnect    |
 | **Design System**        | Inter & Space Grotesk fonts • Consistent CSS variables • 400px mobile container                                   |
 | **Development**          | Static file server • Live reload capabilities                                                                      |
@@ -102,7 +102,7 @@ EthereumTimeCapsule/
 │  ├─ config.py                 # Configuration management
 │  ├─ capsules.db              # SQLite database file
 │  ├─ ipfs_storage/            # Local IPFS file cache
-│  └─ pixelated/               # Pixelated image previews
+│  └─ pixelated/               # Pixelated image previews (local cache)
 │
 ├─ frontend/
 │  ├─ index.html               # Homepage with content sections
@@ -120,16 +120,11 @@ EthereumTimeCapsule/
 ├─ contracts/
 │  └─ TimeCapsule.sol          # Main smart contract
 │
-├─ scripts/
-│  └─ deploy.js                # Hardhat deployment script
-│
-├─ tests/
-│  ├─ test_ipfs.py             # IPFS functionality tests
-│  ├─ test_pinata_public.py    # Pinata integration tests
-│  └─ test_frontend_integration.py # End-to-end tests
-│
-├─ requirements.txt            # Python dependencies
-├─ README.md                   # This file
+├─ Procfile                    # Heroku deployment configuration
+├─ heroku_app.py              # Heroku entry point
+├─ runtime.txt                # Python version for Heroku
+├─ requirements.txt           # Python dependencies
+├─ README.md                  # This file
 └─ PINATA_INTEGRATION_SUMMARY.md # Pinata setup guide
 ```
 
@@ -144,7 +139,6 @@ EthereumTimeCapsule/
 | **Node.js**                                    | 18.x            | For Hardhat & frontend development      |
 | **Python**                                     | 3.11            | Backend with modern async support       |
 | **pip**                                        | 23+             | Modern dependency resolution             |
-| **IPFS daemon**                                | 0.21+           | Local storage: `ipfs daemon --init`     |
 | **MetaMask / WalletConnect-compatible wallet** | Latest          | On Gnosis Chain network                  |
 
 ---
@@ -194,16 +188,13 @@ venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Start IPFS daemon (separate terminal)
-ipfs daemon --init
-
 # Run Flask backend
 python backend/app.py
 ```
 
 **Key Features:**
 - **SQLite Database:** Persistent storage for capsule metadata
-- **IPFS Integration:** Local daemon + optional Pinata cloud pinning
+- **IPFS Integration:** Local storage + Pinata cloud pinning for both encrypted and pixelated images
 - **Image Processing:** Automatic pixelation for previews
 - **Shutter Encryption:** Server-side encryption before storage
 - **Blockchain Sync:** Automatic event synchronization
@@ -214,8 +205,8 @@ python backend/app.py
 | -------------------- | ------ | --------------------------------------------------------------------- |
 | `/submit_capsule`    | POST   | Complete capsule submission with encryption & storage                 |
 | `/api/capsules`      | GET    | Retrieve capsules with pagination and filtering                       |
-| `/ipfs/<cid>`        | GET    | Serve IPFS content with fallback handling                            |
-| `/pixelated/<cid>`   | GET    | Serve pixelated image previews                                        |
+| `/ipfs/<cid>`        | GET    | Serve IPFS content with Pinata fallback                              |
+| `/pixelated/<cid>`   | GET    | Serve pixelated image previews from IPFS or local cache             |
 | `/system_info`       | GET    | System configuration and capabilities                                 |
 
 ---
@@ -295,9 +286,9 @@ FLASK_DEBUG=true
 | Phase | Step | What Happens |
 | ----- | ---- | ------------ |
 | **Submission** | User fills form | Title, tags, story text, and image upload |
-| | Background processing | Server pixelates image, registers Shutter identity |
+| | Background processing | Server pixelates image, stores to IPFS, registers Shutter identity |
 | | Encryption | Story and image encrypted with Shutter threshold encryption |
-| | Storage | Encrypted data stored on IPFS, metadata in database |
+| | Storage | Encrypted data stored on IPFS with Pinata pinning, metadata in database |
 | | Blockchain | User signs transaction to commit capsule hash on-chain |
 | **Gallery** | Browse | Users can view pixelated previews and metadata |
 | | Search | Filter by tags, creator, or reveal status |
@@ -358,10 +349,17 @@ For development and testing, you can create capsules with short reveal times:
 ### 13. Production Checklist
 
 **Infrastructure:**
-- [ ] Deploy backend to cloud service (AWS, DigitalOcean, etc.)
-- [ ] Set up persistent IPFS node or use dedicated pinning service
+- [ ] Deploy to Heroku using included `Procfile`, `heroku_app.py`, and `runtime.txt`
+- [ ] Set up Pinata account for persistent IPFS pinning
 - [ ] Configure SSL/HTTPS for all endpoints
 - [ ] Set up domain name and DNS
+
+**Heroku Deployment:**
+- [ ] Install Heroku CLI and login: `heroku login`
+- [ ] Create new app: `heroku create your-app-name`
+- [ ] Set environment variables: `heroku config:set PINATA_JWT=your_jwt_token`
+- [ ] Deploy: `git push heroku main`
+- [ ] Check logs: `heroku logs --tail`
 
 **Security:**
 - [ ] Rate limiting on `/submit_capsule` endpoint
@@ -371,7 +369,7 @@ For development and testing, you can create capsules with short reveal times:
 
 **Monitoring:**
 - [ ] Set up automated capsule revelation system for July 30, 2025
-- [ ] Monitor IPFS pinning status and storage costs
+- [ ] Monitor Pinata pinning status and IPFS availability
 - [ ] Track gas costs and blockchain transaction success rates
 - [ ] Set up error logging and monitoring
 
@@ -379,7 +377,7 @@ For development and testing, you can create capsules with short reveal times:
 - [ ] CDN for static assets
 - [ ] Database indexing for search queries
 - [ ] Image compression and optimization
-- [ ] IPFS gateway redundancy
+- [ ] Pinata gateway redundancy for IPFS access
 
 ---
 
@@ -389,12 +387,12 @@ For development and testing, you can create capsules with short reveal times:
 
 | Issue | Solution |
 | ----- | -------- |
-| **IPFS connection failed** | Ensure `ipfs daemon` is running on port 5001 |
+| **IPFS connection failed** | Ensure Pinata is configured properly or check local IPFS storage |
 | **Wallet won't connect** | Check network is set to Gnosis Chain (ID 100) |
 | **Image upload fails** | Verify file size under 10MB and valid image format |
 | **Encryption errors** | Ensure Shutter WASM is loaded properly |
 | **Database locked** | Check file permissions and close other connections |
-| **Pixelated images not showing** | Verify PIL/Pillow installation and image processing |
+| **Pixelated images not showing** | Verify PIL/Pillow installation and IPFS/Pinata connectivity |
 | **Transaction fails** | Check wallet has sufficient xDAI for gas fees |
 | **Gallery not loading** | Verify backend API is running and accessible |
 
@@ -402,7 +400,7 @@ For development and testing, you can create capsules with short reveal times:
 - Check browser console for JavaScript errors
 - Monitor Flask logs for backend issues
 - Use browser dev tools to inspect network requests
-- Test IPFS connectivity: `ipfs id` in terminal
+- Test Pinata connectivity: check `/system_info` endpoint for Pinata status
 
 ---
 
@@ -412,7 +410,7 @@ For development and testing, you can create capsules with short reveal times:
 
 **Data Privacy:**
 - **Temporary Plaintext:** Backend temporarily sees plaintext before encryption
-- **IPFS Visibility:** Encrypted data is publicly accessible on IPFS network
+- **IPFS Visibility:** Encrypted data is publicly accessible on IPFS network via Pinata
 - **Blockchain Permanence:** Once revealed, stories are permanently on-chain
 - **Image Metadata:** EXIF data is preserved through encryption
 
