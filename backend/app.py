@@ -90,6 +90,10 @@ def create_html():
 def gallery_html():
     return app.send_static_file('gallery.html')
 
+@app.route('/default.jpg')
+def default_image():
+    return app.send_static_file('default.jpg')
+
 # Initialize database
 # Use PostgreSQL on Heroku, SQLite locally
 if IS_PRODUCTION and 'DATABASE_URL' in os.environ:
@@ -283,9 +287,20 @@ def submit_capsule():
         tags  = request.form.get("tags", "").strip()
         story = request.form.get("story", "").strip()
         img   = request.files.get("image")
-        if not all([title, tags, story, img]):
-            return {"error": "Missing field"}, 400        # 1) pixelated preview
-        pil = Image.open(img.stream)
+        if not all([title, tags, story]):
+            return {"error": "Missing required field (title, tags, or story)"}, 400
+
+        # Handle image - use default if none provided
+        if img:
+            # 1) pixelated preview from uploaded image
+            pil = Image.open(img.stream)
+        else:
+            # Use default image
+            default_path = os.path.join(app.static_folder, "default.jpg")
+            if not os.path.exists(default_path):
+                return {"error": "Default image not found"}, 500
+            pil = Image.open(default_path)
+            
         pixelated = pixelate(pil)
         buf = io.BytesIO()
         pixelated.save(buf, format="PNG")
