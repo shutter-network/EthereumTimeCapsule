@@ -410,11 +410,6 @@ function createCapsuleCard(capsule) {
     // Add timestamp to prevent caching issues
     const timestamp = Date.now();    // Use pixelated image CID if available, otherwise fall back to encrypted image CID
     // Handle empty strings properly (not just null/undefined)
-    console.log(`Capsule #${capsule.id} CID info:`, {
-      pixelatedImageCID: capsule.pixelatedImageCID,
-      imageCID: capsule.imageCID,
-      pixelatedTrimmed: capsule.pixelatedImageCID && capsule.pixelatedImageCID.trim()
-    });
     pixelatedCID = (capsule.pixelatedImageCID && capsule.pixelatedImageCID.trim()) || capsule.imageCID;
     
     // Try IPFS endpoint first (for new pixelated images uploaded to IPFS)
