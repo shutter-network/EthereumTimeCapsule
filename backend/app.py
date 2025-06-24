@@ -54,7 +54,8 @@ except ImportError:
         PINATA_VERSION = None
         print("❌ Pinata not configured - no valid credentials found")
     
-    IS_PRODUCTION = os.environ.get('HEROKU') is not None
+    # Detect production environment (Heroku provides PORT env var)
+    IS_PRODUCTION = os.environ.get('PORT') is not None or os.environ.get('DYNO') is not None
 
 SHUTTER_API_BASE   = "https://shutter-api.chiado.staging.shutter.network/api"
 SHUTTER_REGISTRY   = os.getenv("SHUTTER_REGISTRY_ADDRESS", "0x2693a4Fb363AdD4356e6b80Ac5A27fF05FeA6D9F")
@@ -115,11 +116,11 @@ try:
     
     with open(abi_path, "r") as f:
         contract_abi = json.load(f)
-    
-    # Use default network configuration
+      # Use default network configuration
     default_network = config_data.get("default_network", "testnet")
     network_config = config_data[default_network]
-      # Initialize blockchain sync service
+    
+    # Initialize blockchain sync service
     sync_service = BlockchainSyncService(
         rpc_url=network_config["rpc_url"],
         contract_address=network_config["contract_address"],
@@ -129,11 +130,10 @@ try:
     
     print(f"📊 Database initialized, blockchain sync ready for {network_config['contract_address']}")
     
-    # Start sync service automatically in production
-    if IS_PRODUCTION:
-        print("🔄 Starting blockchain sync service in production...")
-        sync_service.start_sync()
-        print("✅ Blockchain sync service started")
+    # Start sync service automatically
+    print("🔄 Starting blockchain sync service...")
+    sync_service.start_sync()
+    print("✅ Blockchain sync service started")
     
 except Exception as e:
     print(f"⚠️  Warning: Could not initialize blockchain sync: {e}")
