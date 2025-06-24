@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contract Address Test</title>
+</head>
+<body>
+    <h1>Contract Address Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function testContractAddress() {
+            const results = document.getElementById('results');
+            
+            try {
+                // Force fresh load of config with strong cache busting
+                const timestamp = Date.now();
+                const randomParam = Math.random().toString(36).substring(7);
+                const configUrl = `public_config.json?v=${timestamp}&r=${randomParam}&bust=${new Date().getTime()}`;
+                
+                console.log('Loading config from:', configUrl);
+                
+                const response = await fetch(configUrl, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const config = await response.json();
+                
+                results.innerHTML = `
+                    <h2>✅ Config Loaded Successfully</h2>
+                    <p><strong>Default Network:</strong> ${config.default_network}</p>
+                    <p><strong>Testnet Contract:</strong> ${config.testnet.contract_address}</p>
+                    <p><strong>Mainnet Contract:</strong> ${config.mainnet.contract_address}</p>
+                    <p><strong>Testnet RPC:</strong> ${config.testnet.rpc_url}</p>
+                    <p><strong>Mainnet RPC:</strong> ${config.mainnet.rpc_url}</p>
+                    <hr>
+                    <p><strong>Expected Contract:</strong> 0xdb2F5E3DfD295df167AEfed2336D92364A7a7eCF</p>
+                    <p><strong>Match Status:</strong> ${config.testnet.contract_address === '0xdb2F5E3DfD295df167AEfed2336D92364A7a7eCF' ? '✅ MATCHES' : '❌ MISMATCH'}</p>
+                `;
+                
+            } catch (error) {
+                results.innerHTML = `
+                    <h2>❌ Error Loading Config</h2>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p><strong>URL:</strong> ${configUrl}</p>
+                `;
+                console.error('Config loading error:', error);
+            }
+        }
+        
+        // Auto-run the test
+        window.addEventListener('DOMContentLoaded', testContractAddress);
+    </script>
+</body>
+</html>

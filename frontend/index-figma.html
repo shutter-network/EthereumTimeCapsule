@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ethereum Time Capsule - Preserve Your Digital Legacy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Figma-inspired design variables */
+    :root {
+      /* Colors */
+      --eth1: #ffffff;
+      --eth2: #ececec;
+      --eth3: #232323;
+      --eth4: #c0c0c0;
+      --eth5: #242ae0;
+      --d9d9d9: #d9d9d9;
+      
+      /* Fonts */
+      --eth1-font-family: 'Inter', sans-serif;
+      --eth1-font-size: 12px;
+      --eth1-font-weight: 500;
+      --button-font-family: 'Inter', sans-serif;
+      --button-font-size: 20px;
+      --button-font-weight: 600;
+      --intro-copy-font-family: 'Inter', sans-serif;
+      --intro-copy-font-size: 20px;
+      --intro-copy-font-weight: 400;
+      --slogan-mobile-font-family: 'Space Grotesk', sans-serif;
+      --slogan-mobile-font-size: 40px;
+      --slogan-mobile-line-height: 48px;
+      --slogan-mobile-font-weight: 700;
+      --tinx-font-family: 'Inter', sans-serif;
+      --tinx-font-size: 10px;
+      --tinx-font-weight: 400;
+      --tinx-light-font-family: 'Inter', sans-serif;
+      --tinx-light-font-size: 11px;
+      --tinx-light-font-weight: 300;
+      --small-button-font-family: 'Inter', sans-serif;
+      --small-button-font-size: 16px;
+      --small-button-font-weight: 600;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--eth1-font-family);
+      background: var(--eth1);
+      color: var(--eth3);
+    }
+
+    /* Main container */
+    .home-container {
+      background: var(--eth1);
+      border-radius: 24px;
+      border: 1px solid #000000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      max-width: 400px;
+      margin: 0 auto;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      background: var(--eth2);
+      padding: 12px 20px 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 68px;
+      min-width: 272px;
+    }
+
+    .logo {
+      font-family: var(--small-button-font-family);
+      font-size: 18px;
+      font-weight: var(--small-button-font-weight);
+      color: var(--eth3);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      font-size: 24px;
+    }
+
+    .menu {
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--d9d9d9);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 24px;
+    }
+
+    /* Body */
+    .body {
+      padding: 32px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Thumbnail carousel */
+    .thumb-carousel {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 222px;
+      padding: 0 20px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .thumb-carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .intro-thumbnail {
+      flex-shrink: 0;
+      width: 162px;
+      height: 222px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .intro-thumbnail:hover {
+      transform: translateY(-5px);
+    }
+
+    .rectangle-143 {
+      background: var(--eth2);
+      border-radius: 15px;
+      width: 162px;
+      height: 221.68px;
+      position: absolute;
+      left: 0.06px;
+      top: 0.32px;
+    }
+
+    .content {
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-start;
+      justify-content: flex-start;
+      width: 162px;
+      height: 111px;
+      position: absolute;
+      left: 0;
+      top: 111.02px;
+      z-index: 10;
+    }
+
+    .issued-by-xyz {
+      color: #000000;
+      text-align: left;
+      font-family: var(--tinx-font-family);
+      font-size: var(--tinx-font-size);
+      font-weight: var(--tinx-font-weight);
+      width: 150.06px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .title-on-two-lines {
+      color: #000000;
+      text-align: left;
+      font-family: var(--small-button-font-family);
+      font-size: var(--small-button-font-size);
+      font-weight: var(--small-button-font-weight);
+      width: 150.06px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      line-height: 1.3;
+    }
+
+    .onchain-values-container {
+      background: var(--d9d9d9);
+      border-radius: 16px;
+      opacity: 0.68;
+      padding: 2px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 98px;
+      height: 24px;
+    }
+
+    .onchain-values {
+      color: #000000;
+      text-align: center;
+      font-family: var(--tinx-light-font-family);
+      font-size: var(--tinx-light-font-size);
+      font-weight: var(--tinx-light-font-weight);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-cropped {
+      border-radius: 12px;
+      width: 162px;
+      height: 111px;
+      position: absolute;
+      left: 0;
+      top: 0.32px;
+      object-fit: cover;
+      background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+    }
+
+    .image-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #999;
+      background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+      border-radius: 12px;
+      width: 162px;
+      height: 111px;
+      position: absolute;
+      left: 0;
+      top: 0.32px;
+    }
+
+    /* Copy section */
+    .copy {
+      padding: 0 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      flex: 1;
+    }
+
+    .main-heading {
+      color: #000000;
+      text-align: left;
+      font-family: var(--slogan-mobile-font-family);
+      font-size: var(--slogan-mobile-font-size);
+      line-height: var(--slogan-mobile-line-height);
+      font-weight: var(--slogan-mobile-font-weight);
+      width: 296.72px;
+      max-width: 100%;
+    }
+
+    .intro-copy {
+      color: #000000;
+      text-align: left;
+      font-family: var(--intro-copy-font-family);
+      font-size: var(--intro-copy-font-size);
+      font-weight: var(--intro-copy-font-weight);
+      width: 296.72px;
+      max-width: 100%;
+      line-height: 1.4;
+    }
+
+    .button-add-your-entry {
+      background: var(--eth5);
+      border-radius: 46px;
+      padding: 12px 37px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .button-add-your-entry:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(36, 42, 224, 0.3);
+    }
+
+    .add-your-entry {
+      color: var(--eth1);
+      text-align: center;
+      font-family: var(--small-button-font-family);
+      font-size: var(--small-button-font-size);
+      font-weight: var(--small-button-font-weight);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--eth2);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 58px;
+    }
+
+    .learn-more {
+      color: #000000;
+      text-align: center;
+      font-family: var(--eth1-font-family);
+      font-size: var(--eth1-font-size);
+      font-weight: var(--eth1-font-weight);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .learn-more:hover {
+      text-decoration: underline;
+    }
+
+    /* Loading state */
+    .loading {
+      opacity: 0.7;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 420px) {
+      .home-container {
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
+        min-height: 100vh;
+      }
+
+      .copy {
+        padding: 0 20px;
+      }
+
+      .main-heading {
+        font-size: 32px;
+        line-height: 38px;
+      }
+
+      .intro-copy {
+        font-size: 18px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .home-container {
+        max-width: 500px;
+        margin: 20px auto;
+        min-height: calc(100vh - 40px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="home-container">
+    <!-- Header -->
+    <div class="header">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">🕰️</span>
+        <span>Ethereum Time Capsule</span>
+      </a>
+      <div class="menu" onclick="toggleMenu()">☰</div>
+    </div>
+
+    <!-- Body -->
+    <div class="body">
+      <!-- Thumbnail carousel -->
+      <div class="thumb-carousel" id="thumbCarousel">
+        <!-- Sample capsules will be loaded here -->
+        <div class="intro-thumbnail loading">
+          <div class="rectangle-143"></div>
+          <div class="content">
+            <div class="issued-by-xyz">issued by xyz</div>
+            <div class="title-on-two-lines">
+              This is the title<br />
+              on two lines
+            </div>
+            <div class="onchain-values-container">
+              <div class="onchain-values">#OnchainValues</div>
+            </div>
+          </div>
+          <div class="image-placeholder">🔒</div>
+        </div>
+        
+        <div class="intro-thumbnail loading">
+          <div class="rectangle-143"></div>
+          <div class="content">
+            <div class="issued-by-xyz">issued by xyz</div>
+            <div class="title-on-two-lines">
+              This is the title<br />
+              on two lines
+            </div>
+            <div class="onchain-values-container">
+              <div class="onchain-values">#OnchainValues</div>
+            </div>
+          </div>
+          <div class="image-placeholder">🔒</div>
+        </div>
+      </div>
+
+      <!-- Copy section -->
+      <div class="copy">
+        <div class="main-heading">
+          Be part<br />
+          of Ethereum's<br />
+          living history
+        </div>
+        
+        <div class="intro-copy">
+          To celebrate Ethereum's 10th anniversary, we've created an Ethereum time capsule<br />
+          — privately sealed now, revealed later, and immutably recorded onchain forever.
+        </div>
+      </div>
+
+      <a href="create.html" class="button-add-your-entry">
+        <div class="add-your-entry">add your entry</div>
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <a href="gallery.html" class="learn-more">learn more</a>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module">
+    // Load sample capsules for the carousel
+    async function loadSampleCapsules() {
+      try {
+        const response = await fetch('http://localhost:5000/api/capsules?limit=4');
+        const data = await response.json();
+        
+        if (data.success && data.capsules.length > 0) {
+          const carousel = document.getElementById('thumbCarousel');
+          carousel.innerHTML = ''; // Clear loading thumbnails
+          
+          data.capsules.slice(0, 4).forEach(capsule => {
+            const thumbnail = createThumbnail(capsule);
+            carousel.appendChild(thumbnail);
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load sample capsules:', error);
+        // Keep the loading thumbnails as fallback
+      }
+    }
+
+    function createThumbnail(capsule) {
+      const thumbnail = document.createElement('div');
+      thumbnail.className = 'intro-thumbnail';
+      
+      const creator = `${capsule.creator.slice(0, 6)}...${capsule.creator.slice(-4)}`;
+      const isRevealed = capsule.isRevealed;
+      const imageSrc = isRevealed 
+        ? `http://localhost:5000/ipfs/${capsule.imageCID}` 
+        : `http://localhost:5000/pixelated/${capsule.imageCID}`;
+      
+      // Truncate title if too long
+      let title = capsule.title;
+      if (title.length > 20) {
+        const words = title.split(' ');
+        if (words.length > 2) {
+          title = words.slice(0, 2).join(' ') + '...';
+        } else {
+          title = title.substring(0, 20) + '...';
+        }
+      }
+      
+      thumbnail.innerHTML = `
+        <div class="rectangle-143"></div>
+        <div class="content">
+          <div class="issued-by-xyz">issued by ${creator}</div>
+          <div class="title-on-two-lines">${title}</div>
+          <div class="onchain-values-container">
+            <div class="onchain-values">#${capsule.tags.split(',')[0].trim()}</div>
+          </div>
+        </div>
+        <img class="image-cropped" src="${imageSrc}" alt="Capsule image" loading="lazy" 
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+        <div class="image-placeholder" style="display: none;">🔒</div>
+      `;
+      
+      // Add click handler to view capsule
+      thumbnail.addEventListener('click', () => {
+        window.location.href = `gallery.html#capsule-${capsule.id}`;
+      });
+      
+      return thumbnail;
+    }
+
+    function toggleMenu() {
+      // Simple menu toggle - could expand this later
+      const links = [
+        { text: 'Home', href: 'index.html' },
+        { text: 'Create Capsule', href: 'create.html' },
+        { text: 'Gallery', href: 'gallery.html' }
+      ];
+      
+      const existingMenu = document.querySelector('.mobile-menu');
+      if (existingMenu) {
+        existingMenu.remove();
+        return;
+      }
+      
+      const menu = document.createElement('div');
+      menu.className = 'mobile-menu';
+      menu.style.cssText = `
+        position: fixed;
+        top: 68px;
+        right: 20px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        z-index: 1000;
+      `;
+      
+      links.forEach(link => {
+        const a = document.createElement('a');
+        a.href = link.href;
+        a.textContent = link.text;
+        a.style.cssText = `
+          display: block;
+          padding: 8px 12px;
+          text-decoration: none;
+          color: #333;
+          border-radius: 4px;
+          white-space: nowrap;
+        `;
+        a.onmouseover = () => a.style.background = '#f5f5f5';
+        a.onmouseout = () => a.style.background = 'transparent';
+        menu.appendChild(a);
+      });
+      
+      document.body.appendChild(menu);
+      
+      // Remove menu when clicking outside
+      setTimeout(() => {
+        const clickHandler = (e) => {
+          if (!menu.contains(e.target) && !e.target.closest('.menu')) {
+            menu.remove();
+            document.removeEventListener('click', clickHandler);
+          }
+        };
+        document.addEventListener('click', clickHandler);
+      }, 10);
+    }
+
+    // Load sample capsules when page loads
+    document.addEventListener('DOMContentLoaded', loadSampleCapsules);
+  </script>
+</body>
+</html>

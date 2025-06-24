@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ethereum Time Capsule - Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Figma-inspired design variables - consistent with index.html and create.html */
+    :root {
+      /* Colors */
+      --eth1: #ffffff;
+      --eth2: #ececec;
+      --eth3: #232323;
+      --eth4: #c0c0c0;
+      --eth5: #242ae0;
+      --d9d9d9: #d9d9d9;
+      
+      /* Fonts */
+      --eth1-font-family: 'Inter', sans-serif;
+      --eth1-font-size: 12px;
+      --eth1-font-weight: 500;
+      --button-font-family: 'Inter', sans-serif;
+      --button-font-size: 20px;
+      --button-font-weight: 600;
+      --intro-copy-font-family: 'Inter', sans-serif;
+      --intro-copy-font-size: 20px;
+      --intro-copy-font-weight: 400;
+      --slogan-mobile-font-family: 'Space Grotesk', sans-serif;
+      --slogan-mobile-font-size: 40px;
+      --slogan-mobile-line-height: 48px;
+      --slogan-mobile-font-weight: 700;
+      --tinx-font-family: 'Inter', sans-serif;
+      --tinx-font-size: 10px;
+      --tinx-font-weight: 400;
+      --tinx-light-font-family: 'Inter', sans-serif;
+      --tinx-light-font-size: 11px;
+      --tinx-light-font-weight: 300;
+      --small-button-font-family: 'Inter', sans-serif;
+      --small-button-font-size: 16px;
+      --small-button-font-weight: 600;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--eth1-font-family);
+      background: var(--eth1);
+      color: var(--eth3);
+      line-height: 1.4;
+    }
+
+    /* Main container - consistent with other pages */
+    .gallery-container {
+      background: var(--eth1);
+      border-radius: 24px;
+      border: 1px solid #000000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      max-width: 400px;
+      margin: 0 auto;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Header - consistent with other pages */
+    .header {
+      background: var(--eth2);
+      padding: 12px 20px 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 68px;
+      min-width: 272px;
+      position: relative;
+    }
+
+    .logo {
+      font-family: var(--small-button-font-family);
+      font-size: 18px;
+      font-weight: var(--small-button-font-weight);
+      color: var(--eth3);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      font-size: 24px;
+    }
+
+    .menu {
+      width: 52px;
+      height: 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--d9d9d9);
+      border-radius: 12px;
+      cursor: pointer;
+      gap: 4px;
+      padding: 14px 12px;
+      transition: all 0.3s ease;
+    }
+
+    .menu:hover {
+      background: #c5c5c5;
+    }
+
+    .menu-line {
+      width: 28px;
+      height: 2px;
+      background-color: var(--eth3);
+      border-radius: 1px;
+      transition: all 0.3s ease;
+    }
+
+    /* Menu dropdown - consistent with other pages */
+    .menu-dropdown {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--eth2);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--eth1-font-family);
+      font-size: 24px;
+      font-weight: 400;
+      transform: translateY(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .menu-dropdown.show {
+      transform: translateY(0);
+    }
+
+    .menu-dropdown a {
+      display: block;
+      padding: 20px 0;
+      text-decoration: none;
+      color: var(--eth3);
+      text-align: center;
+      width: 100%;
+      transition: opacity 0.2s ease;
+    }
+
+    .menu-dropdown a:hover {
+      opacity: 0.7;
+    }
+
+    .menu-back {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 24px;
+      color: var(--eth3);
+    }
+
+    /* Main content area */
+    .main-content {
+      flex: 1;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+
+    /* Gallery header */
+    .gallery-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .gallery-title {
+      color: var(--eth3);
+      text-align: center;
+      font-family: var(--slogan-mobile-font-family);
+      font-size: 32px;
+      line-height: 38px;
+      font-weight: var(--slogan-mobile-font-weight);
+      margin-bottom: 8px;
+    }
+
+    .gallery-subtitle {
+      color: var(--eth3);
+      text-align: center;
+      font-family: var(--intro-copy-font-family);
+      font-size: var(--intro-copy-font-size);
+      font-weight: var(--intro-copy-font-weight);
+      line-height: 1.4;
+    }
+
+    /* Gallery controls */
+    .gallery-controls {
+      background: var(--eth2);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .search-box {
+      width: 100%;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--eth4);
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: var(--eth1-font-family);
+      background: var(--eth1);
+      color: var(--eth3);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--eth5);
+    }
+
+    .filter-controls {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .btn-filter {
+      background: var(--d9d9d9);
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--eth3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: var(--eth1-font-family);
+    }
+
+    .btn-filter:hover {
+      background: #c5c5c5;
+    }
+
+    .btn-filter.active {
+      background: var(--eth5);
+      color: var(--eth1);
+    }
+
+    .btn-search {
+      background: var(--eth5);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--eth1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: var(--small-button-font-family);
+    }
+
+    .btn-search:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(36, 42, 224, 0.3);
+    }
+
+    /* Capsules grid */
+    .capsules-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .capsule-card-gallery {
+      background: var(--eth2);
+      border-radius: 16px;
+      padding: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .capsule-card-gallery:hover {
+      transform: translateY(-2px);
+    }
+
+    .capsule-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .capsule-id {
+      background: var(--eth5);
+      color: var(--eth1);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--eth1-font-family);
+    }
+
+    .capsule-status {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-family: var(--eth1-font-family);
+    }
+
+    .status-revealed {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .status-locked {
+      background: #FF9800;
+      color: white;
+    }
+      .capsule-image {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .capsule-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--eth3);
+      font-family: var(--small-button-font-family);
+      line-height: 1.3;
+    }
+
+    .capsule-meta {
+      font-size: 12px;
+      color: var(--eth3);
+      margin-bottom: 12px;
+      font-family: var(--tinx-font-family);
+      opacity: 0.7;
+    }
+
+    .capsule-story {
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--eth3);
+      margin-bottom: 12px;
+      max-height: 80px;
+      overflow: hidden;
+      position: relative;
+      font-family: var(--eth1-font-family);
+    }
+
+    .capsule-story.expanded {
+      max-height: none;
+    }
+
+    .story-fade {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 20px;
+      background: linear-gradient(transparent, var(--eth2));
+    }
+
+    .capsule-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-family: var(--eth1-font-family);
+    }
+
+    .btn-decrypt {
+      background: var(--eth5);
+      color: var(--eth1);
+    }
+
+    .btn-decrypt:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-reveal {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .btn-reveal:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-expand {
+      background: var(--d9d9d9);
+      color: var(--eth3);
+    }
+
+    .btn-expand:hover {
+      background: #c5c5c5;
+    }
+
+    /* Loading and status */
+    .loading-indicator {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--eth2);
+      border-top: 3px solid var(--eth5);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .load-more-container {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .btn-load-more {
+      background: var(--eth5);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--eth1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: var(--small-button-font-family);
+    }
+
+    .btn-load-more:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(36, 42, 224, 0.3);
+    }
+
+    .load-status {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--eth3);
+      opacity: 0.7;
+      font-family: var(--eth1-font-family);
+    }
+
+    /* Wallet status */
+    .wallet-status {
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-family: var(--eth1-font-family);
+    }
+
+    .wallet-status.connected {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4CAF50;
+    }
+
+    .wallet-status.disconnected {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+    }
+
+    /* Footer - consistent with other pages */
+    .footer {
+      background: var(--eth2);
+      padding: 16px 20px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .footer a {
+      color: var(--eth5);
+      text-decoration: none;
+      font-weight: 500;
+      font-family: var(--eth1-font-family);
+      font-size: 14px;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive adjustments - consistent with other pages */
+    @media (max-width: 420px) {
+      .gallery-container {
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
+        min-height: 100vh;
+      }
+
+      .main-content {
+        padding: 16px;
+      }
+
+      .gallery-title {
+        font-size: 28px;
+        line-height: 34px;
+      }
+
+      .gallery-subtitle {
+        font-size: 16px;
+      }
+
+      .gallery-controls {
+        padding: 12px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .gallery-container {
+        max-width: 500px;
+        margin: 20px auto;
+        min-height: calc(100vh - 40px);
+      }
+    }  </style>
+</head>
+<body>
+  <div class="gallery-container">
+    <!-- Header -->
+    <div class="header">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">🕰️</span>
+        <span>Time Capsule</span>
+      </a>
+      <div class="menu" id="menuButton">
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Gallery Header -->
+      <div class="gallery-header">
+        <div class="gallery-title">Gallery</div>
+        <div class="gallery-subtitle">Explore preserved messages from the community</div>
+      </div>      <!-- Wallet Status - Hidden for read-only gallery -->
+      <div id="wallet-status" class="wallet-status disconnected" style="display: none;">❌ Wallet Not Connected</div>
+
+      <!-- Gallery Controls -->
+      <div class="gallery-controls">
+        <div class="search-box">
+          <input type="text" id="search-input" class="search-input" placeholder="Search by title, tags, or creator...">
+        </div>
+        <div class="filter-controls">
+          <button id="filter-all" class="btn-filter active">All</button>
+          <button id="filter-revealed" class="btn-filter">Revealed</button>
+          <button id="filter-locked" class="btn-filter">Locked</button>
+        </div>
+        <button id="search-btn" class="btn-search">Search</button>
+      </div>
+
+      <!-- Loading indicator -->
+      <div id="loading-indicator" class="loading-indicator" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading capsules...</p>
+      </div>
+
+      <!-- Capsules Grid -->
+      <div id="capsules-grid" class="capsules-grid">
+        <!-- Capsules will be loaded here -->
+      </div>
+
+      <!-- Load More -->
+      <div class="load-more-container">
+        <button id="load-more-btn" class="btn-load-more">Load More</button>
+        <p id="load-status" class="load-status"></p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <a href="/create">Create Entry</a> | <a href="/">Home</a>
+    </div>
+  </div>  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+  
+  <!-- BLST WASM runtime (required for custom shutter crypto) -->
+  <script src="https://cdn.jsdelivr.net/npm/@shutter-network/blst@0.1.7/dist/blst.min.js"></script>  <!-- Custom Shutter WASM loader and app logic with cache busting -->
+  <script src="blst.js?v=2025062004"></script>
+  <script type="module" src="main.js?v=2025062004"></script>
+  <script type="module" src="gallery.js?v=2025062004"></script>
+  
+  <script>
+    // Menu toggle functionality - consistent with other pages
+    function toggleMenu() {
+      // Remove existing menu if present
+      const existingMenu = document.querySelector('.menu-dropdown');
+      if (existingMenu) {
+        existingMenu.classList.remove('show');
+        setTimeout(() => {
+          existingMenu.remove();
+        }, 300);
+        return;
+      }
+
+      // Create new full-screen menu
+      const menu = document.createElement('div');
+      menu.className = 'menu-dropdown';
+        const links = [
+        { text: 'home', href: '/' },
+        { text: 'create entry', href: '/create' },
+        { text: 'gallery', href: '/gallery' },
+        { text: 'documentation', href: '#documentation' },
+        { text: 'faq', href: '#faq' }
+      ];
+      
+      links.forEach((link, index) => {
+        const a = document.createElement('a');
+        a.href = link.href;
+        a.textContent = link.text;
+        menu.appendChild(a);
+      });
+
+      // Add back button
+      const backButton = document.createElement('div');
+      backButton.className = 'menu-back';
+      backButton.innerHTML = '&lt;';
+      backButton.addEventListener('click', toggleMenu);
+      menu.appendChild(backButton);
+      
+      // Append to body for full-screen overlay
+      document.body.appendChild(menu);
+      
+      // Trigger animation
+      setTimeout(() => {
+        menu.classList.add('show');
+      }, 10);
+      
+      // Remove menu when clicking outside or on links
+      menu.addEventListener('click', (e) => {
+        if (e.target === menu || e.target.tagName === 'A') {
+          if (e.target.tagName === 'A' && e.target.href.startsWith('#')) {
+            e.preventDefault(); // Prevent navigation for placeholder links
+          }
+          toggleMenu();
+        }
+      });
+    }
+
+    // Add event listener for menu button
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuButton = document.getElementById('menuButton');
+      if (menuButton) {
+        menuButton.addEventListener('click', toggleMenu);
+      }      
+      // Gallery is read-only, no wallet connection needed
+      console.log("Gallery page loaded in read-only mode");
+    });
+  </script>
+</body>
+</html>

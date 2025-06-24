@@ -1,0 +1,23 @@
+# Sensitive configuration and data
+config.py
+.env
+.env.local
+.env.production
+.env.development
+setup_aws_locally.bat
+deploy_aws_to_heroku.bat
+setup_aws_locally.ps1
+# Generated data directories
+pixelated
+ipfs_storage
+capsules.db
+
+# Python cache
+__pycache__
+*.pyc
+
+# Heroku deployment files - keep these for deployment
+# heroku_app.py
+# Procfile
+# runtime.txt
+# DEPLOYMENT.md
