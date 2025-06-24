@@ -408,10 +408,14 @@ function createCapsuleCard(capsule) {
     pixelatedCID = capsule.imageCID; // Use encrypted image CID for error fallback
   } else {
     // Add timestamp to prevent caching issues
-    const timestamp = Date.now();
-    
-    // Use pixelated image CID if available, otherwise fall back to encrypted image CID
-    pixelatedCID = capsule.pixelatedImageCID || capsule.imageCID;
+    const timestamp = Date.now();    // Use pixelated image CID if available, otherwise fall back to encrypted image CID
+    // Handle empty strings properly (not just null/undefined)
+    console.log(`Capsule #${capsule.id} CID info:`, {
+      pixelatedImageCID: capsule.pixelatedImageCID,
+      imageCID: capsule.imageCID,
+      pixelatedTrimmed: capsule.pixelatedImageCID && capsule.pixelatedImageCID.trim()
+    });
+    pixelatedCID = (capsule.pixelatedImageCID && capsule.pixelatedImageCID.trim()) || capsule.imageCID;
     
     // Try IPFS endpoint first (for new pixelated images uploaded to IPFS)
     // If that fails, fall back to legacy pixelated endpoint
@@ -426,11 +430,10 @@ function createCapsuleCard(capsule) {
       </div>
     </div>      <img src="${imageSrc}" alt="Capsule image" class="capsule-image" loading="lazy" 
          onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})">>
-    
-    <div class="capsule-title">${capsule.title}</div>
+      <div class="capsule-title">${capsule.title || 'Untitled Capsule'}</div>
     
     <div class="capsule-meta">
-      <div><strong>Tags:</strong> ${capsule.tags}</div>
+      <div><strong>Tags:</strong> ${capsule.tags || 'No tags'}</div>
       <div><strong>Creator:</strong> ${creator}</div>
       <div><strong>Unlocks:</strong> ${revealTime.toLocaleDateString()}</div>
     </div>
