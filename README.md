@@ -4,6 +4,19 @@
 
 ---
 
+## 🚀 Deployment Status
+
+**LIVE ON HEROKU**: https://ethereum-time-capsule-49394b184e45.herokuapp.com/
+
+### ✅ Fully Operational Features:
+- **Automatic blockchain sync** - runs every few seconds, no manual intervention needed
+- **Complete DApp functionality** - create, view, and decrypt time capsules
+- **IPFS+Pinata integration** - images stored and cached via IPFS
+- **Mobile-responsive gallery** - view all capsules with images
+- **Clean production deployment** - no AWS/S3 dependencies
+
+---
+
 ### Table of Contents
 
 1. [Overview](#overview)
