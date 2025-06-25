@@ -956,22 +956,19 @@
         if (customCapsuleIds.length > 0) {
           console.log('📋 Using configured capsule IDs:', customCapsuleIds);
           
-          // Load specific capsules by ID
+          // Load specific capsules by ID using the individual capsule endpoint
           for (const capsuleId of customCapsuleIds) {
             try {
-              const response = await axios.get(`${getApiBaseUrl()}/api/capsules`, {
-                params: {
-                  capsule_id: capsuleId
-                }
-              });
+              const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
               
-              if (response.data.success && response.data.capsules.length > 0) {
-                capsules.push(response.data.capsules[0]);
+              if (response.data.success && response.data.capsule) {
+                capsules.push(response.data.capsule);
+                console.log(`✅ Loaded capsule ${capsuleId}:`, response.data.capsule.title);
               } else {
                 console.warn(`⚠️ Capsule ${capsuleId} not found`);
               }
             } catch (error) {
-              console.warn(`⚠️ Failed to load capsule ${capsuleId}:`, error);
+              console.warn(`⚠️ Failed to load capsule ${capsuleId}:`, error.message);
             }
           }
         } else {
