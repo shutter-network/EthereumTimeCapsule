@@ -555,23 +555,30 @@ function pixelizeCanvas(canvas, factor = null) {
   }
   
   const ctx = canvas.getContext('2d');
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   
   // Create smaller canvas for pixelization
   const smallCanvas = document.createElement('canvas');
   const smallCtx = smallCanvas.getContext('2d');
   
-  smallCanvas.width = Math.max(1, canvas.width / factor);
-  smallCanvas.height = Math.max(1, canvas.height / factor);
+  const newWidth = Math.max(1, canvas.width / factor);
+  const newHeight = Math.max(1, canvas.height / factor);
+  
+  smallCanvas.width = newWidth;
+  smallCanvas.height = newHeight;
+  
+  console.log(`🎨 Pixelating canvas: ${canvas.width}x${canvas.height} -> ${newWidth}x${newHeight} (factor: ${factor})`);
   
   // Draw scaled down
   smallCtx.imageSmoothingEnabled = true;
   smallCtx.drawImage(canvas, 0, 0, smallCanvas.width, smallCanvas.height);
   
-  // Clear original canvas and draw back scaled up
+  // Resize the original canvas to the smaller pixelated size
+  canvas.width = newWidth;
+  canvas.height = newHeight;
+  
+  // Draw the pixelated image at the new smaller size
   ctx.imageSmoothingEnabled = false;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(smallCanvas, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(smallCanvas, 0, 0);
 }
 
 function smoothenCanvas(canvas, factor = null) {
@@ -582,23 +589,32 @@ function smoothenCanvas(canvas, factor = null) {
   
   const ctx = canvas.getContext('2d');
   
-  // Create intermediate canvas for smoothing
-  const smoothCanvas = document.createElement('canvas');
-  const smoothCtx = smoothCanvas.getContext('2d');
+  console.log(`🎨 Smoothing canvas: ${canvas.width}x${canvas.height} (factor: ${factor})`);
   
-  smoothCanvas.width = Math.max(1, canvas.width / factor);
-  smoothCanvas.height = Math.max(1, canvas.height / factor);
-  
-  // Draw scaled down with high quality
-  smoothCtx.imageSmoothingEnabled = true;
-  smoothCtx.imageSmoothingQuality = 'high';
-  smoothCtx.drawImage(canvas, 0, 0, smoothCanvas.width, smoothCanvas.height);
-  
-  // Clear original and draw back scaled up with smoothing
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(smoothCanvas, 0, 0, canvas.width, canvas.height);
+  // For small pixelated images, apply gentle smoothing
+  // Only smooth if the image is large enough to benefit from it
+  if (canvas.width > factor && canvas.height > factor) {
+    // Create intermediate canvas for smoothing
+    const smoothCanvas = document.createElement('canvas');
+    const smoothCtx = smoothCanvas.getContext('2d');
+    
+    smoothCanvas.width = Math.max(1, canvas.width / factor);
+    smoothCanvas.height = Math.max(1, canvas.height / factor);
+    
+    // Draw scaled down with high quality
+    smoothCtx.imageSmoothingEnabled = true;
+    smoothCtx.imageSmoothingQuality = 'high';
+    smoothCtx.drawImage(canvas, 0, 0, smoothCanvas.width, smoothCanvas.height);
+    
+    // Clear original and draw back scaled up with smoothing
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(smoothCanvas, 0, 0, canvas.width, canvas.height);
+  } else {
+    // Image is already very small, apply minimal processing
+    console.log('🎨 Image too small for smoothing, skipping');
+  }
 }
 
 function floydSteinbergDither(canvas) {
@@ -730,7 +746,7 @@ function populatePreview() {
   const img = new Image();
   
   img.onload = function() {
-    // Set canvas size to match the container
+    // Set canvas size to match the container initially
     const containerWidth = 350;
     const containerHeight = 200;
     canvas.width = containerWidth;
@@ -765,8 +781,14 @@ function populatePreview() {
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
     
-    // Then apply advanced dithering to the entire canvas
+    // Then apply advanced dithering (this will resize the canvas to smaller dimensions)
     applyAdvancedDithering(canvas);
+    
+    // After pixelation, style the canvas to display the small pixels nicely
+    canvas.style.imageRendering = 'pixelated';
+    canvas.style.imageRendering = 'crisp-edges';
+    canvas.style.width = '350px';  // Scale up the display while keeping pixelated look
+    canvas.style.height = '200px';
   };
   
   // Load the uploaded image or default image
@@ -1193,8 +1215,14 @@ function populateCompletion() {
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
     
-    // Then apply advanced dithering to the entire canvas
+    // Then apply advanced dithering (this will resize the canvas)
     applyAdvancedDithering(canvas);
+    
+    // After pixelation, style the canvas to display the small pixels nicely
+    canvas.style.imageRendering = 'pixelated';
+    canvas.style.imageRendering = 'crisp-edges';
+    canvas.style.width = '350px';  // Scale up the display while keeping pixelated look
+    canvas.style.height = '200px';
   };
   
   // Load the uploaded image or default image

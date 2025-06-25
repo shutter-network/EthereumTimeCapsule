@@ -2,7 +2,7 @@ import os, io, time, base64, json, re
 import numpy as np
 from flask import Flask, request, jsonify, send_from_directory, redirect
 from flask_cors import CORS
-from PIL import Image
+from PIL import Image, ImageFilter
 import requests
 import secrets
 import hashlib
@@ -222,28 +222,43 @@ if 'IMAGE_PROCESSING_CONFIG' not in globals():
 
 # ---------- helpers ----------
 def pixelate(img, factor=None):
-    """Step 1: Pixelate image by reducing resolution"""
+    """Step 1: Pixelate image by reducing resolution and keeping it small"""
     if factor is None:
         factor = IMAGE_PROCESSING_CONFIG.get("pixelation_factor", 14)
     
     w, h = img.size
-    img_small = img.resize((max(1, w // factor), max(1, h // factor)), Image.BILINEAR)
-    return img_small.resize((w, h), Image.NEAREST)
+    # Calculate new smaller dimensions
+    new_w = max(1, w // factor)
+    new_h = max(1, h // factor)
+    
+    print(f"🎨 Pixelating: {w}x{h} -> {new_w}x{new_h} (factor: {factor})")
+    
+    # Downscale and keep the smaller size for true pixelation
+    img_small = img.resize((new_w, new_h), Image.BILINEAR)
+    return img_small
 
 def smoothen(img, factor=None):
-    """Step 2: Apply smoothing filter"""
+    """Step 2: Apply smoothing filter to small pixelated image"""
     if factor is None:
         factor = IMAGE_PROCESSING_CONFIG.get("smoothing_factor", 12)
     
     w, h = img.size
-    # Create a slightly smaller intermediate size for smoothing
-    smooth_w = max(1, w // factor)
-    smooth_h = max(1, h // factor)
+    print(f"🎨 Smoothing: {w}x{h} (factor: {factor})")
     
-    # Resize down with LANCZOS for better quality smoothing
-    img_smooth = img.resize((smooth_w, smooth_h), Image.LANCZOS)
-    # Resize back up with BILINEAR for smooth interpolation
-    return img_smooth.resize((w, h), Image.BILINEAR)
+    # For small pixelated images, apply gentle smoothing
+    # Only smooth if the image is large enough to benefit from it
+    if w > factor and h > factor:
+        # Create a slightly smaller intermediate size for smoothing
+        smooth_w = max(1, w // factor)
+        smooth_h = max(1, h // factor)
+        
+        # Resize down with LANCZOS for better quality smoothing
+        img_smooth = img.resize((smooth_w, smooth_h), Image.LANCZOS)
+        # Resize back up with BILINEAR for smooth interpolation
+        return img_smooth.resize((w, h), Image.BILINEAR)
+    else:
+        # Image is already very small, apply gentle blur instead
+        return img.filter(ImageFilter.SMOOTH)
 
 def floyd_steinberg_dither(img):
     """Step 3: Apply Floyd-Steinberg dithering (optimized for performance)"""
