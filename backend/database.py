@@ -124,15 +124,27 @@ class CapsuleDatabase:
             logger.error(f"Error fetching capsule {capsule_id}: {e}")
             return None
     
-    def get_capsules(self, offset: int = 0, limit: int = 10, revealed_only: bool = False) -> List[Dict[str, Any]]:
-        """Get multiple capsules with pagination"""
+    def get_capsules(self, offset: int = 0, limit: int = 10, revealed_only: bool = False, tag: str = None) -> List[Dict[str, Any]]:
+        """Get multiple capsules with pagination and optional tag filtering"""
         try:
             with self.get_connection() as conn:
-                where_clause = "WHERE is_revealed = 1" if revealed_only else ""
+                where_conditions = []
+                params = []
+                
+                if revealed_only:
+                    where_conditions.append("is_revealed = 1")
+                
+                if tag:
+                    # Case-insensitive tag search - tags are stored as comma-separated values
+                    where_conditions.append("LOWER(tags) LIKE ?")
+                    params.append(f"%{tag.lower()}%")
+                
+                where_clause = "WHERE " + " AND ".join(where_conditions) if where_conditions else ""
+                
                 cursor = conn.execute(f"""
                     SELECT * FROM capsules {where_clause}
                     ORDER BY id DESC LIMIT ? OFFSET ?
-                """, (limit, offset))
+                """, params + [limit, offset])
                 return [dict(row) for row in cursor.fetchall()]
         except Exception as e:
             logger.error(f"Error fetching capsules: {e}")

@@ -609,14 +609,17 @@ def save_pixelated():
 # ---------- DATABASE API ENDPOINTS ----------
 @app.route("/api/capsules", methods=["GET"])
 def get_capsules():
-    """Get capsules from database with pagination"""
+    """Get capsules from database with pagination and optional tag filtering"""
     try:
         offset = int(request.args.get("offset", 0))
         limit = int(request.args.get("limit", 10))
         revealed_only = request.args.get("revealed_only", "false").lower() == "true"
+        tag = request.args.get("tag", "").strip()
         
-        capsules = db.get_capsules(offset=offset, limit=limit, revealed_only=revealed_only)
-        total_count = db.get_capsule_count()        # Format capsules for frontend compatibility
+        # Pass tag filter to database if provided
+        tag_filter = tag if tag else None
+        capsules = db.get_capsules(offset=offset, limit=limit, revealed_only=revealed_only, tag=tag_filter)
+        total_count = db.get_capsule_count()# Format capsules for frontend compatibility
         formatted_capsules = []
         for capsule in capsules:
             formatted_capsule = {

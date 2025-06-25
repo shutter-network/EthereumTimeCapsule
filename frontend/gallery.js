@@ -15,11 +15,12 @@ let walletConnected = false;
 
 // Gallery state
 let currentOffset = 0;
-let currentFilter = 'all'; // 'all', 'revealed', 'locked'
+let currentFilter = 'all'; // 'all' or specific tag name
 let currentSearch = '';
 const batchSize = 12;
 let isLoading = false;
 let hasMore = true;
+let availableTags = []; // Store available tags for filtering
 
 // =============  GALLERY SHARE FUNCTIONS (GLOBAL)  =============
 // Define immediately to ensure availability
@@ -180,12 +181,14 @@ window.addEventListener("DOMContentLoaded", async () => {
     
     if (capsuleId) {
       console.log(`🎯 Direct capsule link detected: ${capsuleId}`);
-      await loadDirectCapsule(capsuleId);
-    } else {
+      await loadDirectCapsule(capsuleId);    } else {
       console.log('📚 Loading all capsules');
       // Load initial capsules
       loadCapsules();
     }
+    
+    // Load popular tags for filtering
+    await loadPopularTags();
     
   } catch (e) {
     console.error("Initialization failed:", e);
@@ -282,8 +285,6 @@ async function connectWallet(manual = false) {
 function setupEventListeners() {
   // Filter buttons
   document.getElementById('filter-all').onclick = () => setFilter('all');
-  document.getElementById('filter-revealed').onclick = () => setFilter('revealed');
-  document.getElementById('filter-locked').onclick = () => setFilter('locked');
   
   // Search
   document.getElementById('search-btn').onclick = performSearch;
@@ -298,6 +299,60 @@ function setupEventListeners() {
 }
 
 // =============  FILTER AND SEARCH  =============
+async function loadPopularTags() {
+  try {
+    console.log('🏷️ Loading popular tags...');
+    const response = await axios.get(`${getApiBaseUrl()}/api/capsules`, {
+      params: { limit: 100 } // Get a good sample of capsules to extract tags
+    });
+    
+    if (!response.data.success) {
+      console.warn('Failed to load capsules for tag extraction');
+      return;
+    }
+    
+    // Extract and count all tags
+    const tagCounts = {};
+    response.data.capsules.forEach(capsule => {
+      if (capsule.tags) {
+        const tags = capsule.tags.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag);
+        tags.forEach(tag => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      }
+    });
+    
+    // Sort tags by popularity and take top 10
+    availableTags = Object.entries(tagCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 10)
+      .map(([tag, count]) => ({ name: tag, count }));
+    
+    console.log('✅ Popular tags loaded:', availableTags);
+    
+    // Render tag filter buttons
+    renderTagFilters();
+    
+  } catch (error) {
+    console.error('Failed to load popular tags:', error);
+  }
+}
+
+function renderTagFilters() {
+  const tagFiltersContainer = document.getElementById('tag-filters');
+  if (!tagFiltersContainer) return;
+  
+  tagFiltersContainer.innerHTML = '';
+  
+  availableTags.forEach(({ name, count }) => {
+    const tagButton = document.createElement('button');
+    tagButton.className = 'btn-tag-filter';
+    tagButton.textContent = `#${name} (${count})`;
+    tagButton.onclick = () => setFilter(name);
+    tagFiltersContainer.appendChild(tagButton);
+  });
+}
+
 function setFilter(filter) {
   currentFilter = filter;
   currentOffset = 0;
@@ -307,8 +362,21 @@ function setFilter(filter) {
   document.querySelectorAll('.filter-controls button').forEach(btn => {
     btn.classList.remove('active');
   });
+  document.querySelectorAll('.btn-tag-filter').forEach(btn => {
+    btn.classList.remove('active');
+  });
   
-  document.getElementById(`filter-${filter}`).classList.add('active');
+  if (filter === 'all') {
+    document.getElementById('filter-all').classList.add('active');
+  } else {
+    // Find and activate the corresponding tag button
+    const tagButtons = document.querySelectorAll('.btn-tag-filter');
+    tagButtons.forEach(btn => {
+      if (btn.textContent.toLowerCase().includes(`#${filter.toLowerCase()}`)) {
+        btn.classList.add('active');
+      }
+    });
+  }
   
   // Clear grid and reload
   document.getElementById('capsules-grid').innerHTML = '';
@@ -345,15 +413,18 @@ async function loadCapsules() {
       params = {
         q: currentSearch,
         limit: batchSize
-      };
-    } else {
+      };    } else {
       // Normal load mode
       url = `${getApiBaseUrl()}/api/capsules`;
       params = {
         offset: currentOffset,
-        limit: batchSize,
-        revealed_only: currentFilter === 'revealed'
+        limit: batchSize
       };
+      
+      // Add tag filtering if not 'all'
+      if (currentFilter !== 'all') {
+        params.tag = currentFilter;
+      }
     }
     
     console.log(`📦 Loading capsules: ${JSON.stringify(params)}`);
@@ -365,16 +436,15 @@ async function loadCapsules() {
     
     const capsules = response.data.capsules;
     const totalCount = response.data.total_count || capsules.length;
-    
-    console.log(`✅ Loaded ${capsules.length} capsules`);
+      console.log(`✅ Loaded ${capsules.length} capsules`);
     
     // Filter capsules based on current filter (for search results)
     let filteredCapsules = capsules;
     if (currentSearch && currentFilter !== 'all') {
       filteredCapsules = capsules.filter(capsule => {
-        if (currentFilter === 'revealed') return capsule.isRevealed;
-        if (currentFilter === 'locked') return !capsule.isRevealed;
-        return true;
+        if (!capsule.tags) return false;
+        const tags = capsule.tags.split(',').map(tag => tag.trim().toLowerCase());
+        return tags.includes(currentFilter.toLowerCase());
       });
     }
     
@@ -431,9 +501,17 @@ function createCapsuleCard(capsule) {
   const card = document.createElement('div');
   card.className = 'capsule-card-gallery';
   card.setAttribute('data-capsule-id', capsule.id); // Add unique identifier
-    const isRevealed = capsule.isRevealed;
+  const isRevealed = capsule.isRevealed;
   const revealTime = new Date(capsule.revealTime * 1000);
   const creator = `${capsule.creator.slice(0, 6)}...${capsule.creator.slice(-4)}`;
+  
+  // Process tags into clickable chips
+  const tags = capsule.tags ? capsule.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+  const tagsHtml = tags.length > 0 ? 
+    `<div class="capsule-tags">
+      ${tags.map(tag => `<span class="tag-chip" onclick="filterByTag('${tag.toLowerCase()}')">#${tag}</span>`).join('')}
+    </div>` : 
+    '<div class="capsule-tags"><span style="color: #999; font-style: italic;">No tags</span></div>';
   
   // Determine the image source and CID to use
   let imageSrc;
@@ -453,18 +531,22 @@ function createCapsuleCard(capsule) {
     imageSrc = `${getApiBaseUrl()}/ipfs/${pixelatedCID}?t=${timestamp}`;
     console.log(`Setting pixelated image src for capsule #${capsule.id}: ${imageSrc} (IPFS, CID: ${pixelatedCID})`);
   }
-    card.innerHTML = `
+  card.innerHTML = `
     <div class="capsule-header">
       <div class="capsule-id">ID #${capsule.id}</div>
       <div class="capsule-status ${isRevealed ? 'status-revealed' : 'status-locked'}">
         ${isRevealed ? 'Revealed' : 'Locked'}
       </div>
-    </div>      <img src="${imageSrc}" alt="Capsule image" class="capsule-image" loading="lazy" 
-         onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})">>
-      <div class="capsule-title">${capsule.title || 'Untitled Capsule'}</div>
+    </div>
+
+    <img src="${imageSrc}" alt="Capsule image" class="capsule-image" loading="lazy" 
+         onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})">
+         
+    <div class="capsule-title">${capsule.title || 'Untitled Capsule'}</div>
+    
+    ${tagsHtml}
     
     <div class="capsule-meta">
-      <div><strong>Tags:</strong> ${capsule.tags || 'No tags'}</div>
       <div><strong>Creator:</strong> ${creator}</div>
       <div><strong>Unlocks:</strong> ${revealTime.toLocaleDateString()}</div>
     </div>
@@ -475,7 +557,9 @@ function createCapsuleCard(capsule) {
         `<div style="color: #999; font-style: italic;">🔒 Story will be revealed on ${revealTime.toLocaleDateString()}</div>`
       }
       ${!isRevealed ? '<div class="story-fade"></div>' : ''}
-    </div>      <div class="capsule-actions">
+    </div>
+
+    <div class="capsule-actions">
       ${!isRevealed ? `
         <button class="btn-small btn-decrypt" onclick="decryptCapsule(${capsule.id}, '${capsule.shutterIdentity}')">
           🔓 Preview Story
@@ -728,6 +812,10 @@ window.revealCapsule = revealCapsule;
 window.toggleStory = toggleStory;
 window.decryptAndDisplayImage = decryptAndDisplayImage;
 window.handleImageError = handleImageError;
+window.filterByTag = function(tagName) {
+  console.log(`🏷️ Filtering by tag: ${tagName}`);
+  setFilter(tagName);
+};
 
 // Function to load a specific capsule directly
 async function loadDirectCapsule(capsuleId) {
