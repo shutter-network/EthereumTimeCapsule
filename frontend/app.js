@@ -1125,83 +1125,127 @@ function generateCapsuleImage() {
         return;
       }
 
-      // Create a canvas that matches the preview card exactly
+      // Create a canvas that matches the preview card aspect ratio exactly
       const downloadCanvas = document.createElement('canvas');
       const downloadCtx = downloadCanvas.getContext('2d');
       
-      // Use exact dimensions from the final preview card container
-      downloadCanvas.width = 400;
-      downloadCanvas.height = 500;
+      // Use aspect ratio that matches the actual preview card (more compact, portrait-oriented)
+      const cardWidth = 350;
+      const cardHeight = 450;
+      downloadCanvas.width = cardWidth;
+      downloadCanvas.height = cardHeight;
       
-      // White background with subtle shadow (card style)
-      downloadCtx.fillStyle = '#ffffff';
-      downloadCtx.fillRect(0, 0, 400, 500);
+      // Helper function to draw rounded rectangle
+      function drawRoundedRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+      }
       
-      // Add subtle border like the preview card
-      downloadCtx.strokeStyle = '#e2e8f0';
+      // Draw card background with rounded corners (15px border-radius like CSS)
+      downloadCtx.fillStyle = '#f8f9fa';
+      drawRoundedRect(downloadCtx, 0, 0, cardWidth, cardHeight, 15);
+      downloadCtx.fill();
+      
+      // Add subtle border
+      downloadCtx.strokeStyle = '#e9ecef';
       downloadCtx.lineWidth = 1;
-      downloadCtx.strokeRect(0, 0, 400, 500);
+      drawRoundedRect(downloadCtx, 0, 0, cardWidth, cardHeight, 15);
+      downloadCtx.stroke();
       
-      // 1. Image area (matching final-preview-image-container)
-      const imageAreaWidth = 350;
-      const imageAreaHeight = 200;
-      const imageAreaX = 25;
-      const imageAreaY = 25;
+      // Card padding (matching CSS: 2rem = 32px)
+      const cardPadding = 32;
       
-      // Fill image background
+      // 1. Image area (matching preview-image dimensions: max 300x300)
+      const imageAreaWidth = 300;
+      const imageAreaHeight = 200; // More compact ratio
+      const imageAreaX = (cardWidth - imageAreaWidth) / 2; // Center horizontally
+      const imageAreaY = cardPadding;
+      
+      // Draw image background with rounded corners (10px like CSS)
       downloadCtx.fillStyle = '#f0f0f0';
-      downloadCtx.fillRect(imageAreaX, imageAreaY, imageAreaWidth, imageAreaHeight);
+      drawRoundedRect(downloadCtx, imageAreaX, imageAreaY, imageAreaWidth, imageAreaHeight, 10);
+      downloadCtx.fill();
       
-      // Draw the pixelated image using the exact same logic as the preview
+      // Draw the pixelated image with rounded corners
       if (canvas.width > 0 && canvas.height > 0) {
+        downloadCtx.save();
+        drawRoundedRect(downloadCtx, imageAreaX, imageAreaY, imageAreaWidth, imageAreaHeight, 10);
+        downloadCtx.clip();
         downloadCtx.imageSmoothingEnabled = false;
         downloadCtx.drawImage(canvas, imageAreaX, imageAreaY, imageAreaWidth, imageAreaHeight);
+        downloadCtx.restore();
       }
+      
+      // Add shadow to image (matching CSS box-shadow)
+      downloadCtx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+      downloadCtx.shadowBlur = 20;
+      downloadCtx.shadowOffsetY = 10;
+      drawRoundedRect(downloadCtx, imageAreaX, imageAreaY, imageAreaWidth, imageAreaHeight, 10);
+      downloadCtx.stroke();
+      downloadCtx.shadowColor = 'transparent';
+      downloadCtx.shadowBlur = 0;
+      downloadCtx.shadowOffsetY = 0;
       
       // 2. Issuer overlay on image (matching exact style)
       const issuerText = `issued by ${capsuleData.userName || 'anonymous'}`;
+      const issuerBgWidth = downloadCtx.measureText(issuerText).width + 20;
+      const issuerBgHeight = 24;
+      const issuerX = imageAreaX + 12;
+      const issuerY = imageAreaY + imageAreaHeight - issuerBgHeight - 12;
+      
       downloadCtx.fillStyle = 'rgba(0, 0, 0, 0.75)';
-      downloadCtx.fillRect(imageAreaX + 12, imageAreaY + imageAreaHeight - 32, 140, 24);
+      drawRoundedRect(downloadCtx, issuerX, issuerY, issuerBgWidth, issuerBgHeight, 4);
+      downloadCtx.fill();
+      
       downloadCtx.fillStyle = 'white';
       downloadCtx.font = '12px system-ui, -apple-system, sans-serif';
       downloadCtx.textAlign = 'left';
-      downloadCtx.fillText(issuerText, imageAreaX + 18, imageAreaY + imageAreaHeight - 14);
+      downloadCtx.fillText(issuerText, issuerX + 10, issuerY + 16);
       
-      // 3. Content area starting below image
-      let contentY = imageAreaY + imageAreaHeight + 25;
-      const contentPadding = 25;
+      // 3. Content area starting below image (2rem margin like CSS)
+      let contentY = imageAreaY + imageAreaHeight + 32;
+      const contentX = cardPadding;
       
-      // Title (matching exact font and size)
-      downloadCtx.fillStyle = '#1a202c';
-      downloadCtx.font = 'bold 24px system-ui, -apple-system, sans-serif';
+      // Title (matching CSS: 1.8rem font-size)
+      downloadCtx.fillStyle = '#2c3e50';
+      downloadCtx.font = 'bold 29px system-ui, -apple-system, sans-serif'; // 1.8rem ≈ 29px
       downloadCtx.textAlign = 'left';
       const title = capsuleData.title || 'My Time Capsule';
       
-      // Word wrap title if needed (350px max width)
-      const maxTitleWidth = 350;
+      // Word wrap title if needed
+      const maxTitleWidth = cardWidth - (cardPadding * 2);
       const words = title.split(' ');
       let line = '';
-      let lineHeight = 30;
+      let lineHeight = 35;
       
       for (let i = 0; i < words.length; i++) {
         const testLine = line + words[i] + ' ';
         if (downloadCtx.measureText(testLine).width > maxTitleWidth && i > 0) {
-          downloadCtx.fillText(line.trim(), contentPadding, contentY);
+          downloadCtx.fillText(line.trim(), contentX, contentY);
           line = words[i] + ' ';
           contentY += lineHeight;
         } else {
           line = testLine;
         }
       }
-      downloadCtx.fillText(line.trim(), contentPadding, contentY);
-      contentY += lineHeight + 15;
+      downloadCtx.fillText(line.trim(), contentX, contentY);
+      contentY += 25; // 1rem margin-bottom
       
-      // 4. Unlock date section (matching exact style)
-      downloadCtx.fillStyle = '#718096';
+      // 4. Meta information (unlock date and ciphertext)
+      downloadCtx.fillStyle = '#6c757d';
       downloadCtx.font = '12px system-ui, -apple-system, sans-serif';
-      downloadCtx.fillText('encrypted until', contentPadding, contentY);
+      downloadCtx.fillText('encrypted until', contentX, contentY);
       
-      downloadCtx.fillStyle = '#4a5568';
+      downloadCtx.fillStyle = '#2c3e50';
       downloadCtx.font = 'bold 14px system-ui, -apple-system, sans-serif';
       const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
       const formattedDate = unlockDate.toLocaleString('en-US', {
@@ -1211,53 +1255,50 @@ function generateCapsuleImage() {
         hour: '2-digit',
         minute: '2-digit'
       });
-      downloadCtx.fillText(formattedDate, contentPadding, contentY + 18);
-      contentY += 50;
+      downloadCtx.fillText(formattedDate, contentX, contentY + 18);
       
-      // 5. Ciphertext link (matching style)
-      downloadCtx.fillStyle = '#718096';
+      // Ciphertext link
+      const cipherX = contentX + 180; // Position to the right
+      downloadCtx.fillStyle = '#6c757d';
       downloadCtx.font = '12px system-ui, -apple-system, sans-serif';
-      downloadCtx.fillText('copy', contentPadding, contentY);
+      downloadCtx.fillText('copy', cipherX, contentY);
       
-      downloadCtx.fillStyle = '#667eea';
+      downloadCtx.fillStyle = '#4F46E5';
       downloadCtx.font = 'bold 14px system-ui, -apple-system, sans-serif';
-      downloadCtx.fillText('cyphertext', contentPadding, contentY + 18);
+      downloadCtx.fillText('cyphertext', cipherX, contentY + 18);
+      
       contentY += 50;
       
-      // 6. Tags (matching exact preview-tags style)
+      // 5. Tags (matching exact preview-tags style with rounded corners)
       if (capsuleData.tags) {
         const tags = capsuleData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-        let tagX = contentPadding;
+        let tagX = contentX;
         const tagY = contentY;
         
-        downloadCtx.font = '12px system-ui, -apple-system, sans-serif';
+        downloadCtx.font = '14px system-ui, -apple-system, sans-serif';
         
         tags.forEach((tag, index) => {
           const tagText = `#${tag}`;
           const textMetrics = downloadCtx.measureText(tagText);
-          const tagWidth = textMetrics.width + 16;
-          const tagHeight = 24;
+          const tagWidth = textMetrics.width + 24; // 0.8rem padding * 2
+          const tagHeight = 28; // Slightly taller
           
           // Check if tag fits on current line
-          if (tagX + tagWidth > 350 && index > 0) {
-            tagX = contentPadding;
-            contentY += 32;
+          if (tagX + tagWidth > cardWidth - cardPadding && index > 0) {
+            tagX = contentX;
+            contentY += 35;
           }
           
-          // Tag background (matching CSS styling)
-          downloadCtx.fillStyle = '#ebf8ff';
-          downloadCtx.fillRect(tagX, contentY, tagWidth, tagHeight);
+          // Tag background with rounded corners (matching CSS: 20px border-radius)
+          downloadCtx.fillStyle = '#667eea';
+          drawRoundedRect(downloadCtx, tagX, contentY, tagWidth, tagHeight, 20);
+          downloadCtx.fill();
           
-          // Tag border
-          downloadCtx.strokeStyle = '#bee3f8';
-          downloadCtx.lineWidth = 1;
-          downloadCtx.strokeRect(tagX, contentY, tagWidth, tagHeight);
-          
-          // Tag text
-          downloadCtx.fillStyle = '#3182ce';
-          downloadCtx.font = 'bold 12px system-ui, -apple-system, sans-serif';
+          // Tag text (white color like CSS)
+          downloadCtx.fillStyle = 'white';
+          downloadCtx.font = '14px system-ui, -apple-system, sans-serif';
           downloadCtx.textAlign = 'left';
-          downloadCtx.fillText(tagText, tagX + 8, contentY + 16);
+          downloadCtx.fillText(tagText, tagX + 12, contentY + 18);
           
           tagX += tagWidth + 8;
         });
