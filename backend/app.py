@@ -173,13 +173,14 @@ try:    # Handle different working directories (local vs Heroku)
     
     with open(abi_path, "r") as f:
         contract_abi = json.load(f)
-    
-    # Store image processing config globally
+      # Store image processing config globally
     IMAGE_PROCESSING_CONFIG = config_data.get("image_processing", {
         "pixelation_factor": 14,
         "smoothing_factor": 12,
         "enable_floyd_steinberg_dithering": True,
-        "enable_advanced_dithering": True
+        "enable_advanced_dithering": True,
+        "max_processing_dimension": 800,
+        "disable_dithering_on_large_images": True
     })
     
     print(f"📊 Image processing config loaded: {IMAGE_PROCESSING_CONFIG}")
@@ -213,7 +214,9 @@ if 'IMAGE_PROCESSING_CONFIG' not in globals():
         "pixelation_factor": 14,
         "smoothing_factor": 12,
         "enable_floyd_steinberg_dithering": True,
-        "enable_advanced_dithering": True
+        "enable_advanced_dithering": True,
+        "max_processing_dimension": 800,
+        "disable_dithering_on_large_images": True
     }
     print("⚠️  Using fallback image processing config")
 
@@ -243,16 +246,37 @@ def smoothen(img, factor=None):
     return img_smooth.resize((w, h), Image.BILINEAR)
 
 def floyd_steinberg_dither(img):
-    """Step 3: Apply Floyd-Steinberg dithering"""
+    """Step 3: Apply Floyd-Steinberg dithering (optimized for performance)"""
     import numpy as np
     
     # Convert to RGB if not already
     if img.mode != 'RGB':
         img = img.convert('RGB')
     
+    # Get max dimension from config
+    max_dimension = IMAGE_PROCESSING_CONFIG.get("max_processing_dimension", 800)
+    disable_on_large = IMAGE_PROCESSING_CONFIG.get("disable_dithering_on_large_images", True)
+    
+    original_size = img.size
+    
+    # Check if image is too large and we should skip dithering
+    if disable_on_large and max(original_size) > max_dimension:
+        print(f"🎨 Image {original_size} is too large, skipping Floyd-Steinberg dithering for performance")
+        return img
+    
+    # Limit image size for performance - resize if too large
+    if max(original_size) > max_dimension:
+        # Calculate new size maintaining aspect ratio
+        ratio = max_dimension / max(original_size)
+        new_size = (int(original_size[0] * ratio), int(original_size[1] * ratio))
+        img = img.resize(new_size, Image.LANCZOS)
+        print(f"🎨 Resized image from {original_size} to {new_size} for dithering performance")
+    
     # Convert to numpy array for easier manipulation
     pixels = np.array(img, dtype=np.float32)
     height, width, channels = pixels.shape
+    
+    print(f"🎨 Processing {width}x{height} image for Floyd-Steinberg dithering...")
     
     # Apply Floyd-Steinberg dithering to each channel
     for c in range(channels):
@@ -279,7 +303,14 @@ def floyd_steinberg_dither(img):
     
     # Convert back to PIL Image
     pixels = np.clip(pixels, 0, 255).astype(np.uint8)
-    return Image.fromarray(pixels)
+    result_img = Image.fromarray(pixels)
+    
+    # Resize back to original size if we resized for processing
+    if max(original_size) > max_dimension and not disable_on_large:
+        result_img = result_img.resize(original_size, Image.NEAREST)
+        print(f"🎨 Resized result back to original size {original_size}")
+    
+    return result_img
 
 def advanced_dither(img):
     """Apply the complete 3-step dithering process: pixelate -> smoothen -> floyd-steinberg"""

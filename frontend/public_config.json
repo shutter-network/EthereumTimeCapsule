@@ -22,11 +22,12 @@
     7,
     8,
     9
-  ],
-  "image_processing": {
+  ],  "image_processing": {
     "pixelation_factor": 30,
     "smoothing_factor": 12,
     "enable_floyd_steinberg_dithering": true,
-    "enable_advanced_dithering": true
+    "enable_advanced_dithering": true,
+    "max_processing_dimension": 800,
+    "disable_dithering_on_large_images": true
   }
 }
