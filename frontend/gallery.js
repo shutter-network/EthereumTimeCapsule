@@ -138,8 +138,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     
     // Setup event listeners
     setupEventListeners();
-    
-    // Initialize Shutter WASM
+      // Initialize Shutter WASM
     console.log("Initializing Shutter WASM...");
     try {
       await ensureShutterReady();
@@ -148,8 +147,18 @@ window.addEventListener("DOMContentLoaded", async () => {
       console.warn("⚠️ Shutter WASM not ready yet, will retry when needed:", e.message);
     }
     
-    // Load initial capsules
-    loadCapsules();
+    // Check if we have a direct capsule link
+    const urlParams = new URLSearchParams(window.location.search);
+    const capsuleId = urlParams.get('capsule');
+    
+    if (capsuleId) {
+      console.log(`🎯 Direct capsule link detected: ${capsuleId}`);
+      await loadDirectCapsule(capsuleId);
+    } else {
+      console.log('📚 Loading all capsules');
+      // Load initial capsules
+      loadCapsules();
+    }
     
   } catch (e) {
     console.error("Initialization failed:", e);
@@ -690,27 +699,6 @@ window.revealCapsule = revealCapsule;
 window.toggleStory = toggleStory;
 window.decryptAndDisplayImage = decryptAndDisplayImage;
 window.handleImageError = handleImageError;
-
-// Initialize gallery when page loads
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    console.log('🎭 Gallery initializing...');
-    
-    // Check if we have a direct capsule link
-    const urlParams = new URLSearchParams(window.location.search);
-    const capsuleId = urlParams.get('capsule');
-    
-    if (capsuleId) {
-      console.log(`🎯 Direct capsule link detected: ${capsuleId}`);
-      await loadDirectCapsule(capsuleId);
-    } else {
-      console.log('📚 Loading all capsules');
-      await loadCapsules();
-    }
-  } catch (error) {
-    console.error('❌ Gallery initialization failed:', error);
-  }
-});
 
 // Function to load a specific capsule directly
 async function loadDirectCapsule(capsuleId) {
