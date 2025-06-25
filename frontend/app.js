@@ -1113,7 +1113,7 @@ function setupDownloadImage() {
 let generatedImageBlob = null;
 
 function generateCapsuleImage() {
-  console.log('🎨 Starting simple image generation...');
+  console.log('🎨 Starting preview-style image generation...');
   
   return new Promise((resolve) => {
     try {
@@ -1125,56 +1125,144 @@ function generateCapsuleImage() {
         return;
       }
 
-      // Create a simple square canvas for social sharing
+      // Create a canvas that matches the preview card style exactly
       const downloadCanvas = document.createElement('canvas');
       const downloadCtx = downloadCanvas.getContext('2d');
       
-      downloadCanvas.width = 400;
+      // Use the preview card dimensions (similar to create.html preview)
+      downloadCanvas.width = 350;
       downloadCanvas.height = 400;
       
-      // White background
+      // White background (same as preview card)
       downloadCtx.fillStyle = '#ffffff';
-      downloadCtx.fillRect(0, 0, 400, 400);
+      downloadCtx.fillRect(0, 0, 350, 400);
       
-      // Add border
+      // Add border like preview card
       downloadCtx.strokeStyle = '#e0e0e0';
-      downloadCtx.lineWidth = 2;
-      downloadCtx.strokeRect(0, 0, 400, 400);
+      downloadCtx.lineWidth = 1;
+      downloadCtx.strokeRect(0, 0, 350, 400);
       
-      // Draw the pixelated image (centered, maintaining aspect ratio)
+      // 1. Image area (matching preview-image-container)
+      const imageAreaHeight = 200;
+      const imageAreaY = 0;
+      
+      // Fill image background
+      downloadCtx.fillStyle = '#f0f0f0';
+      downloadCtx.fillRect(0, imageAreaY, 350, imageAreaHeight);
+      
+      // Draw the pixelated image (same scaling as preview)
       if (canvas.width > 0 && canvas.height > 0) {
-        const size = 280;
-        const x = (400 - size) / 2;
-        const y = 20;
+        const containerWidth = 350;
+        const containerHeight = 200;
+        const imgAspectRatio = canvas.width / canvas.height;
+        const containerAspectRatio = containerWidth / containerHeight;
+        
+        let drawWidth, drawHeight, offsetX, offsetY;
+        
+        if (imgAspectRatio > containerAspectRatio) {
+          drawWidth = containerWidth;
+          drawHeight = containerWidth / imgAspectRatio;
+          offsetX = 0;
+          offsetY = (containerHeight - drawHeight) / 2;
+        } else {
+          drawHeight = containerHeight;
+          drawWidth = containerHeight * imgAspectRatio;
+          offsetX = (containerWidth - drawWidth) / 2;
+          offsetY = 0;
+        }
         
         downloadCtx.imageSmoothingEnabled = false;
-        downloadCtx.drawImage(canvas, x, y, size, size * (canvas.height / canvas.width));
+        downloadCtx.drawImage(canvas, offsetX, offsetY, drawWidth, drawHeight);
       }
       
-      // Add text overlay at bottom
-      downloadCtx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-      downloadCtx.fillRect(0, 320, 400, 80);
+      // 2. Issuer tag (bottom left of image area)
+      downloadCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      downloadCtx.fillRect(12, imageAreaHeight - 24, 120, 20);
+      downloadCtx.fillStyle = 'white';
+      downloadCtx.font = '10px Inter, Arial, sans-serif';
+      downloadCtx.textAlign = 'left';
+      downloadCtx.fillText(`issued by ${capsuleData.userName || 'anonymous'}`, 16, imageAreaHeight - 10);
+      
+      // 3. Content area (matching preview-content)
+      let contentY = imageAreaHeight + 20;
+      const contentPadding = 20;
       
       // Title
-      downloadCtx.fillStyle = '#ffffff';
-      downloadCtx.font = 'bold 18px Arial, sans-serif';
-      downloadCtx.textAlign = 'center';
-      const title = (capsuleData.title || 'My Time Capsule').substring(0, 30);
-      downloadCtx.fillText(title, 200, 345);
+      downloadCtx.fillStyle = '#333333';
+      downloadCtx.font = 'bold 18px Inter, Arial, sans-serif';
+      downloadCtx.textAlign = 'left';
+      const title = capsuleData.title || 'My Time Capsule';
+      // Wrap title if too long
+      const maxTitleWidth = 310;
+      if (downloadCtx.measureText(title).width > maxTitleWidth) {
+        const words = title.split(' ');
+        let line = '';
+        for (let i = 0; i < words.length; i++) {
+          const testLine = line + words[i] + ' ';
+          if (downloadCtx.measureText(testLine).width > maxTitleWidth && i > 0) {
+            downloadCtx.fillText(line, contentPadding, contentY);
+            line = words[i] + ' ';
+            contentY += 22;
+          } else {
+            line = testLine;
+          }
+        }
+        downloadCtx.fillText(line, contentPadding, contentY);
+      } else {
+        downloadCtx.fillText(title, contentPadding, contentY);
+      }
+      contentY += 32;
       
-      // Unlock date
-      downloadCtx.font = '14px Arial, sans-serif';
+      // 4. Meta information (matching preview-meta layout)
+      downloadCtx.fillStyle = '#666666';
+      downloadCtx.font = '10px Inter, Arial, sans-serif';
+      downloadCtx.fillText('encrypted until', contentPadding + 20, contentY);
+      downloadCtx.fillText('copy', contentPadding + 120, contentY);
+      
+      contentY += 12;
+      downloadCtx.fillStyle = '#333333';
+      downloadCtx.font = 'bold 11px Inter, Arial, sans-serif';
       const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
-      downloadCtx.fillText(`Unlocks: ${unlockDate.toLocaleDateString()}`, 200, 365);
+      downloadCtx.fillText(unlockDate.toLocaleDateString(), contentPadding + 20, contentY);
+      downloadCtx.fillStyle = '#4F46E5';
+      downloadCtx.fillText('cyphertext', contentPadding + 120, contentY);
       
-      // Capsule ID
-      downloadCtx.font = '12px Arial, sans-serif';      downloadCtx.fillText(`Capsule #${capsuleData.capsuleId || '0'}`, 200, 385);
+      contentY += 24;
+      
+      // 5. Tags (matching preview-tags)
+      if (capsuleData.tags) {
+        const tags = capsuleData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+        let tagX = contentPadding;
+        
+        tags.forEach(tag => {
+          // Tag background
+          downloadCtx.fillStyle = '#E8F2FF';
+          const tagText = `#${tag}`;
+          const tagWidth = downloadCtx.measureText(tagText).width + 24;
+          const tagHeight = 20;
+          
+          // Simple rounded rectangle for tag
+          downloadCtx.fillRect(tagX, contentY, tagWidth, tagHeight);
+          
+          // Tag border
+          downloadCtx.strokeStyle = '#D1E7FF';
+          downloadCtx.lineWidth = 1;
+          downloadCtx.strokeRect(tagX, contentY, tagWidth, tagHeight);
+          
+          // Tag text
+          downloadCtx.fillStyle = '#4F46E5';
+          downloadCtx.font = 'bold 12px Inter, Arial, sans-serif';
+          downloadCtx.fillText(tagText, tagX + 12, contentY + 14);
+          
+          tagX += tagWidth + 8;
+        });
+      }
       
       // Convert to blob
       downloadCanvas.toBlob((blob) => {
         if (blob) {
           generatedImageBlob = blob;
-          console.log('✅ Image generated successfully');
+          console.log('✅ Preview-style image generated successfully');
           resolve(blob);
         } else {
           console.error('Failed to create blob');
