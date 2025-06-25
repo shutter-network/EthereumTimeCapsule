@@ -690,3 +690,83 @@ window.revealCapsule = revealCapsule;
 window.toggleStory = toggleStory;
 window.decryptAndDisplayImage = decryptAndDisplayImage;
 window.handleImageError = handleImageError;
+
+// Initialize gallery when page loads
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    console.log('🎭 Gallery initializing...');
+    
+    // Check if we have a direct capsule link
+    const urlParams = new URLSearchParams(window.location.search);
+    const capsuleId = urlParams.get('capsule');
+    
+    if (capsuleId) {
+      console.log(`🎯 Direct capsule link detected: ${capsuleId}`);
+      await loadDirectCapsule(capsuleId);
+    } else {
+      console.log('📚 Loading all capsules');
+      await loadCapsules();
+    }
+  } catch (error) {
+    console.error('❌ Gallery initialization failed:', error);
+  }
+});
+
+// Function to load a specific capsule directly
+async function loadDirectCapsule(capsuleId) {
+  try {
+    console.log(`🔍 Loading capsule ${capsuleId} directly...`);
+    
+    // Fetch the specific capsule from the backend
+    const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
+    const capsule = response.data;
+    
+    if (!capsule) {
+      console.error('❌ Capsule not found');
+      // Fall back to loading all capsules
+      await loadCapsules();
+      return;
+    }
+    
+    console.log('✅ Direct capsule loaded:', capsule);
+    
+    // Clear the gallery and display only this capsule
+    const gallery = document.getElementById('gallery');
+    if (gallery) {
+      gallery.innerHTML = '';
+      displayCapsule(capsule);
+      
+      // Update page title to reflect the specific capsule
+      document.title = `Time Capsule: ${capsule.title} - Ethereum Time Capsule`;
+    }
+    
+  } catch (error) {
+    console.error('❌ Error loading direct capsule:', error);
+    // Fall back to loading all capsules
+    await loadCapsules();
+  }
+}
+
+// Helper function to display a single capsule (extracted from existing code)
+function displayCapsule(capsule) {
+  const gallery = document.getElementById('gallery');
+  if (!gallery) return;
+  
+  // Create capsule card (this would use the existing capsule rendering logic)
+  const capsuleCard = createCapsuleCard(capsule);
+  gallery.appendChild(capsuleCard);
+}
+
+// Helper function to create a capsule card (placeholder - would need to extract from existing rendering code)
+function createCapsuleCard(capsule) {
+  // This would use the existing capsule card creation logic from loadCapsules()
+  // For now, create a basic structure
+  const card = document.createElement('div');
+  card.className = 'capsule-card';
+  card.innerHTML = `
+    <h3>${capsule.title}</h3>
+    <p>By: ${capsule.creator}</p>
+    <p>Unlock: ${new Date(capsule.reveal_timestamp * 1000).toLocaleDateString()}</p>
+  `;
+  return card;
+}

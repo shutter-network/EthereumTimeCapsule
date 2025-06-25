@@ -698,14 +698,67 @@
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
-    }
-
-    /* Completion Actions Styles */
+    }    /* Completion Actions Styles */
     .completion-actions {
       margin: 20px;
       display: flex;
       flex-direction: column;
       gap: 12px;
+    }
+
+    /* Shareable Link Styles */
+    .shareable-link-section {
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 8px;
+    }
+
+    .link-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .link-container {
+      display: flex;
+      gap: 8px;
+    }
+
+    .link-input {
+      flex: 1;
+      background: white;
+      border: 1px solid #d0d0d0;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .copy-link-btn {
+      background: var(--eth5);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.3s ease;
+    }
+
+    .copy-link-btn:hover {
+      background: #1e22b3;
+    }
+
+    .copy-link-btn.copied {
+      background: #10b981;
     }
 
     .follow-button {
@@ -1338,13 +1391,21 @@
           </div>
         </div>
       </div>
-      
-      <!-- Action buttons section matching screenshot -->
+        <!-- Action buttons section matching screenshot -->
       <div class="completion-actions">
+        <!-- Shareable link section -->
+        <div class="shareable-link-section">
+          <div class="link-label">Your shareable link:</div>
+          <div class="link-container">
+            <input type="text" id="shareable-link-input" class="link-input" readonly>
+            <button id="copy-link-btn" class="copy-link-btn">Copy Link</button>
+          </div>
+        </div>
+        
         <button id="follow-x-btn" class="follow-button">Follow us on X</button>
         <button id="share-x-btn" class="share-button">Share on X</button>
         <button id="gallery-btn" class="gallery-button">See your entry in the gallery</button>
-        <button id="encrypt-another-btn" class="encrypt-another-button">encrypt another entry</button>      </div>
+        <button id="encrypt-another-btn" class="encrypt-another-button">encrypt another entry</button></div>
     </div>
 
     </div> <!-- Close main-content -->

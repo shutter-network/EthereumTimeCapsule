@@ -964,8 +964,7 @@ function populateCompletion() {
   
   document.getElementById('final-unlock-date').textContent = 
     unlockDate.toLocaleString('en-US', formatOptions);
-  
-  // Update tags
+    // Update tags
   const finalTagsContainer = document.getElementById('final-preview-tags');
   finalTagsContainer.innerHTML = '';
   const tags = capsuleData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
@@ -975,6 +974,9 @@ function populateCompletion() {
     tagElement.textContent = `#${tag}`;
     finalTagsContainer.appendChild(tagElement);
   });
+
+  // Generate and populate shareable link
+  generateShareableLink();
   // Recreate pixelated image in final preview
   const canvas = document.getElementById('final-preview-canvas');
   const ctx = canvas.getContext('2d');
@@ -1063,6 +1065,42 @@ function populateCompletion() {
   }
 }
 
+function generateShareableLink() {
+  if (!capsuleData.capsuleId && capsuleData.capsuleId !== 0) {
+    console.warn('No capsule ID available for shareable link');
+    return;
+  }
+
+  // Generate the shareable link
+  const baseUrl = window.location.origin;
+  const shareableUrl = `${baseUrl}/gallery.html?capsule=${capsuleData.capsuleId}`;
+  
+  // Populate the input field
+  const linkInput = document.getElementById('shareable-link-input');
+  if (linkInput) {
+    linkInput.value = shareableUrl;
+  }
+
+  // Add copy functionality
+  const copyBtn = document.getElementById('copy-link-btn');
+  if (copyBtn) {
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(shareableUrl).then(() => {
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy link:', err);
+        alert('Failed to copy link to clipboard');
+      });
+    };
+  }
+}
+
 function followOnX() {
   window.open('https://twitter.com/ethereum', '_blank');
 }
@@ -1070,7 +1108,7 @@ function followOnX() {
 function shareOnX() {
   const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
   const text = `I just created a time capsule on Ethereum! 🕰️✨ It will unlock on ${unlockDate.toLocaleString()}`;
-  const shareUrl = `${window.location.origin}${window.location.pathname}?capsule=${capsuleData.capsuleId}`;
+  const shareUrl = `${window.location.origin}/gallery.html?capsule=${capsuleData.capsuleId}`;
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
   window.open(twitterUrl, '_blank');
 }
