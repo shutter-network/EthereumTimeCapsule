@@ -1323,6 +1323,28 @@ function generateCapsuleImage() {
   });
 }
 
+async function copyImageToClipboard(blob) {
+  try {
+    // Check if the browser supports clipboard API and can write images
+    if (!navigator.clipboard || !navigator.clipboard.write) {
+      throw new Error('Clipboard API not supported');
+    }
+
+    // Create a ClipboardItem with the image blob
+    const clipboardItem = new ClipboardItem({
+      [blob.type]: blob
+    });
+
+    // Write to clipboard
+    await navigator.clipboard.write([clipboardItem]);
+    console.log('✅ Image copied to clipboard successfully');
+    return true;
+  } catch (error) {
+    console.warn('⚠️ Failed to copy image to clipboard:', error);
+    return false;
+  }
+}
+
 function downloadCapsuleImage() {
   // Update button to show it's working
   const downloadBtn = document.getElementById('download-image-btn');
@@ -1332,9 +1354,12 @@ function downloadCapsuleImage() {
   }
   
   // Generate image and download it
-  generateCapsuleImage().then((blob) => {
+  generateCapsuleImage().then(async (blob) => {
     if (blob) {
-      // Create download link
+      // Try to copy to clipboard first
+      const clipboardSuccess = await copyImageToClipboard(blob);
+      
+      // Always provide download as fallback
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -1346,13 +1371,24 @@ function downloadCapsuleImage() {
       
       // Update button to show success
       if (downloadBtn) {
-        downloadBtn.textContent = '✅ Downloaded!';
+        if (clipboardSuccess) {
+          downloadBtn.textContent = '📋 Copied & Downloaded!';
+        } else {
+          downloadBtn.textContent = '✅ Downloaded!';
+        }
         downloadBtn.classList.add('downloaded');
         downloadBtn.disabled = false;
         setTimeout(() => {
           downloadBtn.textContent = '📷 Download Again';
           downloadBtn.classList.remove('downloaded');
         }, 3000);
+      }
+      
+      // Show user-friendly message
+      if (clipboardSuccess) {
+        alert('📋 Perfect! Your capsule image is now copied to your clipboard AND downloaded.\n\nYou can paste it directly on Twitter! 🚀');
+      } else {
+        alert('📁 Image downloaded! You can now attach it to your tweet.');
       }
       
     } else {
@@ -1388,11 +1424,13 @@ function shareOnX() {
   const text = `I just created a time capsule on Ethereum! 🕰️✨ It will unlock on ${unlockDate.toLocaleString()}`;
   const shareUrl = `${window.location.origin}/gallery.html?capsule=${capsuleData.capsuleId}`;
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
-  
-  // Generate image and auto-download, then open Twitter
-  generateCapsuleImage().then((blob) => {
+    // Generate image and auto-copy to clipboard, then open Twitter
+  generateCapsuleImage().then(async (blob) => {
     if (blob) {
-      // Automatically download the image
+      // Try to copy to clipboard
+      const clipboardSuccess = await copyImageToClipboard(blob);
+      
+      // Also download as backup
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -1405,14 +1443,23 @@ function shareOnX() {
       // Show download success on button
       const downloadBtn = document.getElementById('download-image-btn');
       if (downloadBtn) {
-        downloadBtn.textContent = '✅ Downloaded!';
+        if (clipboardSuccess) {
+          downloadBtn.textContent = '📋 Copied!';
+        } else {
+          downloadBtn.textContent = '✅ Downloaded!';
+        }
         downloadBtn.classList.add('downloaded');
       }
       
-      // Wait a moment then open Twitter with instructions
+      // Wait a moment then open Twitter with appropriate instructions
       setTimeout(() => {
         window.open(twitterUrl, '_blank');
-        alert('📷 Perfect! Your capsule image has been downloaded.\n\nNow attach it to your tweet to show off your time capsule! 🚀');
+        
+        if (clipboardSuccess) {
+          alert('� Perfect! Your capsule image is copied to your clipboard.\n\nJust paste it (Ctrl+V / Cmd+V) directly in your tweet! 🚀');
+        } else {
+          alert('📷 Your capsule image has been downloaded.\n\nAttach the downloaded file to your tweet to show off your time capsule! 🚀');
+        }
       }, 500);
     } else {
       // If generation fails, open Twitter without image
