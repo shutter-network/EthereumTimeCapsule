@@ -448,8 +448,7 @@ function createCapsuleCard(capsule) {
         `<div style="color: #999; font-style: italic;">🔒 Story will be revealed on ${revealTime.toLocaleDateString()}</div>`
       }
       ${!isRevealed ? '<div class="story-fade"></div>' : ''}
-    </div>
-      <div class="capsule-actions">
+    </div>      <div class="capsule-actions">
       ${!isRevealed ? `
         <button class="btn-small btn-decrypt" onclick="decryptCapsule(${capsule.id}, '${capsule.shutterIdentity}')">
           🔓 Preview Story
@@ -460,6 +459,9 @@ function createCapsuleCard(capsule) {
       ` : ''}
       <button class="btn-small btn-expand" onclick="toggleStory(${capsule.id})">
         📖 Read More
+      </button>
+      <button class="btn-small btn-share" onclick="shareGalleryCapsule(${capsule.id}, '${capsule.title || 'Capsule'}', '${revealTime.toLocaleDateString()}')">
+        🐦 Share on X
       </button>
     </div>
   `;
@@ -755,4 +757,30 @@ function displayCapsule(capsule) {
   // Create capsule card using the existing capsule rendering logic
   const capsuleCard = createCapsuleCard(capsule);
   gallery.appendChild(capsuleCard);
+}
+
+// =============  GALLERY SHARE FUNCTIONS  =============
+function shareGalleryCapsule(capsuleId, title, unlockDate) {
+  try {
+    const shareUrl = `${window.location.origin}/gallery.html?capsule=${capsuleId}`;
+    const text = `Check out this time capsule on Ethereum! 🕰️✨ "${title}" - Unlocks on ${unlockDate}`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
+    
+    window.open(twitterUrl, '_blank');
+    
+    // Show a tooltip or notification that the link was shared
+    const shareBtn = event.target;
+    const originalText = shareBtn.textContent;
+    shareBtn.textContent = '✅ Shared!';
+    shareBtn.style.background = '#10b981';
+    
+    setTimeout(() => {
+      shareBtn.textContent = originalText;
+      shareBtn.style.background = '';
+    }, 2000);
+    
+  } catch (error) {
+    console.error('Failed to share capsule:', error);
+    alert('Failed to share capsule. Please try again.');
+  }
 }
