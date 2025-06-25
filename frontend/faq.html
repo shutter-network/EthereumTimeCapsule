@@ -731,13 +731,12 @@
       // Create new full-screen menu
       const menu = document.createElement('div');
       menu.className = 'menu-dropdown';
-      
-      const links = [
+        const links = [
         { text: 'home', href: '/' },
         { text: 'create entry', href: '/create' },
         { text: 'gallery', href: '/gallery' },
         { text: 'faq', href: '/faq' },
-        { text: 'documentation', href: '#documentation' }
+        { text: 'documentation', href: 'https://github.com/pepae/EthereumTimeCapsule-prod' }
       ];
       
       links.forEach((link, index) => {
@@ -761,12 +760,15 @@
       setTimeout(() => {
         menu.classList.add('show');
       }, 10);
-      
-      // Remove menu when clicking outside or on links
+        // Remove menu when clicking outside or on links
       menu.addEventListener('click', (e) => {
         if (e.target === menu || e.target.tagName === 'A') {
           if (e.target.tagName === 'A' && e.target.href.startsWith('#')) {
             e.preventDefault(); // Prevent navigation for placeholder links
+          } else if (e.target.tagName === 'A' && e.target.href.startsWith('https://')) {
+            // Open external links in new tab
+            e.preventDefault();
+            window.open(e.target.href, '_blank');
           }
           toggleMenu();
         }
