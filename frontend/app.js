@@ -974,9 +974,11 @@ function populateCompletion() {
     tagElement.textContent = `#${tag}`;
     finalTagsContainer.appendChild(tagElement);
   });
-
   // Generate and populate shareable link
   generateShareableLink();
+  
+  // Setup download image functionality
+  setupDownloadImage();
   // Recreate pixelated image in final preview
   const canvas = document.getElementById('final-preview-canvas');
   const ctx = canvas.getContext('2d');
@@ -1101,16 +1103,118 @@ function generateShareableLink() {
   }
 }
 
+function setupDownloadImage() {
+  const downloadBtn = document.getElementById('download-image-btn');
+  if (downloadBtn) {
+    downloadBtn.onclick = downloadCapsuleImage;
+  }
+}
+
+function downloadCapsuleImage() {
+  // Get the canvas element from the final preview
+  const canvas = document.getElementById('final-preview-canvas');
+  if (!canvas) {
+    console.error('Preview canvas not found');
+    alert('Preview canvas not found');
+    return;
+  }
+
+  try {
+    // Create a new canvas with higher resolution for better quality
+    const downloadCanvas = document.createElement('canvas');
+    const downloadCtx = downloadCanvas.getContext('2d');
+    
+    // Set a higher resolution (2x) for better quality
+    const scale = 2;
+    downloadCanvas.width = canvas.width * scale;
+    downloadCanvas.height = canvas.height * scale;
+    
+    // Scale up the context
+    downloadCtx.scale(scale, scale);
+    downloadCtx.imageSmoothingEnabled = false; // Keep pixelated effect
+    
+    // Draw the original canvas content onto the download canvas
+    downloadCtx.drawImage(canvas, 0, 0);
+    
+    // Add title overlay at the bottom
+    const title = capsuleData.title || 'My Time Capsule';
+    const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
+    
+    // Add semi-transparent overlay for text readability
+    downloadCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    downloadCtx.fillRect(0, canvas.height - 60, canvas.width, 60);
+    
+    // Add title text
+    downloadCtx.fillStyle = 'white';
+    downloadCtx.font = 'bold 16px Inter, sans-serif';
+    downloadCtx.textAlign = 'center';
+    downloadCtx.fillText(title, canvas.width / 2, canvas.height - 35);
+    
+    // Add unlock date
+    downloadCtx.font = '12px Inter, sans-serif';
+    downloadCtx.fillText(`Unlocks: ${unlockDate.toLocaleDateString()}`, canvas.width / 2, canvas.height - 15);
+    
+    // Convert to blob and download
+    downloadCanvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `time-capsule-${capsuleData.capsuleId || 'preview'}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      // Update button to show success
+      const downloadBtn = document.getElementById('download-image-btn');
+      if (downloadBtn) {
+        const originalText = downloadBtn.textContent;
+        downloadBtn.textContent = '✅ Downloaded!';
+        downloadBtn.classList.add('downloaded');
+        setTimeout(() => {
+          downloadBtn.textContent = originalText;
+          downloadBtn.classList.remove('downloaded');
+        }, 3000);
+      }
+    }, 'image/png');
+    
+  } catch (error) {
+    console.error('Failed to download image:', error);
+    alert('Failed to download image. Please try again.');
+  }
+}
+
 function followOnX() {
   window.open('https://twitter.com/ethereum', '_blank');
 }
 
 function shareOnX() {
+  // Check if image has been downloaded
+  const downloadBtn = document.getElementById('download-image-btn');
+  const hasDownloaded = downloadBtn && downloadBtn.classList.contains('downloaded');
+  
   const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
   const text = `I just created a time capsule on Ethereum! 🕰️✨ It will unlock on ${unlockDate.toLocaleString()}`;
   const shareUrl = `${window.location.origin}/gallery.html?capsule=${capsuleData.capsuleId}`;
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
+  
+  if (!hasDownloaded) {
+    // Prompt user to download image first
+    if (confirm('💡 Tip: Download the capsule image first, then you can attach it to your tweet for better engagement!\n\nClick "OK" to download the image now, or "Cancel" to tweet without image.')) {
+      downloadCapsuleImage();
+      // Wait a moment for download to complete, then open Twitter
+      setTimeout(() => {
+        window.open(twitterUrl, '_blank');
+        alert('📷 Image downloaded! Now attach it to your tweet for the best result.');
+      }, 1000);
+      return;
+    }
+  }
+  
   window.open(twitterUrl, '_blank');
+  if (hasDownloaded) {
+    alert('📷 Don\'t forget to attach the downloaded image to your tweet!');
+  }
 }
 
 function viewInGallery() {
