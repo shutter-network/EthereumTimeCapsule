@@ -1127,198 +1127,181 @@ function setupDownloadImage() {
   }
 }
 
-// Polyfill for roundRect (not available in all browsers)
-if (!CanvasRenderingContext2D.prototype.roundRect) {
-  CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
-    this.beginPath();
-    this.moveTo(x + radius, y);
-    this.lineTo(x + width - radius, y);
-    this.quadraticCurveTo(x + width, y, x + width, y + radius);
-    this.lineTo(x + width, y + height - radius);
-    this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    this.lineTo(x + radius, y + height);
-    this.quadraticCurveTo(x, y + height, x, y + height - radius);
-    this.lineTo(x, y + radius);
-    this.quadraticCurveTo(x, y, x + radius, y);
-    this.closePath();
-  };
-}
-
 // Store the generated image blob globally for easy access
 let generatedImageBlob = null;
 
 function generateCapsuleImage() {
+  console.log('🎨 Starting gallery-style image generation...');
+  
   // Get the canvas element from the final preview
   const canvas = document.getElementById('final-preview-canvas');
   if (!canvas) {
     console.error('Preview canvas not found');
-    return null;
+    return Promise.resolve(null);
   }
 
   try {
-    // Create a canvas that matches the gallery card layout
+    // Create a simplified canvas that looks like the gallery view
     const downloadCanvas = document.createElement('canvas');
     const downloadCtx = downloadCanvas.getContext('2d');
     
-    // Set canvas size to match gallery card proportions
-    // Gallery cards are typically 360px wide with 16px padding
-    const cardWidth = 360;
-    const cardPadding = 16;
-    const contentWidth = cardWidth - (cardPadding * 2);
-    
-    // Calculate height based on gallery card structure
-    const headerHeight = 32; // ID and status badges
-    const imageHeight = 160; // Gallery image height
-    const titleHeight = 24; // Title line height
-    const metaHeight = 60; // 3 lines of metadata
-    const storyHeight = 80; // Story section
-    const actionsHeight = 40; // Action buttons
-    const spacing = 12 * 6; // 6 gaps of 12px each
-    
-    const cardHeight = headerHeight + imageHeight + titleHeight + metaHeight + storyHeight + actionsHeight + spacing + (cardPadding * 2);
+    // Set canvas size (slightly smaller than gallery for better mobile sharing)
+    const cardWidth = 320;
+    const cardHeight = 400;
+    const padding = 16;
     
     downloadCanvas.width = cardWidth;
     downloadCanvas.height = cardHeight;
     
-    // Fill background (gallery card background color)
-    downloadCtx.fillStyle = '#ececec'; // var(--eth2)
+    // Fill background with gallery card color
+    downloadCtx.fillStyle = '#ffffff';
     downloadCtx.fillRect(0, 0, cardWidth, cardHeight);
     
-    let yPos = cardPadding;
+    // Add subtle border like gallery cards
+    downloadCtx.strokeStyle = '#e0e0e0';
+    downloadCtx.lineWidth = 1;
+    downloadCtx.strokeRect(0, 0, cardWidth, cardHeight);
     
-    // 1. Header with ID and Status
-    // ID Badge
-    downloadCtx.fillStyle = '#242ae0'; // var(--eth5)
-    downloadCtx.fillRect(cardPadding, yPos, 60, 24);
+    let yPos = padding;
+    
+    // 1. Header with ID badge
+    downloadCtx.fillStyle = '#242ae0';
+    drawRoundedRect(downloadCtx, padding, yPos, 80, 24, 6);
+    downloadCtx.fill();
+    
     downloadCtx.fillStyle = 'white';
-    downloadCtx.font = 'bold 12px Inter, sans-serif';
+    downloadCtx.font = 'bold 12px Arial, sans-serif';
     downloadCtx.textAlign = 'center';
-    downloadCtx.fillText(`ID #${capsuleData.capsuleId || '0'}`, cardPadding + 30, yPos + 16);
+    downloadCtx.fillText(`ID #${capsuleData.capsuleId || '0'}`, padding + 40, yPos + 16);
     
-    // Status Badge
-    downloadCtx.fillStyle = '#FF9800'; // Orange for locked
-    downloadCtx.fillRect(cardWidth - cardPadding - 60, yPos, 60, 24);
+    // Status badge
+    downloadCtx.fillStyle = '#FF9800';
+    drawRoundedRect(downloadCtx, cardWidth - padding - 80, yPos, 80, 24, 6);
+    downloadCtx.fill();
+    
     downloadCtx.fillStyle = 'white';
-    downloadCtx.fillText('Locked', cardWidth - cardPadding - 30, yPos + 16);
+    downloadCtx.fillText('🔒 Locked', cardWidth - padding - 40, yPos + 16);
     
-    yPos += headerHeight + 12;
+    yPos += 36;
     
-    // 2. Image (scaled to match gallery dimensions)
-    const imageAspectRatio = canvas.width / canvas.height;
-    let drawWidth = contentWidth;
-    let drawHeight = imageHeight;
+    // 2. Main image area
+    const imageHeight = 140;
+    const imageWidth = cardWidth - (padding * 2);
     
-    // Scale image to cover the gallery image area (like object-fit: cover)
-    if (imageAspectRatio > contentWidth / imageHeight) {
-      // Image is wider, scale by height
-      drawWidth = imageHeight * imageAspectRatio;
-    } else {
-      // Image is taller, scale by width
-      drawHeight = contentWidth / imageAspectRatio;
-    }
-    
-    // Center the image in the available space
-    const imageX = cardPadding + (contentWidth - drawWidth) / 2;
-    const imageY = yPos + (imageHeight - drawHeight) / 2;
-    
-    // Clip to the gallery image area
+    // Create rounded rectangle clip for image
     downloadCtx.save();
-    downloadCtx.beginPath();
-    downloadCtx.roundRect(cardPadding, yPos, contentWidth, imageHeight, 12);
+    drawRoundedRect(downloadCtx, padding, yPos, imageWidth, imageHeight, 8);
     downloadCtx.clip();
     
-    // Draw the pixelated image
-    downloadCtx.imageSmoothingEnabled = false;
-    downloadCtx.drawImage(canvas, imageX, imageY, drawWidth, drawHeight);
-    downloadCtx.restore();
+    // Fill image background
+    downloadCtx.fillStyle = '#f0f0f0';
+    downloadCtx.fillRect(padding, yPos, imageWidth, imageHeight);
     
-    yPos += imageHeight + 12;
+    // Draw the pixelated preview image
+    if (canvas.width > 0 && canvas.height > 0) {
+      const aspectRatio = canvas.width / canvas.height;
+      let drawWidth = imageWidth;
+      let drawHeight = imageHeight;
+      let offsetX = 0;
+      let offsetY = 0;
+      
+      if (aspectRatio > imageWidth / imageHeight) {
+        drawHeight = imageWidth / aspectRatio;
+        offsetY = (imageHeight - drawHeight) / 2;
+      } else {
+        drawWidth = imageHeight * aspectRatio;
+        offsetX = (imageWidth - drawWidth) / 2;
+      }
+      
+      downloadCtx.imageSmoothingEnabled = false;
+      downloadCtx.drawImage(canvas, padding + offsetX, yPos + offsetY, drawWidth, drawHeight);
+    }
+    
+    downloadCtx.restore();
+    yPos += imageHeight + 16;
     
     // 3. Title
-    downloadCtx.fillStyle = '#232323'; // var(--eth3)
-    downloadCtx.font = 'bold 18px Inter, sans-serif';
+    downloadCtx.fillStyle = '#232323';
+    downloadCtx.font = 'bold 16px Arial, sans-serif';
     downloadCtx.textAlign = 'left';
-    downloadCtx.fillText(capsuleData.title || 'Untitled Capsule', cardPadding, yPos + 18);
+    const title = capsuleData.title || 'My Time Capsule';
+    downloadCtx.fillText(title.length > 30 ? title.substring(0, 27) + '...' : title, padding, yPos + 16);
     
-    yPos += titleHeight + 8;
+    yPos += 28;
     
     // 4. Metadata
-    downloadCtx.fillStyle = 'rgba(35, 35, 35, 0.7)'; // Semi-transparent eth3
-    downloadCtx.font = '12px Inter, sans-serif';
+    downloadCtx.fillStyle = '#666666';
+    downloadCtx.font = '12px Arial, sans-serif';
     
     // Tags
-    downloadCtx.fillText(`Tags: ${capsuleData.tags || 'No tags'}`, cardPadding, yPos + 12);
-    yPos += 16;
+    const tags = capsuleData.tags || 'No tags';
+    downloadCtx.fillText(`🏷️ ${tags.length > 25 ? tags.substring(0, 22) + '...' : tags}`, padding, yPos + 12);
+    yPos += 20;
     
-    // Creator (use first part of wallet address if available)
+    // Creator
     const creator = window.ethereum?.selectedAddress 
       ? `${window.ethereum.selectedAddress.slice(0, 6)}...${window.ethereum.selectedAddress.slice(-4)}`
       : 'Anonymous';
-    downloadCtx.fillText(`Creator: ${creator}`, cardPadding, yPos + 12);
-    yPos += 16;
+    downloadCtx.fillText(`👤 ${creator}`, padding, yPos + 12);
+    yPos += 20;
     
     // Unlock date
     const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
-    downloadCtx.fillText(`Unlocks: ${unlockDate.toLocaleDateString()}`, cardPadding, yPos + 12);
+    downloadCtx.fillText(`⏰ Unlocks ${unlockDate.toLocaleDateString()}`, padding, yPos + 12);
+    yPos += 24;
     
-    yPos += 16 + 12;
+    // 5. Story preview
+    downloadCtx.fillStyle = '#999999';
+    downloadCtx.font = 'italic 12px Arial, sans-serif';
+    downloadCtx.fillText('🔒 Story will be revealed when unlocked', padding, yPos + 12);
     
-    // 5. Story preview (locked state)
-    downloadCtx.fillStyle = 'rgba(153, 153, 153, 1)'; // #999
-    downloadCtx.font = 'italic 14px Inter, sans-serif';
-    const storyText = `🔒 Story will be revealed on ${unlockDate.toLocaleDateString()}`;
+    yPos += 24;
     
-    // Wrap text to fit in story area
-    const words = storyText.split(' ');
-    let line = '';
-    const lineHeight = 18;
-    let storyY = yPos;
-    
-    for (let i = 0; i < words.length; i++) {
-      const testLine = line + words[i] + ' ';
-      const metrics = downloadCtx.measureText(testLine);
-      if (metrics.width > contentWidth && i > 0) {
-        downloadCtx.fillText(line, cardPadding, storyY + lineHeight);
-        line = words[i] + ' ';
-        storyY += lineHeight;
-        if (storyY > yPos + storyHeight - lineHeight) break; // Don't exceed story area
-      } else {
-        line = testLine;
-      }
-    }
-    downloadCtx.fillText(line, cardPadding, storyY + lineHeight);
-    
-    // Add gradient fade at bottom of story (like gallery)
-    const fadeGradient = downloadCtx.createLinearGradient(0, yPos + storyHeight - 20, 0, yPos + storyHeight);
-    fadeGradient.addColorStop(0, 'rgba(236, 236, 236, 0)');
-    fadeGradient.addColorStop(1, 'rgba(236, 236, 236, 1)');
-    downloadCtx.fillStyle = fadeGradient;
-    downloadCtx.fillRect(cardPadding, yPos + storyHeight - 20, contentWidth, 20);
-    
-    yPos += storyHeight + 12;
-    
-    // 6. Action buttons
-    downloadCtx.fillStyle = '#f5f5f5';
-    downloadCtx.fillRect(cardPadding, yPos, (contentWidth - 8) / 2, 32);
-    downloadCtx.fillRect(cardPadding + (contentWidth + 8) / 2, yPos, (contentWidth - 8) / 2, 32);
-    
-    downloadCtx.fillStyle = '#666';
-    downloadCtx.font = '12px Inter, sans-serif';
+    // 6. Footer
+    downloadCtx.fillStyle = '#4F46E5';
+    downloadCtx.font = 'bold 10px Arial, sans-serif';
     downloadCtx.textAlign = 'center';
-    downloadCtx.fillText('🔓 Preview Story', cardPadding + (contentWidth - 8) / 4, yPos + 20);
-    downloadCtx.fillText('📖 Read More', cardPadding + 3 * (contentWidth + 8) / 4, yPos + 20);
+    downloadCtx.fillText('Ethereum Time Capsule', cardWidth / 2, cardHeight - 12);
+    
+    console.log('✅ Gallery-style image canvas completed');
     
     return new Promise((resolve) => {
-      downloadCanvas.toBlob((blob) => {
-        generatedImageBlob = blob;
-        resolve(blob);
-      }, 'image/png');
+      try {
+        downloadCanvas.toBlob((blob) => {
+          if (blob) {
+            generatedImageBlob = blob;
+            console.log('✅ Image blob generated successfully');
+            resolve(blob);
+          } else {
+            console.error('Failed to create blob');
+            resolve(null);
+          }
+        }, 'image/png');
+      } catch (error) {
+        console.error('Error creating blob:', error);
+        resolve(null);
+      }
     });
     
   } catch (error) {
     console.error('Failed to generate image:', error);
-    return null;
+    return Promise.resolve(null);
   }
+}
+
+// Helper function to draw rounded rectangles without roundRect
+function drawRoundedRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
 }
 
 function downloadCapsuleImage() {
