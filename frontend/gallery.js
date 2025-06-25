@@ -719,25 +719,37 @@ async function loadDirectCapsule(capsuleId) {
     
     // Fetch the specific capsule from the backend
     const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
-    const capsule = response.data;
     
-    if (!capsule) {
+    if (!response.data.success || !response.data.capsule) {
       console.error('❌ Capsule not found');
       // Fall back to loading all capsules
       await loadCapsules();
       return;
     }
     
+    const capsule = response.data.capsule;
     console.log('✅ Direct capsule loaded:', capsule);
     
     // Clear the gallery and display only this capsule
-    const gallery = document.getElementById('gallery');
+    const gallery = document.getElementById('capsules-grid');
     if (gallery) {
       gallery.innerHTML = '';
       displayCapsule(capsule);
       
       // Update page title to reflect the specific capsule
       document.title = `Time Capsule: ${capsule.title} - Ethereum Time Capsule`;
+      
+      // Update load status
+      const loadStatus = document.getElementById('load-status');
+      if (loadStatus) {
+        loadStatus.textContent = `Showing specific capsule #${capsule.id}`;
+      }
+      
+      // Hide load more button since we're only showing one capsule
+      const loadMoreBtn = document.getElementById('load-more-btn');
+      if (loadMoreBtn) {
+        loadMoreBtn.style.display = 'none';
+      }
     }
     
   } catch (error) {
@@ -749,24 +761,10 @@ async function loadDirectCapsule(capsuleId) {
 
 // Helper function to display a single capsule (extracted from existing code)
 function displayCapsule(capsule) {
-  const gallery = document.getElementById('gallery');
+  const gallery = document.getElementById('capsules-grid');
   if (!gallery) return;
   
-  // Create capsule card (this would use the existing capsule rendering logic)
+  // Create capsule card using the existing capsule rendering logic
   const capsuleCard = createCapsuleCard(capsule);
   gallery.appendChild(capsuleCard);
-}
-
-// Helper function to create a capsule card (placeholder - would need to extract from existing rendering code)
-function createCapsuleCard(capsule) {
-  // This would use the existing capsule card creation logic from loadCapsules()
-  // For now, create a basic structure
-  const card = document.createElement('div');
-  card.className = 'capsule-card';
-  card.innerHTML = `
-    <h3>${capsule.title}</h3>
-    <p>By: ${capsule.creator}</p>
-    <p>Unlock: ${new Date(capsule.reveal_timestamp * 1000).toLocaleDateString()}</p>
-  `;
-  return card;
 }
