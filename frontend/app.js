@@ -1194,10 +1194,16 @@ function generateCapsuleImage() {
       downloadCtx.shadowColor = 'transparent';
       downloadCtx.shadowBlur = 0;
       downloadCtx.shadowOffsetY = 0;
-      
-      // 2. Issuer overlay on image (matching exact style)
+        // 2. Issuer overlay on image (matching exact style, with proper width constraints)
       const issuerText = `issued by ${capsuleData.userName || 'anonymous'}`;
-      const issuerBgWidth = downloadCtx.measureText(issuerText).width + 20;
+      
+      // Set font first to measure text properly
+      downloadCtx.font = '12px system-ui, -apple-system, sans-serif';
+      const textWidth = downloadCtx.measureText(issuerText).width;
+      
+      // Constrain the background width to not overflow the image area
+      const maxIssuerWidth = imageAreaWidth - 24; // Leave 12px margin on each side
+      const issuerBgWidth = Math.min(textWidth + 20, maxIssuerWidth);
       const issuerBgHeight = 24;
       const issuerX = imageAreaX + 12;
       const issuerY = imageAreaY + imageAreaHeight - issuerBgHeight - 12;
@@ -1209,7 +1215,18 @@ function generateCapsuleImage() {
       downloadCtx.fillStyle = 'white';
       downloadCtx.font = '12px system-ui, -apple-system, sans-serif';
       downloadCtx.textAlign = 'left';
-      downloadCtx.fillText(issuerText, issuerX + 10, issuerY + 16);
+      
+      // Clip text if necessary
+      if (textWidth + 20 > maxIssuerWidth) {
+        downloadCtx.save();
+        downloadCtx.beginPath();
+        downloadCtx.rect(issuerX + 10, issuerY, issuerBgWidth - 20, issuerBgHeight);
+        downloadCtx.clip();
+        downloadCtx.fillText(issuerText, issuerX + 10, issuerY + 16);
+        downloadCtx.restore();
+      } else {
+        downloadCtx.fillText(issuerText, issuerX + 10, issuerY + 16);
+      }
       
       // 3. Content area starting below image (2rem margin like CSS)
       let contentY = imageAreaY + imageAreaHeight + 32;
@@ -1288,10 +1305,9 @@ function generateCapsuleImage() {
             tagX = contentX;
             contentY += 35;
           }
-          
-          // Tag background with rounded corners (matching CSS: 20px border-radius)
+            // Tag background with rounded corners (reduced border-radius for better appearance)
           downloadCtx.fillStyle = '#667eea';
-          drawRoundedRect(downloadCtx, tagX, contentY, tagWidth, tagHeight, 20);
+          drawRoundedRect(downloadCtx, tagX, contentY, tagWidth, tagHeight, 8);
           downloadCtx.fill();
           
           // Tag text (white color like CSS)
@@ -1353,40 +1369,42 @@ function downloadCapsuleImage() {
     downloadBtn.disabled = true;
   }
   
-  // Generate image and download it
+  // Generate image and copy to clipboard only
   generateCapsuleImage().then(async (blob) => {
     if (blob) {
       // Try to copy to clipboard first
       const clipboardSuccess = await copyImageToClipboard(blob);
       
-      // Always provide download as fallback
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `time-capsule-${capsuleData.capsuleId || 'preview'}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Only download if clipboard fails (as fallback)
+      if (!clipboardSuccess) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `time-capsule-${capsuleData.capsuleId || 'preview'}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
       
       // Update button to show success
       if (downloadBtn) {
         if (clipboardSuccess) {
-          downloadBtn.textContent = '📋 Copied & Downloaded!';
+          downloadBtn.textContent = '📋 Copied to Clipboard!';
         } else {
           downloadBtn.textContent = '✅ Downloaded!';
         }
         downloadBtn.classList.add('downloaded');
         downloadBtn.disabled = false;
         setTimeout(() => {
-          downloadBtn.textContent = '📷 Download Again';
+          downloadBtn.textContent = '📷 Copy Image';
           downloadBtn.classList.remove('downloaded');
         }, 3000);
       }
       
       // Show user-friendly message
       if (clipboardSuccess) {
-        alert('📋 Perfect! Your capsule image is now copied to your clipboard AND downloaded.\n\nYou can paste it directly on Twitter! 🚀');
+        alert('📋 Perfect! Your capsule image is now copied to your clipboard.\n\nYou can paste it directly on Twitter! 🚀');
       } else {
         alert('📁 Image downloaded! You can now attach it to your tweet.');
       }
@@ -1426,19 +1444,20 @@ function shareOnX() {
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
     // Generate image and auto-copy to clipboard, then open Twitter
   generateCapsuleImage().then(async (blob) => {
-    if (blob) {
-      // Try to copy to clipboard
+    if (blob) {      // Try to copy to clipboard
       const clipboardSuccess = await copyImageToClipboard(blob);
       
-      // Also download as backup
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `time-capsule-${capsuleData.capsuleId || 'preview'}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Only download as backup if clipboard fails
+      if (!clipboardSuccess) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `time-capsule-${capsuleData.capsuleId || 'preview'}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
       
       // Show download success on button
       const downloadBtn = document.getElementById('download-image-btn');
