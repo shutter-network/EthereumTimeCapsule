@@ -590,6 +590,23 @@ function populatePreview() {
     // Disable smoothing on main canvas
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(tempCanvas, offsetX, offsetY, drawWidth, drawHeight);
+    
+    // After the canvas is ready, automatically generate the gallery-style image
+    setTimeout(() => {
+      generateCapsuleImage().then((blob) => {
+        if (blob) {
+          console.log('✅ Gallery-style image generated automatically');
+          // Update the download button to show it's ready
+          const downloadBtn = document.getElementById('download-image-btn');
+          if (downloadBtn) {
+            downloadBtn.textContent = '📷 Download Ready!';
+            downloadBtn.style.background = '#10b981';
+          }
+        }
+      }).catch(error => {
+        console.error('Failed to auto-generate image:', error);
+      });
+    }, 100);
   };
   
   // Load the uploaded image or default image
@@ -1110,73 +1127,228 @@ function setupDownloadImage() {
   }
 }
 
-function downloadCapsuleImage() {
+// Polyfill for roundRect (not available in all browsers)
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+    this.beginPath();
+    this.moveTo(x + radius, y);
+    this.lineTo(x + width - radius, y);
+    this.quadraticCurveTo(x + width, y, x + width, y + radius);
+    this.lineTo(x + width, y + height - radius);
+    this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    this.lineTo(x + radius, y + height);
+    this.quadraticCurveTo(x, y + height, x, y + height - radius);
+    this.lineTo(x, y + radius);
+    this.quadraticCurveTo(x, y, x + radius, y);
+    this.closePath();
+  };
+}
+
+// Store the generated image blob globally for easy access
+let generatedImageBlob = null;
+
+function generateCapsuleImage() {
   // Get the canvas element from the final preview
   const canvas = document.getElementById('final-preview-canvas');
   if (!canvas) {
     console.error('Preview canvas not found');
-    alert('Preview canvas not found');
+    return null;
+  }
+
+  try {
+    // Create a canvas that matches the gallery card layout
+    const downloadCanvas = document.createElement('canvas');
+    const downloadCtx = downloadCanvas.getContext('2d');
+    
+    // Set canvas size to match gallery card proportions
+    // Gallery cards are typically 360px wide with 16px padding
+    const cardWidth = 360;
+    const cardPadding = 16;
+    const contentWidth = cardWidth - (cardPadding * 2);
+    
+    // Calculate height based on gallery card structure
+    const headerHeight = 32; // ID and status badges
+    const imageHeight = 160; // Gallery image height
+    const titleHeight = 24; // Title line height
+    const metaHeight = 60; // 3 lines of metadata
+    const storyHeight = 80; // Story section
+    const actionsHeight = 40; // Action buttons
+    const spacing = 12 * 6; // 6 gaps of 12px each
+    
+    const cardHeight = headerHeight + imageHeight + titleHeight + metaHeight + storyHeight + actionsHeight + spacing + (cardPadding * 2);
+    
+    downloadCanvas.width = cardWidth;
+    downloadCanvas.height = cardHeight;
+    
+    // Fill background (gallery card background color)
+    downloadCtx.fillStyle = '#ececec'; // var(--eth2)
+    downloadCtx.fillRect(0, 0, cardWidth, cardHeight);
+    
+    let yPos = cardPadding;
+    
+    // 1. Header with ID and Status
+    // ID Badge
+    downloadCtx.fillStyle = '#242ae0'; // var(--eth5)
+    downloadCtx.fillRect(cardPadding, yPos, 60, 24);
+    downloadCtx.fillStyle = 'white';
+    downloadCtx.font = 'bold 12px Inter, sans-serif';
+    downloadCtx.textAlign = 'center';
+    downloadCtx.fillText(`ID #${capsuleData.capsuleId || '0'}`, cardPadding + 30, yPos + 16);
+    
+    // Status Badge
+    downloadCtx.fillStyle = '#FF9800'; // Orange for locked
+    downloadCtx.fillRect(cardWidth - cardPadding - 60, yPos, 60, 24);
+    downloadCtx.fillStyle = 'white';
+    downloadCtx.fillText('Locked', cardWidth - cardPadding - 30, yPos + 16);
+    
+    yPos += headerHeight + 12;
+    
+    // 2. Image (scaled to match gallery dimensions)
+    const imageAspectRatio = canvas.width / canvas.height;
+    let drawWidth = contentWidth;
+    let drawHeight = imageHeight;
+    
+    // Scale image to cover the gallery image area (like object-fit: cover)
+    if (imageAspectRatio > contentWidth / imageHeight) {
+      // Image is wider, scale by height
+      drawWidth = imageHeight * imageAspectRatio;
+    } else {
+      // Image is taller, scale by width
+      drawHeight = contentWidth / imageAspectRatio;
+    }
+    
+    // Center the image in the available space
+    const imageX = cardPadding + (contentWidth - drawWidth) / 2;
+    const imageY = yPos + (imageHeight - drawHeight) / 2;
+    
+    // Clip to the gallery image area
+    downloadCtx.save();
+    downloadCtx.beginPath();
+    downloadCtx.roundRect(cardPadding, yPos, contentWidth, imageHeight, 12);
+    downloadCtx.clip();
+    
+    // Draw the pixelated image
+    downloadCtx.imageSmoothingEnabled = false;
+    downloadCtx.drawImage(canvas, imageX, imageY, drawWidth, drawHeight);
+    downloadCtx.restore();
+    
+    yPos += imageHeight + 12;
+    
+    // 3. Title
+    downloadCtx.fillStyle = '#232323'; // var(--eth3)
+    downloadCtx.font = 'bold 18px Inter, sans-serif';
+    downloadCtx.textAlign = 'left';
+    downloadCtx.fillText(capsuleData.title || 'Untitled Capsule', cardPadding, yPos + 18);
+    
+    yPos += titleHeight + 8;
+    
+    // 4. Metadata
+    downloadCtx.fillStyle = 'rgba(35, 35, 35, 0.7)'; // Semi-transparent eth3
+    downloadCtx.font = '12px Inter, sans-serif';
+    
+    // Tags
+    downloadCtx.fillText(`Tags: ${capsuleData.tags || 'No tags'}`, cardPadding, yPos + 12);
+    yPos += 16;
+    
+    // Creator (use first part of wallet address if available)
+    const creator = window.ethereum?.selectedAddress 
+      ? `${window.ethereum.selectedAddress.slice(0, 6)}...${window.ethereum.selectedAddress.slice(-4)}`
+      : 'Anonymous';
+    downloadCtx.fillText(`Creator: ${creator}`, cardPadding, yPos + 12);
+    yPos += 16;
+    
+    // Unlock date
+    const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
+    downloadCtx.fillText(`Unlocks: ${unlockDate.toLocaleDateString()}`, cardPadding, yPos + 12);
+    
+    yPos += 16 + 12;
+    
+    // 5. Story preview (locked state)
+    downloadCtx.fillStyle = 'rgba(153, 153, 153, 1)'; // #999
+    downloadCtx.font = 'italic 14px Inter, sans-serif';
+    const storyText = `🔒 Story will be revealed on ${unlockDate.toLocaleDateString()}`;
+    
+    // Wrap text to fit in story area
+    const words = storyText.split(' ');
+    let line = '';
+    const lineHeight = 18;
+    let storyY = yPos;
+    
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line + words[i] + ' ';
+      const metrics = downloadCtx.measureText(testLine);
+      if (metrics.width > contentWidth && i > 0) {
+        downloadCtx.fillText(line, cardPadding, storyY + lineHeight);
+        line = words[i] + ' ';
+        storyY += lineHeight;
+        if (storyY > yPos + storyHeight - lineHeight) break; // Don't exceed story area
+      } else {
+        line = testLine;
+      }
+    }
+    downloadCtx.fillText(line, cardPadding, storyY + lineHeight);
+    
+    // Add gradient fade at bottom of story (like gallery)
+    const fadeGradient = downloadCtx.createLinearGradient(0, yPos + storyHeight - 20, 0, yPos + storyHeight);
+    fadeGradient.addColorStop(0, 'rgba(236, 236, 236, 0)');
+    fadeGradient.addColorStop(1, 'rgba(236, 236, 236, 1)');
+    downloadCtx.fillStyle = fadeGradient;
+    downloadCtx.fillRect(cardPadding, yPos + storyHeight - 20, contentWidth, 20);
+    
+    yPos += storyHeight + 12;
+    
+    // 6. Action buttons
+    downloadCtx.fillStyle = '#f5f5f5';
+    downloadCtx.fillRect(cardPadding, yPos, (contentWidth - 8) / 2, 32);
+    downloadCtx.fillRect(cardPadding + (contentWidth + 8) / 2, yPos, (contentWidth - 8) / 2, 32);
+    
+    downloadCtx.fillStyle = '#666';
+    downloadCtx.font = '12px Inter, sans-serif';
+    downloadCtx.textAlign = 'center';
+    downloadCtx.fillText('🔓 Preview Story', cardPadding + (contentWidth - 8) / 4, yPos + 20);
+    downloadCtx.fillText('📖 Read More', cardPadding + 3 * (contentWidth + 8) / 4, yPos + 20);
+    
+    return new Promise((resolve) => {
+      downloadCanvas.toBlob((blob) => {
+        generatedImageBlob = blob;
+        resolve(blob);
+      }, 'image/png');
+    });
+    
+  } catch (error) {
+    console.error('Failed to generate image:', error);
+    return null;
+  }
+}
+
+function downloadCapsuleImage() {
+  if (!generatedImageBlob) {
+    console.error('No image generated yet');
+    alert('Image not ready. Please wait a moment and try again.');
     return;
   }
 
   try {
-    // Create a new canvas with higher resolution for better quality
-    const downloadCanvas = document.createElement('canvas');
-    const downloadCtx = downloadCanvas.getContext('2d');
+    const url = URL.createObjectURL(generatedImageBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `time-capsule-${capsuleData.capsuleId || 'preview'}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
     
-    // Set a higher resolution (2x) for better quality
-    const scale = 2;
-    downloadCanvas.width = canvas.width * scale;
-    downloadCanvas.height = canvas.height * scale;
-    
-    // Scale up the context
-    downloadCtx.scale(scale, scale);
-    downloadCtx.imageSmoothingEnabled = false; // Keep pixelated effect
-    
-    // Draw the original canvas content onto the download canvas
-    downloadCtx.drawImage(canvas, 0, 0);
-    
-    // Add title overlay at the bottom
-    const title = capsuleData.title || 'My Time Capsule';
-    const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
-    
-    // Add semi-transparent overlay for text readability
-    downloadCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    downloadCtx.fillRect(0, canvas.height - 60, canvas.width, 60);
-    
-    // Add title text
-    downloadCtx.fillStyle = 'white';
-    downloadCtx.font = 'bold 16px Inter, sans-serif';
-    downloadCtx.textAlign = 'center';
-    downloadCtx.fillText(title, canvas.width / 2, canvas.height - 35);
-    
-    // Add unlock date
-    downloadCtx.font = '12px Inter, sans-serif';
-    downloadCtx.fillText(`Unlocks: ${unlockDate.toLocaleDateString()}`, canvas.width / 2, canvas.height - 15);
-    
-    // Convert to blob and download
-    downloadCanvas.toBlob((blob) => {
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `time-capsule-${capsuleData.capsuleId || 'preview'}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      
-      // Update button to show success
-      const downloadBtn = document.getElementById('download-image-btn');
-      if (downloadBtn) {
-        const originalText = downloadBtn.textContent;
-        downloadBtn.textContent = '✅ Downloaded!';
-        downloadBtn.classList.add('downloaded');
-        setTimeout(() => {
-          downloadBtn.textContent = originalText;
-          downloadBtn.classList.remove('downloaded');
-        }, 3000);
-      }
-    }, 'image/png');
+    // Update button to show success
+    const downloadBtn = document.getElementById('download-image-btn');
+    if (downloadBtn) {
+      const originalText = downloadBtn.textContent;
+      downloadBtn.textContent = '✅ Downloaded!';
+      downloadBtn.classList.add('downloaded');
+      setTimeout(() => {
+        downloadBtn.textContent = originalText;
+        downloadBtn.classList.remove('downloaded');
+      }, 3000);
+    }
     
   } catch (error) {
     console.error('Failed to download image:', error);
@@ -1189,31 +1361,49 @@ function followOnX() {
 }
 
 function shareOnX() {
-  // Check if image has been downloaded
-  const downloadBtn = document.getElementById('download-image-btn');
-  const hasDownloaded = downloadBtn && downloadBtn.classList.contains('downloaded');
-  
   const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
   const text = `I just created a time capsule on Ethereum! 🕰️✨ It will unlock on ${unlockDate.toLocaleString()}`;
   const shareUrl = `${window.location.origin}/gallery.html?capsule=${capsuleData.capsuleId}`;
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
   
-  if (!hasDownloaded) {
-    // Prompt user to download image first
-    if (confirm('💡 Tip: Download the capsule image first, then you can attach it to your tweet for better engagement!\n\nClick "OK" to download the image now, or "Cancel" to tweet without image.')) {
-      downloadCapsuleImage();
-      // Wait a moment for download to complete, then open Twitter
-      setTimeout(() => {
-        window.open(twitterUrl, '_blank');
-        alert('📷 Image downloaded! Now attach it to your tweet for the best result.');
-      }, 1000);
-      return;
+  // Check if we have a generated image ready
+  if (generatedImageBlob) {
+    // Automatically download the image and open Twitter
+    const url = URL.createObjectURL(generatedImageBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `time-capsule-${capsuleData.capsuleId || 'preview'}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    // Show download success on button
+    const downloadBtn = document.getElementById('download-image-btn');
+    if (downloadBtn) {
+      downloadBtn.textContent = '✅ Downloaded!';
+      downloadBtn.classList.add('downloaded');
     }
-  }
-  
-  window.open(twitterUrl, '_blank');
-  if (hasDownloaded) {
-    alert('📷 Don\'t forget to attach the downloaded image to your tweet!');
+    
+    // Wait a moment then open Twitter with instructions
+    setTimeout(() => {
+      window.open(twitterUrl, '_blank');
+      alert('📷 Perfect! Your capsule image has been downloaded.\n\nNow attach it to your tweet to show off your time capsule! 🚀');
+    }, 500);
+  } else {
+    // Fallback: prompt user to download manually
+    alert('🖼️ Generating your capsule image... Please try again in a moment!');
+    
+    // Try to generate the image now
+    generateCapsuleImage().then((blob) => {
+      if (blob) {
+        // Retry sharing once image is ready
+        setTimeout(() => shareOnX(), 100);
+      } else {
+        // If generation fails, open Twitter without image
+        window.open(twitterUrl, '_blank');
+      }
+    });
   }
 }
 
