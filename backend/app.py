@@ -1,10 +1,12 @@
-import os, io, time, base64, json
+import os, io, time, base64, json, re
 from flask import Flask, request, jsonify, send_from_directory, redirect
 from flask_cors import CORS
 from PIL import Image
 import requests
 import secrets
 import hashlib
+import bleach
+from html import escape
 
 # Import database and blockchain sync
 from database import CapsuleDatabase
@@ -104,6 +106,57 @@ else:
     db_path = "capsules.db"
 
 db = CapsuleDatabase(db_path)
+
+# =============  SECURITY FUNCTIONS  =============
+def sanitize_text_input(text):
+    """Sanitize text input to prevent XSS attacks"""
+    if not isinstance(text, str):
+        return text
+    
+    # First escape HTML entities
+    text = escape(text)
+    
+    # Remove dangerous patterns
+    dangerous_patterns = [
+        r'<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>',  # script tags
+        r'javascript:',  # javascript: urls
+        r'vbscript:',   # vbscript: urls
+        r'on\w+\s*=',   # event handlers like onclick=
+        r'data:text\/html',  # data URLs
+        r'expression\s*\(',  # CSS expressions
+    ]
+    
+    for pattern in dangerous_patterns:
+        text = re.sub(pattern, '', text, flags=re.IGNORECASE)
+    
+    # Use bleach for additional sanitization (allows basic formatting)
+    allowed_tags = []  # No HTML tags allowed
+    allowed_attributes = {}
+    
+    try:
+        text = bleach.clean(text, tags=allowed_tags, attributes=allowed_attributes, strip=True)
+    except:
+        # Fallback if bleach fails
+        pass
+    
+    # Final cleanup - remove any remaining < > characters
+    text = text.replace('<', '&lt;').replace('>', '&gt;')
+    
+    return text.strip()
+
+def sanitize_capsule_data(data):
+    """Sanitize all text fields in capsule data"""
+    sanitized = {}
+    
+    text_fields = ['title', 'tags', 'story', 'userName']
+    
+    for key, value in data.items():
+        if key in text_fields and isinstance(value, str):
+            sanitized[key] = sanitize_text_input(value)
+        else:
+            sanitized[key] = value
+    
+    return sanitized
 
 # Initialize blockchain sync service
 # Load contract configuration
@@ -287,8 +340,18 @@ def submit_capsule():
         tags  = request.form.get("tags", "").strip()
         story = request.form.get("story", "").strip()
         img   = request.files.get("image")
+        
+        # Sanitize text inputs to prevent XSS
+        title = sanitize_text_input(title)
+        tags = sanitize_text_input(tags)
+        story = sanitize_text_input(story)
+        
         if not all([title, tags, story]):
             return {"error": "Missing required field (title, tags, or story)"}, 400
+
+        # Additional validation after sanitization
+        if len(story) > 280:
+            return {"error": "Story must be 280 characters or less"}, 400
 
         # Handle image - use default if none provided
         if img:

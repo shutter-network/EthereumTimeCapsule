@@ -23,6 +23,40 @@ function getApiBaseUrl() {
   return window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
 }
 
+// Helper: sanitize user input to prevent XSS attacks
+function sanitizeInput(input) {
+  if (typeof input !== 'string') return input;
+  
+  // Create a temporary div element to safely escape HTML
+  const div = document.createElement('div');
+  div.textContent = input;
+  let sanitized = div.innerHTML;
+  
+  // Additional protection: remove any remaining script-like patterns
+  sanitized = sanitized
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
+    .replace(/data:text\/html/gi, 'data:text/plain')
+    .replace(/vbscript:/gi, '')
+    .replace(/expression\s*\(/gi, '');
+  
+  return sanitized;
+}
+
+// Helper: sanitize object with string properties
+function sanitizeObject(obj) {
+  const sanitized = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof value === 'string') {
+      sanitized[key] = sanitizeInput(value);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+}
+
 // =============  GLOBALS  =============
 let provider, signer, contract, contractRead;
 let contractAddr, contractAbi, shutterApi, registryAddr;
@@ -479,12 +513,25 @@ function validateStep1() {
     return false;
   }
   
-  // Save data (note: we're using entry-tags for the actual title, and entry-title for the user name)
-  capsuleData.title = entryTitle;     // Title of the entry
-  capsuleData.tags = tags || entryTitle;  // Use actual tags if provided, otherwise use title
-  capsuleData.story = story;
+  // Sanitize all text inputs to prevent XSS
+  const sanitizedUserName = sanitizeInput(userName);
+  const sanitizedEntryTitle = sanitizeInput(entryTitle);
+  const sanitizedStory = sanitizeInput(story);
+  const sanitizedTags = sanitizeInput(tags);
+  
+  // Check if sanitization changed the input (potential XSS attempt)
+  if (sanitizedUserName !== userName || sanitizedEntryTitle !== entryTitle || 
+      sanitizedStory !== story || sanitizedTags !== tags) {
+    alert('Invalid characters detected in input. Please remove any HTML tags or script content.');
+    return false;
+  }
+  
+  // Save sanitized data
+  capsuleData.title = sanitizedEntryTitle;     // Title of the entry
+  capsuleData.tags = sanitizedTags || sanitizedEntryTitle;  // Use actual tags if provided, otherwise use title
+  capsuleData.story = sanitizedStory;
   capsuleData.image = image; // Can be null if no image is uploaded
-  capsuleData.userName = userName;    // Store the user name separately
+  capsuleData.userName = sanitizedUserName;    // Store the user name separately
   
   return true;
 }
@@ -1863,9 +1910,51 @@ function setupEventListeners() {
     };
     walletStatus.style.cursor = 'pointer';
   }
-    // Progress step navigation
+  // Progress step navigation
   document.querySelectorAll('.progress-step').forEach((step, index) => {
     step.onclick = () => goToStep(index + 1);
+  });
+  
+  // Setup XSS protection
+  setupXSSProtection();
+}
+
+// Setup XSS protection for form inputs
+function setupXSSProtection() {
+  const textInputs = [
+    'entry-title',    // Your name
+    'entry-tags',     // Entry title
+    'entry-story'     // Story content
+  ];
+  
+  textInputs.forEach(inputId => {
+    const input = document.getElementById(inputId);
+    if (input) {
+      // Add input validation on paste events
+      input.addEventListener('paste', function(e) {
+        setTimeout(() => {
+          const sanitized = sanitizeInput(this.value);
+          if (sanitized !== this.value) {
+            this.value = sanitized;
+            alert('Pasted content contained potentially unsafe characters and has been cleaned.');
+          }
+        }, 10);
+      });
+      
+      // Add input validation on input events (less intrusive)
+      let timeoutId;
+      input.addEventListener('input', function(e) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          const sanitized = sanitizeInput(this.value);
+          if (sanitized !== this.value) {
+            const cursorPos = this.selectionStart;
+            this.value = sanitized;
+            this.setSelectionRange(cursorPos, cursorPos);
+          }
+        }, 500); // Wait 500ms after user stops typing
+      });
+    }
   });
 }
 

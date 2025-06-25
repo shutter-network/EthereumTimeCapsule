@@ -5,3 +5,5 @@ requests==2.31.0
 web3==6.11.0
 gunicorn==21.2.0
 urllib3==1.26.18
+bleach==6.1.0
+html5lib==1.1
