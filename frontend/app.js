@@ -62,6 +62,9 @@ let provider, signer, contract, contractRead;
 let contractAddr, contractAbi, shutterApi, registryAddr;
 let walletConnected = false;
 
+// Configuration loaded from public_config.json
+let appConfig = null;
+
 // EIP-6963 wallet providers storage
 let availableWallets = new Map();
 let selectedWallet = null;
@@ -544,6 +547,146 @@ function proceedFromStep1() {
 }
 
 // =============  STEP 2: PREVIEW  =============
+// Advanced dithering functions for frontend image processing
+function pixelizeCanvas(canvas, factor = null) {
+  // Use config parameter if not provided
+  if (factor === null) {
+    factor = appConfig?.image_processing?.pixelation_factor || 14;
+  }
+  
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  
+  // Create smaller canvas for pixelization
+  const smallCanvas = document.createElement('canvas');
+  const smallCtx = smallCanvas.getContext('2d');
+  
+  smallCanvas.width = Math.max(1, canvas.width / factor);
+  smallCanvas.height = Math.max(1, canvas.height / factor);
+  
+  // Draw scaled down
+  smallCtx.imageSmoothingEnabled = true;
+  smallCtx.drawImage(canvas, 0, 0, smallCanvas.width, smallCanvas.height);
+  
+  // Clear original canvas and draw back scaled up
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(smallCanvas, 0, 0, canvas.width, canvas.height);
+}
+
+function smoothenCanvas(canvas, factor = null) {
+  // Use config parameter if not provided
+  if (factor === null) {
+    factor = appConfig?.image_processing?.smoothing_factor || 12;
+  }
+  
+  const ctx = canvas.getContext('2d');
+  
+  // Create intermediate canvas for smoothing
+  const smoothCanvas = document.createElement('canvas');
+  const smoothCtx = smoothCanvas.getContext('2d');
+  
+  smoothCanvas.width = Math.max(1, canvas.width / factor);
+  smoothCanvas.height = Math.max(1, canvas.height / factor);
+  
+  // Draw scaled down with high quality
+  smoothCtx.imageSmoothingEnabled = true;
+  smoothCtx.imageSmoothingQuality = 'high';
+  smoothCtx.drawImage(canvas, 0, 0, smoothCanvas.width, smoothCanvas.height);
+  
+  // Clear original and draw back scaled up with smoothing
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(smoothCanvas, 0, 0, canvas.width, canvas.height);
+}
+
+function floydSteinbergDither(canvas) {
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+  const width = canvas.width;
+  const height = canvas.height;
+  
+  // Process each pixel
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = (y * width + x) * 4;
+      
+      // Process each RGB channel (skip alpha)
+      for (let c = 0; c < 3; c++) {
+        const oldPixel = data[idx + c];
+        const newPixel = Math.round(oldPixel / 255) * 255;
+        data[idx + c] = newPixel;
+        
+        const quantError = oldPixel - newPixel;
+        
+        // Distribute error to neighboring pixels using Floyd-Steinberg weights
+        // Error distribution pattern:
+        //     * 7/16
+        //   3/16 5/16 1/16
+        
+        // Right pixel (x+1, y)
+        if (x + 1 < width) {
+          const rightIdx = (y * width + (x + 1)) * 4 + c;
+          data[rightIdx] = Math.max(0, Math.min(255, data[rightIdx] + quantError * 7/16));
+        }
+        
+        // Bottom row pixels
+        if (y + 1 < height) {
+          // Bottom-left (x-1, y+1)
+          if (x - 1 >= 0) {
+            const blIdx = ((y + 1) * width + (x - 1)) * 4 + c;
+            data[blIdx] = Math.max(0, Math.min(255, data[blIdx] + quantError * 3/16));
+          }
+          
+          // Bottom (x, y+1)
+          const bIdx = ((y + 1) * width + x) * 4 + c;
+          data[bIdx] = Math.max(0, Math.min(255, data[bIdx] + quantError * 5/16));
+          
+          // Bottom-right (x+1, y+1)
+          if (x + 1 < width) {
+            const brIdx = ((y + 1) * width + (x + 1)) * 4 + c;
+            data[brIdx] = Math.max(0, Math.min(255, data[brIdx] + quantError * 1/16));
+          }
+        }
+      }
+    }
+  }
+  
+  // Put the modified image data back
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function applyAdvancedDithering(canvas) {
+  console.log('🎨 Starting advanced dithering process...');
+  
+  // Check if advanced dithering is enabled in config
+  if (!appConfig?.image_processing?.enable_advanced_dithering) {
+    console.log('🎨 Advanced dithering disabled in config, using simple pixelation');
+    pixelizeCanvas(canvas);
+    return;
+  }
+  
+  // Step 1: Pixelize (use config parameter)
+  const pixelationFactor = appConfig?.image_processing?.pixelation_factor || 14;
+  pixelizeCanvas(canvas, pixelationFactor);
+  console.log(`🎨 Step 1: Pixelized canvas (factor: ${pixelationFactor})`);
+  
+  // Step 2: Smoothen (use config parameter)
+  const smoothingFactor = appConfig?.image_processing?.smoothing_factor || 12;
+  smoothenCanvas(canvas, smoothingFactor);
+  console.log(`🎨 Step 2: Smoothened canvas (factor: ${smoothingFactor})`);
+  
+  // Step 3: Floyd-Steinberg dithering (if enabled)
+  if (appConfig?.image_processing?.enable_floyd_steinberg_dithering !== false) {
+    floydSteinbergDither(canvas);
+    console.log('🎨 Step 3: Applied Floyd-Steinberg dithering');
+  } else {
+    console.log('🎨 Step 3: Floyd-Steinberg dithering disabled in config');
+  }
+}
+
 function populatePreview() {
   // Update the title (this is the actual entry title)
   document.getElementById('preview-title').textContent = capsuleData.title;
@@ -581,8 +724,7 @@ function populatePreview() {
     tagElement.className = 'tag';
     tagElement.textContent = `#${tag}`;
     tagsContainer.appendChild(tagElement);
-  });
-  // Create pixelated image preview
+  });  // Create advanced dithered image preview
   const canvas = document.getElementById('preview-canvas');
   const ctx = canvas.getContext('2d');
   const img = new Image();
@@ -619,23 +761,12 @@ function populatePreview() {
       offsetY = 0;
     }
     
-    // Create pixelated effect
-    const pixelSize = 4;
-    const pixelWidth = Math.ceil(drawWidth / pixelSize);
-    const pixelHeight = Math.ceil(drawHeight / pixelSize);
+    // First draw the image normally
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
     
-    // Create temporary canvas for pixelation
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCanvas.width = pixelWidth;
-    tempCanvas.height = pixelHeight;
-    
-    // Disable image smoothing for crisp pixels
-    tempCtx.imageSmoothingEnabled = false;
-    tempCtx.drawImage(img, 0, 0, pixelWidth, pixelHeight);
-      // Disable smoothing on main canvas
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(tempCanvas, offsetX, offsetY, drawWidth, drawHeight);
+    // Then apply advanced dithering to the entire canvas
+    applyAdvancedDithering(canvas);
   };
   
   // Load the uploaded image or default image
@@ -1024,8 +1155,7 @@ function populateCompletion() {
   generateShareableLink();
   
   // Setup download image functionality
-  setupDownloadImage();
-  // Recreate pixelated image in final preview
+  setupDownloadImage();  // Recreate advanced dithered image in final preview
   const canvas = document.getElementById('final-preview-canvas');
   const ctx = canvas.getContext('2d');
   const img = new Image();
@@ -1059,24 +1189,12 @@ function populateCompletion() {
       offsetY = 0;
     }
     
-    // Create pixelated effect
-    const pixelSize = 4;
-    const pixelWidth = Math.ceil(drawWidth / pixelSize);
-    const pixelHeight = Math.ceil(drawHeight / pixelSize);
+    // First draw the image normally
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
     
-    // Create temporary canvas for pixelation
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCanvas.width = pixelWidth;
-    tempCanvas.height = pixelHeight;
-    
-    // Disable image smoothing for crisp pixels
-    tempCtx.imageSmoothingEnabled = false;
-    tempCtx.drawImage(img, 0, 0, pixelWidth, pixelHeight);
-    
-    // Disable smoothing on main canvas
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(tempCanvas, offsetX, offsetY, drawWidth, drawHeight);
+    // Then apply advanced dithering to the entire canvas
+    applyAdvancedDithering(canvas);
   };
   
   // Load the uploaded image or default image
@@ -1794,6 +1912,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Load configs & ABI
     const cacheBuster = `?v=${Date.now()}`;
     const cfgAll = await (await fetch(`public_config.json${cacheBuster}`)).json();
+    
+    // Store the full config globally for use by other functions
+    appConfig = cfgAll;
+    console.log('📋 Loaded app configuration:', appConfig);
     
     const fixedNetwork = cfgAll.default_network;
     const fixedCfg = cfgAll[fixedNetwork];

@@ -1,4 +1,5 @@
 import os, io, time, base64, json, re
+import numpy as np
 from flask import Flask, request, jsonify, send_from_directory, redirect
 from flask_cors import CORS
 from PIL import Image
@@ -160,8 +161,7 @@ def sanitize_capsule_data(data):
 
 # Initialize blockchain sync service
 # Load contract configuration
-try:
-    # Handle different working directories (local vs Heroku)
+try:    # Handle different working directories (local vs Heroku)
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     frontend_dir = os.path.join(base_dir, "frontend")
     
@@ -173,7 +173,18 @@ try:
     
     with open(abi_path, "r") as f:
         contract_abi = json.load(f)
-      # Use default network configuration
+    
+    # Store image processing config globally
+    IMAGE_PROCESSING_CONFIG = config_data.get("image_processing", {
+        "pixelation_factor": 14,
+        "smoothing_factor": 12,
+        "enable_floyd_steinberg_dithering": True,
+        "enable_advanced_dithering": True
+    })
+    
+    print(f"📊 Image processing config loaded: {IMAGE_PROCESSING_CONFIG}")
+    
+    # Use default network configuration
     default_network = config_data.get("default_network", "testnet")
     network_config = config_data[default_network]
     
@@ -196,11 +207,106 @@ except Exception as e:
     print(f"⚠️  Warning: Could not initialize blockchain sync: {e}")
     sync_service = None
 
+# Fallback image processing config in case loading fails
+if 'IMAGE_PROCESSING_CONFIG' not in globals():
+    IMAGE_PROCESSING_CONFIG = {
+        "pixelation_factor": 14,
+        "smoothing_factor": 12,
+        "enable_floyd_steinberg_dithering": True,
+        "enable_advanced_dithering": True
+    }
+    print("⚠️  Using fallback image processing config")
+
 # ---------- helpers ----------
-def pixelate(img, factor=12):
+def pixelate(img, factor=None):
+    """Step 1: Pixelate image by reducing resolution"""
+    if factor is None:
+        factor = IMAGE_PROCESSING_CONFIG.get("pixelation_factor", 14)
+    
     w, h = img.size
     img_small = img.resize((max(1, w // factor), max(1, h // factor)), Image.BILINEAR)
     return img_small.resize((w, h), Image.NEAREST)
+
+def smoothen(img, factor=None):
+    """Step 2: Apply smoothing filter"""
+    if factor is None:
+        factor = IMAGE_PROCESSING_CONFIG.get("smoothing_factor", 12)
+    
+    w, h = img.size
+    # Create a slightly smaller intermediate size for smoothing
+    smooth_w = max(1, w // factor)
+    smooth_h = max(1, h // factor)
+    
+    # Resize down with LANCZOS for better quality smoothing
+    img_smooth = img.resize((smooth_w, smooth_h), Image.LANCZOS)
+    # Resize back up with BILINEAR for smooth interpolation
+    return img_smooth.resize((w, h), Image.BILINEAR)
+
+def floyd_steinberg_dither(img):
+    """Step 3: Apply Floyd-Steinberg dithering"""
+    import numpy as np
+    
+    # Convert to RGB if not already
+    if img.mode != 'RGB':
+        img = img.convert('RGB')
+    
+    # Convert to numpy array for easier manipulation
+    pixels = np.array(img, dtype=np.float32)
+    height, width, channels = pixels.shape
+    
+    # Apply Floyd-Steinberg dithering to each channel
+    for c in range(channels):
+        for y in range(height):
+            for x in range(width):
+                old_pixel = pixels[y, x, c]
+                new_pixel = np.round(old_pixel / 255.0) * 255.0
+                pixels[y, x, c] = new_pixel
+                
+                quant_error = old_pixel - new_pixel
+                
+                # Distribute error to neighboring pixels
+                # Error distribution pattern:
+                #     * 7
+                #   3 5 1
+                if x + 1 < width:
+                    pixels[y, x + 1, c] = np.clip(pixels[y, x + 1, c] + quant_error * 7/16, 0, 255)
+                if y + 1 < height:
+                    if x - 1 >= 0:
+                        pixels[y + 1, x - 1, c] = np.clip(pixels[y + 1, x - 1, c] + quant_error * 3/16, 0, 255)
+                    pixels[y + 1, x, c] = np.clip(pixels[y + 1, x, c] + quant_error * 5/16, 0, 255)
+                    if x + 1 < width:
+                        pixels[y + 1, x + 1, c] = np.clip(pixels[y + 1, x + 1, c] + quant_error * 1/16, 0, 255)
+    
+    # Convert back to PIL Image
+    pixels = np.clip(pixels, 0, 255).astype(np.uint8)
+    return Image.fromarray(pixels)
+
+def advanced_dither(img):
+    """Apply the complete 3-step dithering process: pixelate -> smoothen -> floyd-steinberg"""
+    
+    # Check if advanced dithering is enabled
+    if not IMAGE_PROCESSING_CONFIG.get("enable_advanced_dithering", True):
+        print("🎨 Advanced dithering disabled in config, using simple pixelation")
+        return pixelate(img)
+    
+    # Step 1: Pixelate (use config parameter)
+    pixelation_factor = IMAGE_PROCESSING_CONFIG.get("pixelation_factor", 14)
+    img = pixelate(img, factor=pixelation_factor)
+    print(f"🎨 Step 1: Pixelated image (factor: {pixelation_factor})")
+    
+    # Step 2: Smoothen (use config parameter) 
+    smoothing_factor = IMAGE_PROCESSING_CONFIG.get("smoothing_factor", 12)
+    img = smoothen(img, factor=smoothing_factor)
+    print(f"🎨 Step 2: Smoothened image (factor: {smoothing_factor})")
+    
+    # Step 3: Floyd-Steinberg dithering (if enabled)
+    if IMAGE_PROCESSING_CONFIG.get("enable_floyd_steinberg_dithering", True):
+        img = floyd_steinberg_dither(img)
+        print("🎨 Step 3: Applied Floyd-Steinberg dithering")
+    else:
+        print("🎨 Step 3: Floyd-Steinberg dithering disabled in config")
+    
+    return img
 
 def shutter_encrypt(hex_msg, enc_meta):
     """Call the Shutter WebAssembly bundle via CLI bridge (simplest)"""
@@ -351,9 +457,7 @@ def submit_capsule():
 
         # Additional validation after sanitization
         if len(story) > 280:
-            return {"error": "Story must be 280 characters or less"}, 400
-
-        # Handle image - use default if none provided
+            return {"error": "Story must be 280 characters or less"}, 400        # Handle image - use default if none provided
         if img:
             # 1) pixelated preview from uploaded image
             pil = Image.open(img.stream)
@@ -364,7 +468,7 @@ def submit_capsule():
                 return {"error": "Default image not found"}, 500
             pil = Image.open(default_path)
             
-        pixelated = pixelate(pil)
+        pixelated = advanced_dither(pil)
         buf = io.BytesIO()
         pixelated.save(buf, format="PNG")
         pixelated_data = buf.getvalue()
@@ -668,6 +772,18 @@ def save_pixelated():
     except Exception as e:
         print("Error in /save_pixelated:", e)
         return {"error": str(e)}, 500
+
+@app.route("/api/image-processing-config", methods=["GET"])
+def get_image_processing_config():
+    """Get current image processing configuration"""
+    try:
+        return jsonify({
+            "config": IMAGE_PROCESSING_CONFIG,
+            "source": "config file" if 'IMAGE_PROCESSING_CONFIG' in globals() else "fallback",
+            "timestamp": int(time.time())
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # ---------- DATABASE API ENDPOINTS ----------
 @app.route("/api/capsules", methods=["GET"])
