@@ -823,12 +823,22 @@
   </div>
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
-  <script type="module">
-    // =============  HELPER FUNCTIONS  =============
+  <script type="module">    // =============  HELPER FUNCTIONS  =============
     // Helper: get API base URL (production vs development)
     function getApiBaseUrl() {
       return window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
-    }    // =============  CAROUSEL TOUCH FUNCTIONALITY  =============
+    }
+
+    // Helper: load public config
+    async function loadPublicConfig() {
+      try {
+        const response = await axios.get('./public_config.json');
+        return response.data;
+      } catch (error) {
+        console.error('Failed to load public config:', error);
+        return null;
+      }
+    }// =============  CAROUSEL TOUCH FUNCTIONALITY  =============
     let isScrolling = false;
     let scrollTimeout;
 
@@ -929,9 +939,7 @@
         imgElement.style.display = 'none';
         imgElement.nextElementSibling.style.display = 'flex';
       }
-    }
-
-    // Load real capsules for the carousel
+    }    // Load real capsules for the carousel
     async function loadSampleCapsules() {
       try {
         const loadingIndicator = document.getElementById('carouselLoading');
@@ -939,26 +947,58 @@
 
         console.log('🔄 Loading capsules for homepage carousel...');
         
-        // Load up to 9 capsules from the API
-        const response = await axios.get(`${getApiBaseUrl()}/api/capsules`, {
-          params: {
-            limit: 9,
-            offset: 0,
-            revealed_only: false
-          }
-        });
+        // Load public config to check for custom capsule IDs
+        const config = await loadPublicConfig();
+        const customCapsuleIds = config?.homepage_carousel_capsules || [];
         
-        if (!response.data.success) {
-          throw new Error(response.data.message || 'Failed to load capsules');
+        let capsules = [];
+        
+        if (customCapsuleIds.length > 0) {
+          console.log('📋 Using configured capsule IDs:', customCapsuleIds);
+          
+          // Load specific capsules by ID
+          for (const capsuleId of customCapsuleIds) {
+            try {
+              const response = await axios.get(`${getApiBaseUrl()}/api/capsules`, {
+                params: {
+                  capsule_id: capsuleId
+                }
+              });
+              
+              if (response.data.success && response.data.capsules.length > 0) {
+                capsules.push(response.data.capsules[0]);
+              } else {
+                console.warn(`⚠️ Capsule ${capsuleId} not found`);
+              }
+            } catch (error) {
+              console.warn(`⚠️ Failed to load capsule ${capsuleId}:`, error);
+            }
+          }
+        } else {
+          console.log('📋 No custom capsule IDs configured, loading latest capsules');
+          
+          // Load up to 9 capsules from the API (fallback behavior)
+          const response = await axios.get(`${getApiBaseUrl()}/api/capsules`, {
+            params: {
+              limit: 9,
+              offset: 0,
+              revealed_only: false
+            }
+          });
+          
+          if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to load capsules');
+          }
+          
+          capsules = response.data.capsules;
         }
 
-        const capsules = response.data.capsules;
         console.log(`✅ Loaded ${capsules.length} capsules for carousel`);
         
         if (capsules.length > 0) {
           const carousel = document.getElementById('thumbCarousel');
           carousel.innerHTML = ''; // Clear loading indicator
-            capsules.forEach(capsule => {
+          capsules.forEach(capsule => {
             const thumbnail = createThumbnail(capsule);
             carousel.appendChild(thumbnail);
           });

@@ -11,5 +11,6 @@
     "shutter_api_base": "https://shutter-api.shutter.network/api",
     "rpc_url": "https://rpc.gnosis.gateway.fm"
   },
-  "default_network": "testnet"
+  "default_network": "testnet",
+  "homepage_carousel_capsules": [1, 2, 3, 4, 5, 6, 7, 8, 9]
 }
