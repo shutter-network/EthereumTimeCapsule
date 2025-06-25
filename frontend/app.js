@@ -548,37 +548,54 @@ function proceedFromStep1() {
 
 // =============  STEP 2: PREVIEW  =============
 // Advanced dithering functions for frontend image processing
-function pixelizeCanvas(canvas, factor = null) {
+function standardizeResolution(canvas, targetHeight = null) {
   // Use config parameter if not provided
-  if (factor === null) {
-    factor = appConfig?.image_processing?.pixelation_factor || 14;
+  if (targetHeight === null) {
+    targetHeight = appConfig?.image_processing?.target_vertical_resolution || 120;
   }
   
   const ctx = canvas.getContext('2d');
+  const originalWidth = canvas.width;
+  const originalHeight = canvas.height;
   
-  // Create smaller canvas for pixelization
-  const smallCanvas = document.createElement('canvas');
-  const smallCtx = smallCanvas.getContext('2d');
+  // Calculate new width maintaining aspect ratio
+  const aspectRatio = originalWidth / originalHeight;
+  const newWidth = Math.round(targetHeight * aspectRatio);
+  const newHeight = targetHeight;
   
-  const newWidth = Math.max(1, canvas.width / factor);
-  const newHeight = Math.max(1, canvas.height / factor);
+  console.log(`🎨 Standardizing resolution: ${originalWidth}x${originalHeight} -> ${newWidth}x${newHeight} (target height: ${targetHeight})`);
   
-  smallCanvas.width = newWidth;
-  smallCanvas.height = newHeight;
+  // Create new canvas for the standardized image
+  const standardCanvas = document.createElement('canvas');
+  const standardCtx = standardCanvas.getContext('2d');
   
-  console.log(`🎨 Pixelating canvas: ${canvas.width}x${canvas.height} -> ${newWidth}x${newHeight} (factor: ${factor})`);
+  standardCanvas.width = newWidth;
+  standardCanvas.height = newHeight;
   
-  // Draw scaled down
-  smallCtx.imageSmoothingEnabled = true;
-  smallCtx.drawImage(canvas, 0, 0, smallCanvas.width, smallCanvas.height);
+  // Draw scaled down with good quality
+  standardCtx.imageSmoothingEnabled = true;
+  standardCtx.imageSmoothingQuality = 'high';
+  standardCtx.drawImage(canvas, 0, 0, newWidth, newHeight);
   
-  // Resize the original canvas to the smaller pixelated size
+  // Resize the original canvas and copy the standardized image
   canvas.width = newWidth;
   canvas.height = newHeight;
   
-  // Draw the pixelated image at the new smaller size
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(smallCanvas, 0, 0);
+  ctx.drawImage(standardCanvas, 0, 0);
+}
+
+function pixelizeCanvas(canvas, factor = null) {
+  // Legacy function - now uses standardizeResolution for better control
+  if (factor === null) {
+    // Use new standardization approach
+    return standardizeResolution(canvas);
+  }
+  
+  // For backward compatibility, convert factor to approximate target height
+  const originalHeight = canvas.height;
+  const targetHeight = Math.max(10, Math.round(originalHeight / factor));
+  return standardizeResolution(canvas, targetHeight);
 }
 
 function smoothenCanvas(canvas, factor = null) {
@@ -617,53 +634,129 @@ function smoothenCanvas(canvas, factor = null) {
   }
 }
 
-function floydSteinbergDither(canvas) {
+function floydSteinbergDither(canvas, blackWhite = null) {
+  // Check if we should use black & white dithering
+  if (blackWhite === null) {
+    blackWhite = appConfig?.image_processing?.enable_black_white_dithering || false;
+  }
+  
   const ctx = canvas.getContext('2d');
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const data = imageData.data;
   const width = canvas.width;
   const height = canvas.height;
   
-  // Process each pixel
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const idx = (y * width + x) * 4;
-      
-      // Process each RGB channel (skip alpha)
-      for (let c = 0; c < 3; c++) {
-        const oldPixel = data[idx + c];
-        const newPixel = Math.round(oldPixel / 255) * 255;
-        data[idx + c] = newPixel;
+  const ditherType = blackWhite ? "black & white" : "color";
+  console.log(`🎨 Processing ${width}x${height} image for ${ditherType} Floyd-Steinberg dithering...`);
+  
+  if (blackWhite) {
+    // Convert to grayscale and apply black & white dithering
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = (y * width + x) * 4;
         
-        const quantError = oldPixel - newPixel;
+        // Convert RGB to grayscale using standard luminance formula
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+        
+        // Threshold to black or white
+        const newGray = gray > 127.5 ? 255 : 0;
+        
+        // Set all RGB channels to the same value (grayscale)
+        data[idx] = newGray;     // R
+        data[idx + 1] = newGray; // G
+        data[idx + 2] = newGray; // B
+        // Alpha channel (idx + 3) stays unchanged
+        
+        const quantError = gray - newGray;
         
         // Distribute error to neighboring pixels using Floyd-Steinberg weights
-        // Error distribution pattern:
-        //     * 7/16
-        //   3/16 5/16 1/16
-        
         // Right pixel (x+1, y)
         if (x + 1 < width) {
-          const rightIdx = (y * width + (x + 1)) * 4 + c;
-          data[rightIdx] = Math.max(0, Math.min(255, data[rightIdx] + quantError * 7/16));
+          const rightIdx = (y * width + (x + 1)) * 4;
+          const rightGray = 0.299 * data[rightIdx] + 0.587 * data[rightIdx + 1] + 0.114 * data[rightIdx + 2];
+          const newRightGray = Math.max(0, Math.min(255, rightGray + quantError * 7/16));
+          data[rightIdx] = newRightGray;
+          data[rightIdx + 1] = newRightGray;
+          data[rightIdx + 2] = newRightGray;
         }
         
         // Bottom row pixels
         if (y + 1 < height) {
           // Bottom-left (x-1, y+1)
           if (x - 1 >= 0) {
-            const blIdx = ((y + 1) * width + (x - 1)) * 4 + c;
-            data[blIdx] = Math.max(0, Math.min(255, data[blIdx] + quantError * 3/16));
+            const blIdx = ((y + 1) * width + (x - 1)) * 4;
+            const blGray = 0.299 * data[blIdx] + 0.587 * data[blIdx + 1] + 0.114 * data[blIdx + 2];
+            const newBlGray = Math.max(0, Math.min(255, blGray + quantError * 3/16));
+            data[blIdx] = newBlGray;
+            data[blIdx + 1] = newBlGray;
+            data[blIdx + 2] = newBlGray;
           }
           
           // Bottom (x, y+1)
-          const bIdx = ((y + 1) * width + x) * 4 + c;
-          data[bIdx] = Math.max(0, Math.min(255, data[bIdx] + quantError * 5/16));
+          const bIdx = ((y + 1) * width + x) * 4;
+          const bGray = 0.299 * data[bIdx] + 0.587 * data[bIdx + 1] + 0.114 * data[bIdx + 2];
+          const newBGray = Math.max(0, Math.min(255, bGray + quantError * 5/16));
+          data[bIdx] = newBGray;
+          data[bIdx + 1] = newBGray;
+          data[bIdx + 2] = newBGray;
           
           // Bottom-right (x+1, y+1)
           if (x + 1 < width) {
-            const brIdx = ((y + 1) * width + (x + 1)) * 4 + c;
-            data[brIdx] = Math.max(0, Math.min(255, data[brIdx] + quantError * 1/16));
+            const brIdx = ((y + 1) * width + (x + 1)) * 4;
+            const brGray = 0.299 * data[brIdx] + 0.587 * data[brIdx + 1] + 0.114 * data[brIdx + 2];
+            const newBrGray = Math.max(0, Math.min(255, brGray + quantError * 1/16));
+            data[brIdx] = newBrGray;
+            data[brIdx + 1] = newBrGray;
+            data[brIdx + 2] = newBrGray;
+          }
+        }
+      }
+    }
+  } else {
+    // Original color dithering - process each RGB channel separately
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = (y * width + x) * 4;
+        
+        // Process each RGB channel (skip alpha)
+        for (let c = 0; c < 3; c++) {
+          const oldPixel = data[idx + c];
+          const newPixel = Math.round(oldPixel / 255) * 255;
+          data[idx + c] = newPixel;
+          
+          const quantError = oldPixel - newPixel;
+          
+          // Distribute error to neighboring pixels using Floyd-Steinberg weights
+          // Error distribution pattern:
+          //     * 7/16
+          //   3/16 5/16 1/16
+          
+          // Right pixel (x+1, y)
+          if (x + 1 < width) {
+            const rightIdx = (y * width + (x + 1)) * 4 + c;
+            data[rightIdx] = Math.max(0, Math.min(255, data[rightIdx] + quantError * 7/16));
+          }
+          
+          // Bottom row pixels
+          if (y + 1 < height) {
+            // Bottom-left (x-1, y+1)
+            if (x - 1 >= 0) {
+              const blIdx = ((y + 1) * width + (x - 1)) * 4 + c;
+              data[blIdx] = Math.max(0, Math.min(255, data[blIdx] + quantError * 3/16));
+            }
+            
+            // Bottom (x, y+1)
+            const bIdx = ((y + 1) * width + x) * 4 + c;
+            data[bIdx] = Math.max(0, Math.min(255, data[bIdx] + quantError * 5/16));
+            
+            // Bottom-right (x+1, y+1)
+            if (x + 1 < width) {
+              const brIdx = ((y + 1) * width + (x + 1)) * 4 + c;
+              data[brIdx] = Math.max(0, Math.min(255, data[brIdx] + quantError * 1/16));
+            }
           }
         }
       }
@@ -679,15 +772,15 @@ function applyAdvancedDithering(canvas) {
   
   // Check if advanced dithering is enabled in config
   if (!appConfig?.image_processing?.enable_advanced_dithering) {
-    console.log('🎨 Advanced dithering disabled in config, using simple pixelation');
-    pixelizeCanvas(canvas);
+    console.log('🎨 Advanced dithering disabled in config, using simple resolution standardization');
+    standardizeResolution(canvas);
     return;
   }
   
-  // Step 1: Pixelize (use config parameter)
-  const pixelationFactor = appConfig?.image_processing?.pixelation_factor || 14;
-  pixelizeCanvas(canvas, pixelationFactor);
-  console.log(`🎨 Step 1: Pixelized canvas (factor: ${pixelationFactor})`);
+  // Step 1: Standardize resolution (replaces pixelation_factor)
+  const targetHeight = appConfig?.image_processing?.target_vertical_resolution || 120;
+  standardizeResolution(canvas, targetHeight);
+  console.log(`🎨 Step 1: Standardized resolution (target height: ${targetHeight})`);
   
   // Step 2: Smoothen (use config parameter)
   const smoothingFactor = appConfig?.image_processing?.smoothing_factor || 12;
@@ -696,8 +789,10 @@ function applyAdvancedDithering(canvas) {
   
   // Step 3: Floyd-Steinberg dithering (if enabled)
   if (appConfig?.image_processing?.enable_floyd_steinberg_dithering !== false) {
-    floydSteinbergDither(canvas);
-    console.log('🎨 Step 3: Applied Floyd-Steinberg dithering');
+    const blackWhite = appConfig?.image_processing?.enable_black_white_dithering || false;
+    floydSteinbergDither(canvas, blackWhite);
+    const ditherType = blackWhite ? "black & white" : "color";
+    console.log(`🎨 Step 3: Applied ${ditherType} Floyd-Steinberg dithering`);
   } else {
     console.log('🎨 Step 3: Floyd-Steinberg dithering disabled in config');
   }

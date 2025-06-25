@@ -172,12 +172,12 @@ try:    # Handle different working directories (local vs Heroku)
         config_data = json.load(f)
     
     with open(abi_path, "r") as f:
-        contract_abi = json.load(f)
-      # Store image processing config globally
+        contract_abi = json.load(f)      # Store image processing config globally
     IMAGE_PROCESSING_CONFIG = config_data.get("image_processing", {
-        "pixelation_factor": 14,
+        "target_vertical_resolution": 120,
         "smoothing_factor": 12,
         "enable_floyd_steinberg_dithering": True,
+        "enable_black_white_dithering": False,
         "enable_advanced_dithering": True,
         "max_processing_dimension": 800,
         "disable_dithering_on_large_images": True
@@ -211,9 +211,10 @@ except Exception as e:
 # Fallback image processing config in case loading fails
 if 'IMAGE_PROCESSING_CONFIG' not in globals():
     IMAGE_PROCESSING_CONFIG = {
-        "pixelation_factor": 14,
+        "target_vertical_resolution": 120,
         "smoothing_factor": 12,
         "enable_floyd_steinberg_dithering": True,
+        "enable_black_white_dithering": False,
         "enable_advanced_dithering": True,
         "max_processing_dimension": 800,
         "disable_dithering_on_large_images": True
@@ -221,21 +222,36 @@ if 'IMAGE_PROCESSING_CONFIG' not in globals():
     print("⚠️  Using fallback image processing config")
 
 # ---------- helpers ----------
-def pixelate(img, factor=None):
-    """Step 1: Pixelate image by reducing resolution and keeping it small"""
-    if factor is None:
-        factor = IMAGE_PROCESSING_CONFIG.get("pixelation_factor", 14)
+def standardize_resolution(img, target_height=None):
+    """Step 1: Standardize image to a fixed vertical resolution (pixelization effect)"""
+    if target_height is None:
+        target_height = IMAGE_PROCESSING_CONFIG.get("target_vertical_resolution", 120)
     
     w, h = img.size
-    # Calculate new smaller dimensions
-    new_w = max(1, w // factor)
-    new_h = max(1, h // factor)
     
-    print(f"🎨 Pixelating: {w}x{h} -> {new_w}x{new_h} (factor: {factor})")
+    # Calculate new width maintaining aspect ratio
+    aspect_ratio = w / h
+    new_w = int(target_height * aspect_ratio)
+    new_h = target_height
     
-    # Downscale and keep the smaller size for true pixelation
-    img_small = img.resize((new_w, new_h), Image.BILINEAR)
-    return img_small
+    print(f"🎨 Standardizing resolution: {w}x{h} -> {new_w}x{new_h} (target height: {target_height})")
+    
+    # Downscale to target resolution for pixelation effect
+    img_standardized = img.resize((new_w, new_h), Image.BILINEAR)
+    return img_standardized
+
+def pixelate(img, factor=None):
+    """Legacy function - now uses standardize_resolution for better control"""
+    # Convert old factor to approximate target height for backward compatibility
+    if factor is None:
+        return standardize_resolution(img)
+    
+    w, h = img.size
+    # Approximate the old behavior: if factor was 14, that meant divide by 14
+    # So for a 480px high image, that would be ~34px high
+    # We'll use the factor as a divisor of the original height
+    target_height = max(10, h // factor)  # Minimum 10px height
+    return standardize_resolution(img, target_height)
 
 def smoothen(img, factor=None):
     """Step 2: Apply smoothing filter to small pixelated image"""
@@ -260,13 +276,17 @@ def smoothen(img, factor=None):
         # Image is already very small, apply gentle blur instead
         return img.filter(ImageFilter.SMOOTH)
 
-def floyd_steinberg_dither(img):
+def floyd_steinberg_dither(img, black_white=None):
     """Step 3: Apply Floyd-Steinberg dithering (optimized for performance)"""
     import numpy as np
     
     # Convert to RGB if not already
     if img.mode != 'RGB':
         img = img.convert('RGB')
+    
+    # Check if we should use black & white dithering
+    if black_white is None:
+        black_white = IMAGE_PROCESSING_CONFIG.get("enable_black_white_dithering", False)
     
     # Get max dimension from config
     max_dimension = IMAGE_PROCESSING_CONFIG.get("max_processing_dimension", 800)
@@ -291,30 +311,57 @@ def floyd_steinberg_dither(img):
     pixels = np.array(img, dtype=np.float32)
     height, width, channels = pixels.shape
     
-    print(f"🎨 Processing {width}x{height} image for Floyd-Steinberg dithering...")
+    dither_type = "black & white" if black_white else "color"
+    print(f"🎨 Processing {width}x{height} image for {dither_type} Floyd-Steinberg dithering...")
     
-    # Apply Floyd-Steinberg dithering to each channel
-    for c in range(channels):
+    if black_white:
+        # Convert to grayscale first
+        grayscale = np.dot(pixels, [0.299, 0.587, 0.114])  # Standard RGB to grayscale conversion
+        
+        # Apply Floyd-Steinberg dithering to grayscale channel
         for y in range(height):
             for x in range(width):
-                old_pixel = pixels[y, x, c]
-                new_pixel = np.round(old_pixel / 255.0) * 255.0
-                pixels[y, x, c] = new_pixel
+                old_pixel = grayscale[y, x]
+                new_pixel = 255.0 if old_pixel > 127.5 else 0.0  # Threshold at middle gray
+                grayscale[y, x] = new_pixel
                 
                 quant_error = old_pixel - new_pixel
                 
                 # Distribute error to neighboring pixels
-                # Error distribution pattern:
-                #     * 7
-                #   3 5 1
                 if x + 1 < width:
-                    pixels[y, x + 1, c] = np.clip(pixels[y, x + 1, c] + quant_error * 7/16, 0, 255)
+                    grayscale[y, x + 1] = np.clip(grayscale[y, x + 1] + quant_error * 7/16, 0, 255)
                 if y + 1 < height:
                     if x - 1 >= 0:
-                        pixels[y + 1, x - 1, c] = np.clip(pixels[y + 1, x - 1, c] + quant_error * 3/16, 0, 255)
-                    pixels[y + 1, x, c] = np.clip(pixels[y + 1, x, c] + quant_error * 5/16, 0, 255)
+                        grayscale[y + 1, x - 1] = np.clip(grayscale[y + 1, x - 1] + quant_error * 3/16, 0, 255)
+                    grayscale[y + 1, x] = np.clip(grayscale[y + 1, x] + quant_error * 5/16, 0, 255)
                     if x + 1 < width:
-                        pixels[y + 1, x + 1, c] = np.clip(pixels[y + 1, x + 1, c] + quant_error * 1/16, 0, 255)
+                        grayscale[y + 1, x + 1] = np.clip(grayscale[y + 1, x + 1] + quant_error * 1/16, 0, 255)
+        
+        # Convert back to RGB (all channels the same for grayscale)
+        pixels = np.stack([grayscale, grayscale, grayscale], axis=2)
+    else:
+        # Apply Floyd-Steinberg dithering to each RGB channel separately
+        for c in range(channels):
+            for y in range(height):
+                for x in range(width):
+                    old_pixel = pixels[y, x, c]
+                    new_pixel = np.round(old_pixel / 255.0) * 255.0
+                    pixels[y, x, c] = new_pixel
+                    
+                    quant_error = old_pixel - new_pixel
+                    
+                    # Distribute error to neighboring pixels
+                    # Error distribution pattern:
+                    #     * 7
+                    #   3 5 1
+                    if x + 1 < width:
+                        pixels[y, x + 1, c] = np.clip(pixels[y, x + 1, c] + quant_error * 7/16, 0, 255)
+                    if y + 1 < height:
+                        if x - 1 >= 0:
+                            pixels[y + 1, x - 1, c] = np.clip(pixels[y + 1, x - 1, c] + quant_error * 3/16, 0, 255)
+                        pixels[y + 1, x, c] = np.clip(pixels[y + 1, x, c] + quant_error * 5/16, 0, 255)
+                        if x + 1 < width:
+                            pixels[y + 1, x + 1, c] = np.clip(pixels[y + 1, x + 1, c] + quant_error * 1/16, 0, 255)
     
     # Convert back to PIL Image
     pixels = np.clip(pixels, 0, 255).astype(np.uint8)
@@ -328,17 +375,17 @@ def floyd_steinberg_dither(img):
     return result_img
 
 def advanced_dither(img):
-    """Apply the complete 3-step dithering process: pixelate -> smoothen -> floyd-steinberg"""
+    """Apply the complete 3-step dithering process: standardize resolution -> smoothen -> floyd-steinberg"""
     
     # Check if advanced dithering is enabled
     if not IMAGE_PROCESSING_CONFIG.get("enable_advanced_dithering", True):
-        print("🎨 Advanced dithering disabled in config, using simple pixelation")
-        return pixelate(img)
+        print("🎨 Advanced dithering disabled in config, using simple resolution standardization")
+        return standardize_resolution(img)
     
-    # Step 1: Pixelate (use config parameter)
-    pixelation_factor = IMAGE_PROCESSING_CONFIG.get("pixelation_factor", 14)
-    img = pixelate(img, factor=pixelation_factor)
-    print(f"🎨 Step 1: Pixelated image (factor: {pixelation_factor})")
+    # Step 1: Standardize resolution (replaces pixelation_factor)
+    target_height = IMAGE_PROCESSING_CONFIG.get("target_vertical_resolution", 120)
+    img = standardize_resolution(img, target_height)
+    print(f"🎨 Step 1: Standardized resolution (target height: {target_height})")
     
     # Step 2: Smoothen (use config parameter) 
     smoothing_factor = IMAGE_PROCESSING_CONFIG.get("smoothing_factor", 12)
@@ -347,8 +394,10 @@ def advanced_dither(img):
     
     # Step 3: Floyd-Steinberg dithering (if enabled)
     if IMAGE_PROCESSING_CONFIG.get("enable_floyd_steinberg_dithering", True):
-        img = floyd_steinberg_dither(img)
-        print("🎨 Step 3: Applied Floyd-Steinberg dithering")
+        black_white = IMAGE_PROCESSING_CONFIG.get("enable_black_white_dithering", False)
+        img = floyd_steinberg_dither(img, black_white=black_white)
+        dither_type = "black & white" if black_white else "color"
+        print(f"🎨 Step 3: Applied {dither_type} Floyd-Steinberg dithering")
     else:
         print("🎨 Step 3: Floyd-Steinberg dithering disabled in config")
     
