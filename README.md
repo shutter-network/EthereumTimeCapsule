@@ -9,11 +9,17 @@
 **LIVE ON HEROKU**: https://ethereum-time-capsule-49394b184e45.herokuapp.com/
 
 ### ✅ Fully Operational Features:
-- **Automatic blockchain sync** - runs every few seconds, no manual intervention needed
+- **Automatic blockchain sync** - runs every seconds, no manual intervention needed
 - **Complete DApp functionality** - create, view, and decrypt time capsules
-- **IPFS+Pinata integration** - images stored and cached via IPFS
-- **Mobile-responsive gallery** - view all capsules with images
-- **Clean production deployment** - no AWS/S3 dependencies
+- **Advanced image processing** - pixelated previews with Floyd-Steinberg dithering for authentic retro aesthetics
+- **Multiple dithering modes** - black/white, advanced color dithering, and nearest-neighbor scaling
+- **IPFS+Pinata integration** - images stored and cached via IPFS with cloud redundancy
+- **Enhanced mobile gallery** - search, filter by tags, and browse all capsules with responsive design
+- **Smart Twitter sharing** - automatic image-to-clipboard functionality for social media posts
+- **Individual capsule links** - direct URLs to specific capsules for easy sharing
+- **Interactive test pages** - dedicated dithering test interface for image processing experiments
+- **Admin interface** - separate admin.html for capsule management and decryption operations
+- **Clean production deployment** - no AWS/S3 dependencies, fully Heroku-optimized
 
 ---
 
@@ -49,9 +55,11 @@ Ethereum Time Capsule is a mobile-first DApp that lets anyone lock an image and 
 * **Storage:**
   * Encrypted story → on-chain (bytes) in the `TimeCapsule` contract.
   * Encrypted image → IPFS with local storage and Pinata cloud pinning.
-  * Pixelated preview → IPFS with local storage and Pinata cloud pinning.
+  * Pixelated preview → IPFS with local storage and Pinata cloud pinning (using Floyd-Steinberg dithering for authentic retro aesthetics).
 * **Reveal:** When Shutter's keyper network publishes the decryption key (July 30, 2025), anyone can reveal capsules; the story becomes permanent public data on the contract.
-* **User Experience:** Modern mobile-first interface with 4-step submission flow and comprehensive gallery.
+* **User Experience:** Modern mobile-first interface with 4-step submission flow, comprehensive gallery with search/filter, intelligent Twitter sharing with automatic image copying to clipboard.
+* **Admin Tools:** Separate admin interface (`admin.html`) for capsule management, bulk operations, and decryption testing.
+* **Test Interface:** Dedicated test page (`test_config.html`) for experimenting with dithering algorithms and image processing parameters.
 
 The result is a censorship-resistant, provably time-locked "digital bottle in the blockchain sea" with beautiful, intuitive design.
 
@@ -121,12 +129,17 @@ EthereumTimeCapsule/
 │  ├─ index.html               # Homepage with content sections
 │  ├─ create.html              # 4-step submission flow
 │  ├─ gallery.html             # Mobile gallery with search/filter
+│  ├─ admin.html               # Admin interface for capsule management
+│  ├─ test_config.html         # Image dithering test interface
+│  ├─ faq.html                 # Frequently asked questions
+│  ├─ imprint.html             # Legal information
 │  ├─ app.js                   # Main application logic
 │  ├─ gallery.js               # Gallery-specific functionality
+│  ├─ admin.js                 # Admin interface functionality
 │  ├─ main.js                  # Shutter WASM integration
 │  ├─ encryptDataBlst.js       # Encryption utilities
 │  ├─ blst.js + blst.wasm      # Shutter BLST implementation
-│  ├─ public_config.json       # Network configuration
+│  ├─ public_config.json       # Network and feature configuration
 │  ├─ contract_abi.json        # Smart contract ABI
 │  └─ styles.css               # Legacy styles (unused)
 │
@@ -250,9 +263,22 @@ python -m http.server 8080
    - **Step 4:** Completion with sharing options
 
 3. **Gallery (`gallery.html`):**
-   - Browse all submitted capsules
-   - Search and filter functionality
-   - Decrypt previews and reveal capsules
+   - Browse all submitted capsules with responsive card layout
+   - Search and filter functionality by tags, creator, or content
+   - Click any capsule to view individual capsule page
+   - Decrypt previews and reveal capsules (admin functions moved to separate page)
+
+4. **Admin Interface (`admin.html`):**
+   - Secure admin-only functions separated from public gallery
+   - Capsule decryption and reveal capabilities
+   - Bulk operations and management tools
+   - Enhanced Shutter WASM integration for decryption testing
+
+5. **Test Interface (`test_config.html`):**
+   - Interactive dithering algorithm testing
+   - Real-time image processing parameter adjustment
+   - Side-by-side comparison of different dithering methods
+   - Export capabilities for processed images
 
 ---
 
@@ -263,19 +289,55 @@ python -m http.server 8080
 **Frontend Configuration (`frontend/public_config.json`):**
 ```json
 {
-  "default_network": "gnosis",
-  "gnosis": {
-    "contract_address": "0x...",
-    "rpc_url": "https://rpc.gnosischain.com",
-    "chain_id": 100
-  },
   "testnet": {
-    "shutter_api_base": "https://api.shutter.network",
-    "registry_address": "0x...",
-    "reveal_delay_seconds": 31536000
+    "contract_address": "0xdb2F5E3DfD295df167AEfed2336D92364A7a7eCF",
+    "registry_address": "0x2693a4Fb363AdD4356e6b80Ac5A27fF05FeA6D9F",
+    "shutter_api_base": "https://shutter-api.chiado.staging.shutter.network/api",
+    "rpc_url": "https://rpc.gnosis.gateway.fm"
+  },
+  "mainnet": {
+    "contract_address": "0xdb2F5E3DfD295df167AEfed2336D92364A7a7eCF",
+    "registry_address": "0x694e5de9345d39C148DA90e6939A3fd2142267D9",
+    "shutter_api_base": "https://shutter-api.shutter.network/api",
+    "rpc_url": "https://rpc.gnosis.gateway.fm"
+  },
+  "default_network": "testnet",
+  "homepage_carousel_capsules": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  "available_tags": [
+    "memories", "dreams", "goals", "love", "family", "travel",
+    "art", "music", "thoughts", "wishes", "secrets", "future",
+    "present", "past", "hope", "gratitude"
+  ],
+  "image_processing": {
+    "target_vertical_resolution": 100,
+    "smoothing_factor": 19,
+    "enable_floyd_steinberg_dithering": true,
+    "enable_black_white_dithering": true,
+    "enable_advanced_dithering": true,
+    "max_processing_dimension": 800,
+    "disable_dithering_on_large_images": true
   }
 }
 ```
+
+**Configuration Options:**
+
+| Section | Key | Description |
+| ------- | --- | ----------- |
+| **Network** | `default_network` | Choose "testnet" or "mainnet" |
+| | `contract_address` | Smart contract deployment address |
+| | `registry_address` | Shutter registry contract address |
+| | `shutter_api_base` | Shutter Network API endpoint |
+| | `rpc_url` | Gnosis Chain RPC endpoint |
+| **UI** | `homepage_carousel_capsules` | Array of capsule IDs to show on homepage |
+| | `available_tags` | Predefined tags for capsule categorization |
+| **Image Processing** | `target_vertical_resolution` | Target height for pixelated images |
+| | `smoothing_factor` | Blur factor before dithering (higher = smoother) |
+| | `enable_floyd_steinberg_dithering` | Enable Floyd-Steinberg error diffusion |
+| | `enable_black_white_dithering` | Enable black/white only dithering mode |
+| | `enable_advanced_dithering` | Enable color dithering algorithms |
+| | `max_processing_dimension` | Maximum image dimension before processing |
+| | `disable_dithering_on_large_images` | Skip dithering for very large images |
 
 **Backend Configuration (optional `.env`):**
 ```bash
@@ -328,18 +390,63 @@ FLASK_DEBUG=true
 - **Wallet Integration:** Click-to-connect with status indicators
 - **Full-Screen Menu:** Unified navigation across all pages
 - **Live Loading States:** Spinners and progress bars for all async operations
+- **Dithering Preview:** Real-time image processing with multiple algorithm options
+- **Tag Filtering:** Interactive tag-based search in gallery
+- **Clickable Cards:** Full capsule card click targets for navigation
 
 **User Experience:**
 - **Immediate Feedback:** Real-time validation and status updates
-- **Pixelated Previews:** See content before reveal without spoiling
-- **Search & Filter:** Find capsules by various criteria
-- **Social Sharing:** Built-in Twitter integration and gallery links
+- **Pixelated Previews:** Floyd-Steinberg dithered images with authentic retro aesthetics
+- **Search & Filter:** Find capsules by tags, creator, title, or reveal status
+- **Social Sharing:** Twitter integration with automatic image copying to clipboard
+- **Individual Links:** Direct URLs to specific capsules for easy sharing
+- **Admin Separation:** Public gallery separated from admin functions for security
+
+---
+
+<a name="image-processing"></a>
+
+### 12. Advanced Image Processing & Dithering
+
+**Image Processing Pipeline:**
+1. **Upload Processing:** Images are resized and optimized during upload
+2. **Blur Application:** Configurable smoothing factor applied before dithering
+3. **Dithering Algorithm:** Floyd-Steinberg error diffusion for retro aesthetics
+4. **Format Output:** Processed images saved as pixelated previews
+5. **IPFS Storage:** Both original encrypted and pixelated versions stored
+
+**Dithering Modes Available:**
+
+| Mode | Description | Use Case |
+| ---- | ----------- | -------- |
+| **Floyd-Steinberg** | Error diffusion algorithm for smooth gradients | Best for photographs and complex images |
+| **Black & White** | High contrast monochrome dithering | Artistic effect, minimal file sizes |
+| **Advanced Color** | Multi-color dithering with palette reduction | Retro game aesthetic, controlled color palettes |
+| **Nearest-Neighbor** | Pixel-perfect scaling without interpolation | Preserving sharp edges and pixel art |
+
+**Configuration Parameters:**
+- `target_vertical_resolution`: Target height in pixels (default: 100px)
+- `smoothing_factor`: Blur intensity before dithering (default: 19)
+- `max_processing_dimension`: Maximum image size to process (default: 800px)
+- `disable_dithering_on_large_images`: Skip processing for very large images
+
+**Test Interface Features:**
+- Real-time parameter adjustment with live preview
+- Side-by-side comparison of different algorithms
+- Export functionality for testing different settings
+- Performance metrics and processing time display
+
+**Twitter Image Sharing:**
+- Automatic copying of processed images to clipboard
+- Enhanced "Share to X" button with user instructions
+- Perfect integration with social media workflow
+- Maintains image quality during clipboard operations
 
 ---
 
 <a name="test-mode"></a>
 
-### 12. Testing with Short Reveal Windows
+### 13. Testing with Short Reveal Windows
 
 For development and testing, you can create capsules with short reveal times:
 
@@ -406,8 +513,13 @@ For development and testing, you can create capsules with short reveal times:
 | **Encryption errors** | Ensure Shutter WASM is loaded properly |
 | **Database locked** | Check file permissions and close other connections |
 | **Pixelated images not showing** | Verify PIL/Pillow installation and IPFS/Pinata connectivity |
+| **Dithering not working** | Check `image_processing` config in `public_config.json` |
+| **Gallery cards not clickable** | Verify JavaScript is enabled and gallery.js is loaded |
+| **Twitter sharing fails** | Check clipboard permissions and browser compatibility |
+| **Admin page access denied** | Ensure you're accessing `/admin.html` directly |
 | **Transaction fails** | Check wallet has sufficient xDAI for gas fees |
-| **Gallery not loading** | Verify backend API is running and accessible |
+| **Gallery search not working** | Verify backend API is running and search endpoints accessible |
+| **Test page not loading** | Check that `test_config.html` exists and is properly served |
 
 **Debug Mode:**
 - Check browser console for JavaScript errors
