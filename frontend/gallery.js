@@ -25,33 +25,6 @@ let isLoading = false;
 let hasMore = true;
 let availableTags = []; // Store available tags for filtering
 
-// =============  GALLERY SHARE FUNCTIONS (GLOBAL)  =============
-// Define immediately to ensure availability
-window.shareGalleryCapsule = function(capsuleId, title, unlockDate) {
-  try {
-    const shareUrl = `${window.location.origin}/gallery.html?capsule=${capsuleId}`;
-    const text = `Check out this time capsule on Ethereum! 🕰️✨ "${title}" - Unlocks on ${unlockDate}`;
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
-    
-    window.open(twitterUrl, '_blank');
-    
-    // Show a tooltip or notification that the link was shared
-    const shareBtn = event.target;
-    const originalText = shareBtn.textContent;
-    shareBtn.textContent = '✅ Shared!';
-    shareBtn.style.background = '#10b981';
-    
-    setTimeout(() => {
-      shareBtn.textContent = originalText;
-      shareBtn.style.background = '';
-    }, 2000);
-    
-  } catch (error) {
-    console.error('Failed to share capsule:', error);
-    alert('Failed to share capsule. Please try again.');
-  }
-};
-
 // =============  HELPER FUNCTIONS  =============
 // Helper: get API base URL (production vs development)
 function getApiBaseUrl() {
