@@ -1119,16 +1119,20 @@
             if (href.startsWith('#')) {
               // Prevent navigation for placeholder links
               e.preventDefault();
+              toggleMenu();
             } else if (href.startsWith('https://') || href.startsWith('http://')) {
               // Open external links in new tab
               e.preventDefault();
               window.open(href, '_blank');
+              toggleMenu();
             } else {
-              // Internal links - let them navigate normally in same tab
-              // Don't prevent default, just close menu
+              // Internal links - close menu and allow navigation
+              toggleMenu();
+              // Don't prevent default - allow navigation to proceed
             }
+          } else {
+            toggleMenu();
           }
-          toggleMenu();
         }
       });
     }
