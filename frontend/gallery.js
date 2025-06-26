@@ -635,6 +635,20 @@ function createCapsuleCard(capsule) {
     }, 100);
   }
   
+  // Add click handler to make entire card clickable (but prevent clicks on interactive elements)
+  card.addEventListener('click', (e) => {
+    // Don't navigate if clicking on interactive elements
+    if (e.target.closest('.meta-value[onclick]') || e.target.closest('.tag[onclick]')) {
+      return;
+    }
+    
+    // Navigate to individual capsule view
+    window.location.href = `/gallery.html?capsule=${capsule.id}`;
+  });
+  
+  // Add cursor pointer to indicate clickability
+  card.style.cursor = 'pointer';
+  
   return card;
 }
 
