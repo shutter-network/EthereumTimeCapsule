@@ -552,13 +552,8 @@ function createCapsuleCard(capsule) {
   const revealTime = new Date(capsule.revealTime * 1000);
   const creator = `${capsule.creator.slice(0, 6)}...${capsule.creator.slice(-4)}`;
   
-  // Process tags into clickable chips
+  // Process tags into clickable chips using the exact same format as preview card
   const tags = capsule.tags ? capsule.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
-  const tagsHtml = tags.length > 0 ? 
-    `<div class="capsule-tags">
-      ${tags.map(tag => `<span class="tag-chip" onclick="filterByTag('${tag.toLowerCase()}')">#${tag}</span>`).join('')}
-    </div>` : 
-    '<div class="capsule-tags"><span style="color: #999; font-style: italic;">No tags</span></div>';
   
   // Determine the image source and CID to use
   let imageSrc;
@@ -569,7 +564,8 @@ function createCapsuleCard(capsule) {
     pixelatedCID = capsule.imageCID; // Use encrypted image CID for error fallback
   } else {
     // Add timestamp to prevent caching issues
-    const timestamp = Date.now();    // Use pixelated image CID if available, otherwise fall back to encrypted image CID
+    const timestamp = Date.now();
+    // Use pixelated image CID if available, otherwise fall back to encrypted image CID
     // Handle empty strings properly (not just null/undefined)
     pixelatedCID = (capsule.pixelatedImageCID && capsule.pixelatedImageCID.trim()) || capsule.imageCID;
     
@@ -578,39 +574,57 @@ function createCapsuleCard(capsule) {
     imageSrc = `${getApiBaseUrl()}/ipfs/${pixelatedCID}?t=${timestamp}`;
     console.log(`Setting pixelated image src for capsule #${capsule.id}: ${imageSrc} (IPFS, CID: ${pixelatedCID})`);
   }
+
+  // Format unlock date exactly like in preview
+  const unlockDate = revealTime;
+  const formatOptions = { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric'
+  };
+  const formattedDate = unlockDate.toLocaleString('en-US', formatOptions);
+
+  // Use exact same structure as preview card
   card.innerHTML = `
-    <div class="capsule-header">
-      <div class="capsule-id">ID #${capsule.id}</div>
-      <div class="capsule-status ${isRevealed ? 'status-revealed' : 'status-locked'}">
-        ${isRevealed ? 'Revealed' : 'Locked'}
+    <div class="preview-image-container">
+      <img src="${imageSrc}" alt="Capsule image" class="preview-image" loading="lazy" 
+           data-current-cid="${pixelatedCID}" data-capsule-id="${capsule.id}"
+           onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})">
+      <div class="issuer-tag">issued by <span>${creator}</span></div>
+    </div>
+    
+    <div class="preview-content">
+      <h2 class="preview-title">${capsule.title || 'Untitled Capsule'}</h2>
+      
+      <div class="preview-meta">
+        <div class="meta-item">
+          <div class="meta-icon">${isRevealed ? '🔓' : '🔒'}</div>
+          <div class="meta-text">
+            <div class="meta-label">${isRevealed ? 'unlocked on' : 'encrypted until'}</div>
+            <div class="meta-value">${formattedDate}</div>
+          </div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-icon">📄</div>
+          <div class="meta-text">
+            <div class="meta-label">${isRevealed ? 'story' : 'locked'}</div>
+            <div class="meta-value" style="cursor: pointer; color: #4F46E5;" onclick="toggleStory(${capsule.id})">${isRevealed ? 'read story' : 'encrypted'}</div>
+          </div>
+        </div>
       </div>
-    </div>
-
-    <img src="${imageSrc}" alt="Capsule image" class="capsule-image" loading="lazy" 
-         data-current-cid="${pixelatedCID}" data-capsule-id="${capsule.id}"
-         onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})">>
-         
-    <div class="capsule-title">${capsule.title || 'Untitled Capsule'}</div>
-    
-    ${tagsHtml}
-    
-    <div class="capsule-meta">
-      <div><strong>Creator:</strong> ${creator}</div>
-      <div><strong>Unlocks:</strong> ${revealTime.toLocaleDateString()}</div>
-    </div>
-    
-    <div class="capsule-story" id="story-${capsule.id}">
+      
+      <div class="preview-tags">
+        ${tags.map(tag => `<span class="tag" onclick="filterByTag('${tag.toLowerCase()}')">#${tag}</span>`).join('')}
+      </div>
+      
       ${isRevealed && capsule.decryptedStory ? 
-        `<div>${capsule.decryptedStory}</div>` : 
-        `<div style="color: #999; font-style: italic;">🔒 Story will be revealed on ${revealTime.toLocaleDateString()}</div>`
+        `<div id="story-${capsule.id}" style="margin-top: 16px; font-size: 14px; line-height: 1.4; color: #333; display: none;">
+          ${capsule.decryptedStory}
+        </div>` : 
+        `<div id="story-${capsule.id}" style="margin-top: 16px; font-size: 14px; line-height: 1.4; color: #999; font-style: italic; display: none;">
+          � Story will be revealed on ${formattedDate}
+        </div>`
       }
-      ${!isRevealed ? '<div class="story-fade"></div>' : ''}
-    </div>
-
-    <div class="capsule-actions">
-      <button class="btn-small btn-expand" onclick="toggleStory(${capsule.id})">
-        📖 Read More
-      </button>
     </div>
   `;
   
@@ -741,13 +755,10 @@ async function revealCapsule(id, shutterIdentity) {
 function toggleStory(id) {
   const storyElement = document.getElementById(`story-${id}`);
   if (storyElement) {
-    storyElement.classList.toggle('expanded');
-    
-    const button = storyElement.parentElement.querySelector('.btn-expand');
-    if (storyElement.classList.contains('expanded')) {
-      button.textContent = '📖 Read Less';
+    if (storyElement.style.display === 'none') {
+      storyElement.style.display = 'block';
     } else {
-      button.textContent = '📖 Read More';
+      storyElement.style.display = 'none';
     }
   }
 }
