@@ -1529,12 +1529,17 @@
         // Remove menu when clicking outside or on links
       menu.addEventListener('click', (e) => {
         if (e.target === menu || e.target.tagName === 'A') {
-          if (e.target.tagName === 'A' && e.target.href.startsWith('#')) {
-            e.preventDefault(); // Prevent navigation for placeholder links
-          } else if (e.target.tagName === 'A' && e.target.href.startsWith('https://')) {
-            // Open external links in new tab
-            e.preventDefault();
-            window.open(e.target.href, '_blank');
+          if (e.target.tagName === 'A') {
+            // Handle different types of links
+            if (e.target.href.startsWith('#')) {
+              // Prevent navigation for placeholder links
+              e.preventDefault();
+            } else if (e.target.href.startsWith('https://') || e.target.href.startsWith('http://')) {
+              // Open external links in new tab
+              e.preventDefault();
+              window.open(e.target.href, '_blank');
+            }
+            // Internal links (like /gallery, /, /faq.html) will navigate in same tab
           }
           toggleMenu();
         }
