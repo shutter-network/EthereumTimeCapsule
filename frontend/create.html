@@ -1469,7 +1469,7 @@
 
     <!-- Footer - consistent with index.html -->
     <div class="footer">
-      <a href="/gallery" class="learn-more">learn more</a>
+      <a href="/gallery.html" class="learn-more">learn more</a>
     </div>
 
   </div>  <!-- Scripts -->
@@ -1498,7 +1498,7 @@
       // Create new full-screen menu
       const menu = document.createElement('div');
       menu.className = 'menu-dropdown';      const links = [
-        { text: 'gallery', href: '/gallery' },
+        { text: 'gallery', href: '/gallery.html' },
         { text: 'home', href: '/' },
         { text: 'documentation', href: 'https://github.com/pepae/EthereumTimeCapsule-prod' },
         { text: 'faq', href: '/faq.html' },
@@ -1530,16 +1530,19 @@
       menu.addEventListener('click', (e) => {
         if (e.target === menu || e.target.tagName === 'A') {
           if (e.target.tagName === 'A') {
+            const href = e.target.href;
             // Handle different types of links
-            if (e.target.href.startsWith('#')) {
+            if (href.startsWith('#')) {
               // Prevent navigation for placeholder links
               e.preventDefault();
-            } else if (e.target.href.startsWith('https://') || e.target.href.startsWith('http://')) {
+            } else if (href.startsWith('https://') || href.startsWith('http://')) {
               // Open external links in new tab
               e.preventDefault();
-              window.open(e.target.href, '_blank');
+              window.open(href, '_blank');
+            } else {
+              // Internal links - let them navigate normally in same tab
+              // Don't prevent default, just close menu
             }
-            // Internal links (like /gallery, /, /faq.html) will navigate in same tab
           }
           toggleMenu();
         }

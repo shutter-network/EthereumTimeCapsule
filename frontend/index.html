@@ -732,7 +732,7 @@
         </div>
       </div>
 
-      <a href="/create" class="button-add-your-entry">
+      <a href="/create.html" class="button-add-your-entry">
         <div class="add-your-entry">add your entry</div>
       </a>
       
@@ -750,7 +750,7 @@
           <div class="section-text">
             Every builder, user, artist, and dreamer is invited to leave their mark. Stories of triumph, failure, growth, and evolution. Drops, timeless memes, project skills, visions for Ethereum's future — even love letters to what makes blockchain unlock new future.
           </div>
-          <a href="/gallery" class="button-secondary">
+          <a href="/gallery.html" class="button-secondary">
             <div class="button-text">see submissions</div>
           </a>
         </div>
@@ -808,7 +808,7 @@
           <div class="section-heading">
             Are you ready to be part of Ethereum's living history ?
           </div>
-          <a href="/create" class="button-primary-large">
+          <a href="/create.html" class="button-primary-large">
             <div class="button-text">Submit to the capsule</div>
           </a>
         </div>
@@ -817,7 +817,7 @@
 
     <!-- Footer -->
     <div class="footer">
-      <a href="/gallery" class="learn-more">learn more</a>
+      <a href="/gallery.html" class="learn-more">learn more</a>
     </div>
   </div>
   <!-- Scripts -->
@@ -1083,8 +1083,8 @@
       // Create new full-screen menu
       const menu = document.createElement('div');
       menu.className = 'menu-dropdown';      const links = [
-        { text: 'create entry', href: '/create' },
-        { text: 'gallery', href: '/gallery' },
+        { text: 'create entry', href: '/create.html' },
+        { text: 'gallery', href: '/gallery.html' },
         { text: 'documentation', href: 'https://github.com/pepae/EthereumTimeCapsule-prod' },
         { text: 'faq', href: '/faq.html' },
         { text: 'imprint', href: '/imprint.html' }
@@ -1114,16 +1114,19 @@
       menu.addEventListener('click', (e) => {
         if (e.target === menu || e.target.tagName === 'A') {
           if (e.target.tagName === 'A') {
+            const href = e.target.href;
             // Handle different types of links
-            if (e.target.href.startsWith('#')) {
+            if (href.startsWith('#')) {
               // Prevent navigation for placeholder links
               e.preventDefault();
-            } else if (e.target.href.startsWith('https://') || e.target.href.startsWith('http://')) {
+            } else if (href.startsWith('https://') || href.startsWith('http://')) {
               // Open external links in new tab
               e.preventDefault();
-              window.open(e.target.href, '_blank');
+              window.open(href, '_blank');
+            } else {
+              // Internal links - let them navigate normally in same tab
+              // Don't prevent default, just close menu
             }
-            // Internal links (like /create, /gallery, /faq.html) will navigate in same tab
           }
           toggleMenu();
         }
