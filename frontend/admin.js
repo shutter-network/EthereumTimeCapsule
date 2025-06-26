@@ -1,6 +1,8 @@
 /*  admin.js — Admin Panel Logic  */
 /*  Handles administrative functions for managing time capsules  */
 
+import { Buffer } from "https://esm.sh/buffer";
+
 // UMD bundle already loaded, grab default export:
 const WalletConnectProvider = window.WalletConnectProvider.default;
 
