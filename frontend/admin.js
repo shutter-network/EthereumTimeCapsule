@@ -1,12 +1,15 @@
 /*  admin.js — Admin Panel Logic  */
-/*  Handles administrative functions for managing time capsules  */
+/*  Handles admin operations: preview, reveal, share, batch operations  */
+/*  EXACT PORT OF WORKING GALLERY.JS LOGIC  */
 
+import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
+import axios from "https://cdn.skypack.dev/axios";
 import { Buffer } from "https://esm.sh/buffer";
 
 // UMD bundle already loaded, grab default export:
 const WalletConnectProvider = window.WalletConnectProvider.default;
 
-// =============  GLOBALS  =============
+// =============  GLOBALS (EXACT COPY FROM GALLERY.JS)  =============
 let provider, signer, contract, contractRead;
 let contractAddr, contractAbi, shutterApi, registryAddr;
 let walletConnected = false;
@@ -14,465 +17,68 @@ let walletConnected = false;
 // Configuration loaded from public_config.json
 let appConfig = null;
 
-// =============  HELPER FUNCTIONS  =============
+// =============  HELPER FUNCTIONS (EXACT COPY FROM GALLERY.JS)  =============
 // Helper: get API base URL (production vs development)
 function getApiBaseUrl() {
   return window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
 }
 
-// Helper: append output to the admin console
-function appendOutput(message) {
-  const outputContent = document.getElementById('output-content');
-  const timestamp = new Date().toLocaleTimeString();
-  outputContent.textContent += `[${timestamp}] ${message}\n`;
-  outputContent.scrollTop = outputContent.scrollHeight;
-}
-
-// Helper: clear output console
-function clearOutput() {
-  document.getElementById('output-content').textContent = 'Output cleared...\n';
-}
-
-// Helper: update wallet status UI
-function updateWalletStatus(connected, address = '') {
-  const statusElement = document.getElementById('wallet-status');
-  if (connected) {
-    statusElement.className = 'wallet-status connected';
-    statusElement.textContent = `✅ Wallet Connected: ${address.slice(0, 6)}...${address.slice(-4)}`;
-  } else {
-    statusElement.className = 'wallet-status disconnected';
-    statusElement.textContent = '❌ Wallet Not Connected';
+// Helper: get all possible IPFS URLs for a CID
+function getIPFSUrls(cid) {
+  const urls = [];
+  
+  // Try stored URLs first (from upload response)
+  if (window.ipfsUrls && window.ipfsUrls[cid]) {
+    urls.push(...window.ipfsUrls[cid]);
   }
+  
+  // Add Pinata gateway if enabled
+  if (window.systemInfo?.pinata_enabled && window.systemInfo?.pinata_gateway) {
+    const pinataUrl = `${window.systemInfo.pinata_gateway}/ipfs/${cid}`;
+    if (!urls.includes(pinataUrl)) {
+      urls.push(pinataUrl);
+    }
+  }
+  
+  // Add local server as fallback
+  const localUrl = `${getApiBaseUrl()}/ipfs/${cid}`;
+  if (!urls.includes(localUrl)) {
+    urls.push(localUrl);
+  }  
+  return urls;
 }
 
-// =============  INITIALIZATION  =============
-window.addEventListener("DOMContentLoaded", async () => {
-  try {
-    appendOutput('🚀 Initializing admin panel...');
-    
-    // Initialize global storage
-    window.ipfsUrls = {};
-    
-    // Load system information (optional, skip if not available)
-    try {
-      const sysResp = await axios.get(`${getApiBaseUrl()}/api/system_info`);
-      if (sysResp.data.success) {
-        window.systemInfo = sysResp.data.info;
-        appendOutput('✅ System information loaded');
-      }
-    } catch (e) {
-      appendOutput('⚠️ System info endpoint not available (skipping)');
-      // Initialize empty system info
-      window.systemInfo = {};
-    }
-    
-    // Load configs & ABI
-    const cacheBuster = `?v=${Date.now()}`;
-    const cfgAll = await (await fetch(`public_config.json${cacheBuster}`)).json();
-    
-    // Store the full config globally
-    appConfig = cfgAll;
-    appendOutput('📋 App configuration loaded');
-    
-    const fixedNetwork = cfgAll.default_network;
-    const fixedCfg = cfgAll[fixedNetwork];
-    const shutterCfg = cfgAll["testnet"]; // or "mainnet"
-    
-    contractAddr = fixedCfg.contract_address;
-    contractAbi = await (await fetch(`contract_abi.json${cacheBuster}`)).json();
-    shutterApi = shutterCfg.shutter_api_base;
-    registryAddr = shutterCfg.registry_address;
-    
-    appendOutput(`🔗 Contract address: ${contractAddr}`);
-    appendOutput(`🔑 Shutter API: ${shutterApi}`);
-    
-    // Initialize read-only provider
-    contractRead = new ethers.Contract(
-      contractAddr,
-      contractAbi,
-      new ethers.providers.JsonRpcProvider(fixedCfg.rpc_url)
-    );
-    
-    appendOutput('✅ Read-only contract initialized');
-    
-    // Setup event listeners
-    setupEventListeners();
-    
-    // Initialize Shutter WASM
-    appendOutput('🔄 Initializing Shutter WASM...');
-    try {
-      await ensureShutterReady();
-      appendOutput('✅ Shutter WASM ready');
-    } catch (e) {
-      appendOutput('⚠️ Shutter WASM not ready yet, will retry when needed: ' + e.message);
-    }
-    
-    appendOutput('🎉 Admin panel ready!');
-    
-  } catch (e) {
-    appendOutput('❌ Initialization failed: ' + e.message);
-    console.error("Admin initialization failed:", e);
+// Helper: fetch from redundant URLs with fallbacks
+async function fetchWithFallback(urls, options = {}) {
+  if (!urls || urls.length === 0) {
+    throw new Error("No URLs provided for fallback fetch");
   }
-});
-
-// =============  WALLET CONNECTION  =============
-async function connectWallet() {
-  try {
-    appendOutput('🔄 Connecting wallet...');
-    
-    let eth = window.ethereum;
-    if (!eth) {
-      // Try WalletConnect as fallback
-      const walletConnectProvider = new WalletConnectProvider({
-        infuraId: "your-infura-id" // You can set this in config
+  
+  const errors = [];
+  
+  for (let i = 0; i < urls.length; i++) {
+    try {
+      console.log(`Attempting to fetch from URL ${i + 1}/${urls.length}: ${urls[i]}`);
+      const response = await axios.get(urls[i], {
+        timeout: i === 0 ? 5000 : 10000, // First URL gets shorter timeout
+        ...options
       });
-      await walletConnectProvider.enable();
-      eth = walletConnectProvider;
-      appendOutput('🔗 Using WalletConnect');
-    } else {
-      await eth.request({ method: 'eth_requestAccounts' });
-      appendOutput('🔗 Using injected wallet');
-    }
-    
-    provider = new ethers.providers.Web3Provider(eth);
-    signer = provider.getSigner();
-    
-    const address = await signer.getAddress();
-    appendOutput(`👤 Connected address: ${address}`);
-    
-    const net = await provider.getNetwork();
-    appendOutput(`🌐 Network: ${net.name} (Chain ID: ${net.chainId})`);
-    
-    if (net.chainId !== 100) {
-      appendOutput('⚠️ Warning: Not connected to Gnosis Chain (xDai)');
-    }
-    
-    contract = new ethers.Contract(contractAddr, contractAbi, signer);
-    appendOutput('💰 Wallet contract initialized');
-    
-    walletConnected = true;
-    updateWalletStatus(true, address);
-    appendOutput('✅ Wallet connected successfully');
-    
-  } catch (e) {
-    appendOutput('❌ Wallet connection failed: ' + e.message);
-    console.error("Wallet connection failed:", e);
-    walletConnected = false;
-    updateWalletStatus(false);
-  }
-}
-
-// =============  EVENT LISTENERS  =============
-function setupEventListeners() {
-  // Wallet connection
-  document.getElementById('connect-wallet-btn').onclick = connectWallet;
-  
-  // Manual Shutter initialization
-  document.getElementById('init-shutter-btn').onclick = initializeShutter;
-  
-  // Preview story
-  document.getElementById('preview-story-btn').onclick = previewCapsuleStory;
-  
-  // Reveal forever
-  document.getElementById('reveal-forever-btn').onclick = revealCapsuleForever;
-  
-  // Share capsule
-  document.getElementById('share-capsule-btn').onclick = shareCapsule;
-  
-  // Batch operations
-  document.getElementById('batch-preview-btn').onclick = batchPreviewCapsules;
-  
-  // Clear output on double-click
-  document.getElementById('output-content').ondblclick = clearOutput;
-}
-
-// =============  ADMIN FUNCTIONS  =============
-
-// Preview capsule story (off-chain decryption only)
-async function previewCapsuleStory() {
-  const capsuleIdInput = document.getElementById('preview-capsule-id');
-  const capsuleId = parseInt(capsuleIdInput.value);
-  
-  if (!capsuleId || capsuleId < 1) {
-    appendOutput('❌ Please enter a valid capsule ID');
-    return;
-  }
-  
-  try {
-    appendOutput(`🔓 Previewing story for capsule #${capsuleId}...`);
-    
-    // Ensure Shutter WASM is ready first
-    appendOutput('🔄 Checking Shutter WASM availability...');
-    await ensureShutterReady();
-    
-    // Fetch capsule data from database API
-    const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
-    if (!response.data.success) {
-      appendOutput(`❌ Failed to fetch capsule #${capsuleId}: ${response.data.message}`);
-      return;
-    }
-    
-    const capsule = response.data.capsule;
-    appendOutput(`📋 Capsule #${capsuleId}: "${capsule.title}" by ${capsule.creator.slice(0, 6)}...${capsule.creator.slice(-4)}`);
-    
-    if (capsule.isRevealed) {
-      appendOutput(`✅ Capsule #${capsuleId} is already revealed`);
-      if (capsule.decryptedStory) {
-        appendOutput(`📖 Story: ${capsule.decryptedStory}`);
-      }
-      return;
-    }
-    
-    // Get decryption key from Shutter
-    appendOutput(`🔑 Requesting decryption key from Shutter API...`);
-    const resp = await axios.get(`${shutterApi}/get_decryption_key`, {
-      params: { identity: capsule.shutterIdentity, registry: registryAddr },
-      timeout: 10000 // 10 second timeout
-    });
-    
-    const key = resp.data?.message?.decryption_key;
-    if (!key) {
-      appendOutput(`❌ No decryption key available for capsule #${capsuleId}`);
-      appendOutput(`🔍 Shutter response: ${JSON.stringify(resp.data)}`);
-      return;
-    }
-    
-    appendOutput(`🔑 Decryption key obtained (${key.length} chars)`);
-    
-    // Handle encrypted story from database API
-    let encryptedHex;
-    if (typeof capsule.encryptedStory === "string" && capsule.encryptedStory.startsWith("0x")) {
-      encryptedHex = capsule.encryptedStory;
-    } else if (typeof capsule.encryptedStory === "string") {
-      encryptedHex = "0x" + capsule.encryptedStory;
-    } else {
-      appendOutput(`❌ Invalid encrypted story format for capsule #${capsuleId}`);
-      return;
-    }
-    
-    appendOutput(`🔓 Decrypting story...`);
-    
-    // Ensure Shutter WASM is ready before decryption
-    await ensureShutterReady();
-    
-    // Decrypt the story using the same method as gallery.js
-    const plaintextHex = await window.shutter.decrypt(encryptedHex, key);
-    const decryptedStory = Buffer.from(plaintextHex.slice(2), "hex").toString("utf8");
-    
-    appendOutput(`📖 Decrypted story: ${decryptedStory}`);
-    appendOutput(`✅ Successfully previewed capsule #${capsuleId} story`);
-    
-  } catch (error) {
-    appendOutput(`❌ Failed to preview capsule #${capsuleId}: ${error.message}`);
-    
-    // More specific error handling
-    if (error.message.includes('Network Error') || error.message.includes('timeout')) {
-      appendOutput('🌐 This might be a network connectivity issue with the Shutter API');
-    } else if (error.message.includes('Shutter WASM')) {
-      appendOutput('⚙️ Try refreshing the page to reload the Shutter WASM module');
-    }
-    
-    console.error('Preview failed:', error);
-  }
-}
-
-// Reveal capsule forever (write to blockchain)
-async function revealCapsuleForever() {
-  const capsuleIdInput = document.getElementById('reveal-capsule-id');
-  const capsuleId = parseInt(capsuleIdInput.value);
-  
-  if (!capsuleId || capsuleId < 1) {
-    appendOutput('❌ Please enter a valid capsule ID');
-    return;
-  }
-  
-  if (!walletConnected) {
-    appendOutput('❌ Please connect your wallet first');
-    return;
-  }
-  
-  try {
-    appendOutput(`🎉 Revealing capsule #${capsuleId} forever on blockchain...`);
-    
-    // Fetch capsule data
-    const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
-    if (!response.data.success) {
-      appendOutput(`❌ Failed to fetch capsule #${capsuleId}: ${response.data.message}`);
-      return;
-    }
-    
-    const capsule = response.data.capsule;
-    
-    if (capsule.isRevealed) {
-      appendOutput(`⚠️ Capsule #${capsuleId} is already revealed`);
-      return;
-    }
-    
-    // Get decryption key
-    const resp = await axios.get(`${shutterApi}/get_decryption_key`, {
-      params: { identity: capsule.shutterIdentity, registry: registryAddr }
-    });
-    
-    const key = resp.data?.message?.decryption_key;
-    if (!key) {
-      appendOutput(`❌ No decryption key available for capsule #${capsuleId}`);
-      return;
-    }
-    
-    appendOutput(`🔑 Decryption key obtained`);
-    
-    // Handle encrypted story from database API
-    let encryptedHex;
-    if (typeof capsule.encryptedStory === "string" && capsule.encryptedStory.startsWith("0x")) {
-      encryptedHex = capsule.encryptedStory;
-    } else if (typeof capsule.encryptedStory === "string") {
-      encryptedHex = "0x" + capsule.encryptedStory;
-    } else {
-      appendOutput(`❌ Invalid encrypted story format for capsule #${capsuleId}`);
-      return;
-    }
-    
-    // Ensure Shutter WASM is ready before decryption
-    await ensureShutterReady();
-    
-    // Decrypt the story using the same method as gallery.js
-    const plaintextHex = await window.shutter.decrypt(encryptedHex, key);
-    const decryptedStory = Buffer.from(plaintextHex.slice(2), "hex").toString("utf8");
-    
-    appendOutput(`📖 Decrypted story: ${decryptedStory}`);
-    
-    // Call blockchain reveal function
-    appendOutput(`⛓️ Submitting reveal transaction to blockchain...`);
-    const tx = await contract.reveal(capsuleId);
-    appendOutput(`📝 Transaction hash: ${tx.hash}`);
-    
-    // Wait for confirmation
-    appendOutput(`⏳ Waiting for transaction confirmation...`);
-    const receipt = await tx.wait();
-    appendOutput(`✅ Transaction confirmed in block ${receipt.blockNumber}`);
-    
-    // Update database
-    appendOutput(`💾 Updating database with revealed data...`);
-    const updateResp = await axios.post(`${getApiBaseUrl()}/api/reveal_capsule`, {
-      capsule_id: capsuleId,
-      decrypted_story: decryptedStory,
-      transaction_hash: tx.hash
-    });
-    
-    if (updateResp.data.success) {
-      appendOutput(`✅ Successfully revealed capsule #${capsuleId} forever!`);
-    } else {
-      appendOutput(`⚠️ Blockchain reveal succeeded but database update failed: ${updateResp.data.message}`);
-    }
-    
-  } catch (error) {
-    appendOutput(`❌ Failed to reveal capsule #${capsuleId}: ${error.message}`);
-    console.error('Reveal failed:', error);
-  }
-}
-
-// Share capsule on X (Twitter)
-async function shareCapsule() {
-  const capsuleIdInput = document.getElementById('share-capsule-id');
-  const capsuleId = parseInt(capsuleIdInput.value);
-  
-  if (!capsuleId || capsuleId < 1) {
-    appendOutput('❌ Please enter a valid capsule ID');
-    return;
-  }
-  
-  try {
-    appendOutput(`🐦 Sharing capsule #${capsuleId} on X...`);
-    
-    // Fetch capsule data
-    const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
-    if (!response.data.success) {
-      appendOutput(`❌ Failed to fetch capsule #${capsuleId}: ${response.data.message}`);
-      return;
-    }
-    
-    const capsule = response.data.capsule;
-    const unlockDate = new Date(capsule.revealTime * 1000);
-    
-    // Create share URL and text
-    const shareUrl = `${window.location.origin}/gallery.html?capsule=${capsuleId}`;
-    const text = `Check out this time capsule on Ethereum! 🕰️✨ "${capsule.title}" - Unlocks on ${unlockDate.toLocaleDateString()}`;
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
-    
-    appendOutput(`📋 Share URL: ${shareUrl}`);
-    appendOutput(`📝 Share text: ${text}`);
-    
-    // Open Twitter compose window
-    window.open(twitterUrl, '_blank');
-    appendOutput(`✅ Opened Twitter compose window for capsule #${capsuleId}`);
-    
-  } catch (error) {
-    appendOutput(`❌ Failed to share capsule #${capsuleId}: ${error.message}`);
-    console.error('Share failed:', error);
-  }
-}
-
-// Batch preview multiple capsules
-async function batchPreviewCapsules() {
-  const batchInput = document.getElementById('batch-capsule-ids');
-  const idsString = batchInput.value.trim();
-  
-  if (!idsString) {
-    appendOutput('❌ Please enter capsule IDs (comma-separated)');
-    return;
-  }
-  
-  const ids = idsString.split(',').map(id => parseInt(id.trim())).filter(id => id > 0);
-  
-  if (ids.length === 0) {
-    appendOutput('❌ No valid capsule IDs provided');
-    return;
-  }
-  
-  appendOutput(`📦 Starting batch preview for ${ids.length} capsules: ${ids.join(', ')}`);
-  
-  for (const capsuleId of ids) {
-    try {
-      appendOutput(`\n--- Processing Capsule #${capsuleId} ---`);
-      
-      // Set the individual input and trigger preview
-      document.getElementById('preview-capsule-id').value = capsuleId;
-      await previewCapsuleStory();
-      
-      // Small delay between requests to avoid overwhelming the API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      console.log(`Successfully fetched from: ${urls[i]}`);
+      return response;
     } catch (error) {
-      appendOutput(`❌ Batch processing failed for capsule #${capsuleId}: ${error.message}`);
+      const errorMsg = error.response ? `${error.response.status} ${error.response.statusText}` : error.message;
+      console.warn(`Failed to fetch from ${urls[i]}: ${errorMsg}`);
+      errors.push(`URL ${i + 1}: ${errorMsg}`);
+      
+      if (i === urls.length - 1) {
+        throw new Error(`All ${urls.length} URLs failed:\n${errors.join('\n')}`);
+      }
+      // Continue to next URL
     }
-  }
-  
-  appendOutput(`\n✅ Batch preview completed for ${ids.length} capsules`);
-}
-
-// =============  MANUAL SHUTTER INITIALIZATION  =============
-async function initializeShutter() {
-  try {
-    appendOutput('🔄 Manually initializing Shutter WASM...');
-    
-    // Check if already initialized
-    if (window.shutter && typeof window.shutter.encryptData === "function") {
-      appendOutput('✅ Shutter WASM already initialized');
-      return;
-    }
-    
-    // Try to initialize
-    await ensureShutterReady();
-    appendOutput('✅ Shutter WASM manually initialized successfully');
-    
-  } catch (error) {
-    appendOutput('❌ Manual Shutter initialization failed: ' + error.message);
-    appendOutput('⚠️ Try refreshing the page to reload all scripts');
-    console.error('Manual Shutter init failed:', error);
   }
 }
 
-// =============  UTILITY FUNCTIONS  =============
+// Helper: ensure Shutter WASM is ready (EXACT COPY FROM GALLERY.JS)
 async function ensureShutterReady() {
   let tries = 0;
   while (
@@ -487,11 +93,458 @@ async function ensureShutterReady() {
   }
 }
 
-// Expose functions globally for HTML onclick handlers
-window.connectWallet = connectWallet;
-window.initializeShutter = initializeShutter;
+// =============  ADMIN OUTPUT LOGGING  =============
+function logOutput(message) {
+  const outputContent = document.getElementById('output-content');
+  if (outputContent) {
+    const timestamp = new Date().toLocaleTimeString();
+    outputContent.textContent += `[${timestamp}] ${message}\n`;
+    outputContent.scrollTop = outputContent.scrollHeight;
+  }
+  console.log(`[ADMIN] ${message}`);
+}
+
+// =============  INITIALIZATION (EXACT COPY FROM GALLERY.JS)  =============
+window.addEventListener("DOMContentLoaded", async () => {
+  try {
+    logOutput("🚀 Initializing admin panel...");
+    
+    // Initialize global storage
+    window.ipfsUrls = {};
+    
+    // Load system information
+    try {
+      const systemInfo = await axios.get(`${getApiBaseUrl()}/system_info`);
+      window.systemInfo = systemInfo.data;
+      logOutput("✅ System info loaded");
+    } catch (e) {
+      console.warn("Could not load system info:", e);
+      window.systemInfo = { pinata_enabled: false };
+      logOutput("⚠️ System info not available (optional)");
+    }
+    
+    // Load configs & ABI
+    const cacheBuster = `?v=${Date.now()}`;
+    const cfgAll = await (await fetch(`public_config.json${cacheBuster}`)).json();
+    
+    // Store the full config globally
+    appConfig = cfgAll;
+    logOutput('📋 App configuration loaded');
+    
+    const fixedNetwork = cfgAll.default_network;
+    const fixedCfg = cfgAll[fixedNetwork];
+    const shutterCfg = cfgAll["testnet"]; // or "mainnet"
+    
+    contractAddr = fixedCfg.contract_address;
+    contractAbi = await (await fetch(`contract_abi.json${cacheBuster}`)).json();
+    shutterApi = shutterCfg.shutter_api_base;
+    registryAddr = shutterCfg.registry_address;
+    
+    // read-only provider
+    contractRead = new ethers.Contract(
+      contractAddr,
+      contractAbi,
+      new ethers.providers.JsonRpcProvider(fixedCfg.rpc_url)
+    );
+    
+    logOutput("📡 Contract initialized in read-only mode");
+    
+    // Initialize Shutter WASM
+    logOutput("🔧 Initializing Shutter WASM...");
+    try {
+      await ensureShutterReady();
+      logOutput("✅ Shutter WASM ready");
+    } catch (e) {
+      logOutput("⚠️ Shutter WASM not ready yet, will retry when needed");
+    }
+    
+    logOutput("🎯 Admin panel ready for operations");
+    
+  } catch (e) {
+    console.error("Initialization failed:", e);
+    logOutput(`❌ Initialization failed: ${e.message}`);
+  }
+});
+
+// =============  WALLET CONNECTION (EXACT COPY FROM GALLERY.JS)  =============
+async function connectWallet(manual = false) {
+  try {
+    logOutput('🔄 Connecting wallet for blockchain interaction...');
+    
+    let eth = window.ethereum;
+    if (!eth) {
+      // fallback to WalletConnect
+      const wc = new WalletConnectProvider({
+        rpc: { 100: "https://rpc.gnosischain.com" },
+        chainId: 100
+      });
+      await wc.enable();
+      eth = wc;
+    } else {
+      // Request account access (this will prompt the user)
+      const accounts = await eth.request({ method: "eth_requestAccounts" });
+      if (!accounts || accounts.length === 0) {
+        throw new Error('No accounts returned from wallet');
+      }
+    }
+    
+    provider = new ethers.providers.Web3Provider(eth);
+    signer = provider.getSigner();
+    
+    const net = await provider.getNetwork();
+    if (net.chainId !== 100) {
+      // Try to switch to Gnosis Chain
+      try {
+        await eth.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x64' }], // 100 in hex
+        });
+        
+        // IMPORTANT: Recreate provider after network switch
+        provider = new ethers.providers.Web3Provider(eth);
+        signer = provider.getSigner();
+        
+        // Verify the switch worked
+        const newNet = await provider.getNetwork();
+        if (newNet.chainId !== 100) {
+          throw new Error(`Network switch failed. Expected chain ID 100, got ${newNet.chainId}`);
+        }
+        
+      } catch (switchError) {
+        if (switchError.code === 4902) {
+          // Chain not added, try to add it
+          await eth.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x64',
+              chainName: 'Gnosis',
+              nativeCurrency: {
+                name: 'xDAI',
+                symbol: 'XDAI',
+                decimals: 18,
+              },
+              rpcUrls: ['https://rpc.gnosischain.com/'],
+              blockExplorerUrls: ['https://gnosisscan.io/'],
+            }],
+          });
+          
+          // Recreate provider after adding network
+          provider = new ethers.providers.Web3Provider(eth);
+          signer = provider.getSigner();
+          
+        } else {
+          throw new Error("Please switch to Gnosis Chain (network ID 100) in your wallet");
+        }
+      }
+    }
+    
+    contract = new ethers.Contract(contractAddr, contractAbi, signer);
+    logOutput("💰 Wallet contract initialized");
+    
+    walletConnected = true;
+    logOutput('✅ Wallet connected successfully');
+    
+    return true;
+  } catch (e) {
+    console.error("❌ Wallet connection failed:", e);
+    logOutput(`❌ Wallet connection failed: ${e.message}`);
+    walletConnected = false;
+    return false;
+  }
+}
+
+// =============  ADMIN FUNCTIONS (EXACT LOGIC FROM GALLERY.JS)  =============
+
+// Preview Capsule Story (Off-chain decryption only)
+async function previewCapsuleStory() {
+  const capsuleIdInput = document.getElementById('preview-capsule-id');
+  const capsuleId = parseInt(capsuleIdInput.value);
+  
+  if (!capsuleId || capsuleId < 1) {
+    logOutput('❌ Please enter a valid capsule ID');
+    return;
+  }
+  
+  try {
+    logOutput(`🔓 Previewing story for capsule #${capsuleId}...`);
+    
+    // Fetch capsule data from database API
+    const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
+    if (!response.data.success) {
+      throw new Error(response.data.error || "Failed to fetch capsule");
+    }
+    const cap = response.data.capsule;
+    
+    logOutput(`📦 Capsule #${capsuleId} found: "${cap.title}"`);
+    logOutput(`🔗 Shutter Identity: ${cap.shutterIdentity}`);
+    
+    // Get decryption key
+    const resp = await axios.get(`${shutterApi}/get_decryption_key`, {
+      params: { identity: cap.shutterIdentity, registry: registryAddr }
+    });
+    const key = resp.data?.message?.decryption_key;
+    if (!key) {
+      throw new Error("Decryption key not available yet! Please wait and try again.");
+    }
+    
+    logOutput(`🔑 Decryption key obtained`);
+
+    // Handle encrypted story from database API
+    let encryptedHex;
+    if (typeof cap.encryptedStory === "string" && cap.encryptedStory.startsWith("0x")) {
+      encryptedHex = cap.encryptedStory;
+    } else if (typeof cap.encryptedStory === "string") {
+      encryptedHex = "0x" + cap.encryptedStory;
+    } else {
+      throw new Error("Unknown encryptedStory format from database");
+    }
+
+    // Ensure Shutter WASM is ready before decryption
+    await ensureShutterReady();
+
+    // Decrypt the story
+    const plaintextHex = await window.shutter.decrypt(encryptedHex, key);
+    const plaintext = Buffer.from(plaintextHex.slice(2), "hex").toString("utf8");
+
+    logOutput(`✅ Story decrypted successfully!`);
+    logOutput(`📖 Story content: "${plaintext}"`);
+    
+  } catch (error) {
+    console.error(`Failed to preview capsule #${capsuleId}:`, error);
+    logOutput(`❌ Preview failed: ${error.message}`);
+  }
+}
+
+// Reveal Capsule Forever (On-chain transaction)
+async function revealCapsuleForever() {
+  const capsuleIdInput = document.getElementById('reveal-capsule-id');
+  const capsuleId = parseInt(capsuleIdInput.value);
+  
+  if (!capsuleId || capsuleId < 1) {
+    logOutput('❌ Please enter a valid capsule ID');
+    return;
+  }
+  
+  try {
+    // Connect wallet on-demand when user wants to reveal
+    if (!walletConnected) {
+      logOutput('🔗 Connecting wallet for reveal transaction...');
+      const connected = await connectWallet(true);
+      if (!connected) {
+        logOutput('❌ Wallet connection is required to reveal capsules permanently on the blockchain.');
+        return;
+      }
+    }
+    
+    logOutput(`🎉 Revealing capsule #${capsuleId} forever on blockchain...`);
+    
+    // Fetch capsule data from database API
+    const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
+    if (!response.data.success) {
+      throw new Error(response.data.error || "Failed to fetch capsule");
+    }
+    const cap = response.data.capsule;
+    
+    logOutput(`📦 Capsule #${capsuleId} found: "${cap.title}"`);
+    
+    // Get decryption key
+    const resp = await axios.get(`${shutterApi}/get_decryption_key`, {
+      params: { identity: cap.shutterIdentity, registry: registryAddr }
+    });
+    const key = resp.data?.message?.decryption_key;
+    if (!key) {
+      throw new Error("Decryption key not available yet!");
+    }
+    
+    logOutput(`🔑 Decryption key obtained`);
+
+    // Handle encrypted story from database API
+    let encryptedHex;
+    if (typeof cap.encryptedStory === "string" && cap.encryptedStory.startsWith("0x")) {
+      encryptedHex = cap.encryptedStory;
+    } else if (typeof cap.encryptedStory === "string") {
+      encryptedHex = "0x" + cap.encryptedStory;
+    } else {
+      throw new Error("Unknown encryptedStory format from database");
+    }
+
+    // Ensure Shutter WASM is ready before decryption
+    await ensureShutterReady();
+
+    // Decrypt the story
+    const plaintextHex = await window.shutter.decrypt(encryptedHex, key);
+    const plaintext = Buffer.from(plaintextHex.slice(2), "hex").toString("utf8");
+    
+    logOutput(`🔓 Story decrypted: "${plaintext}"`);
+
+    // Submit reveal transaction
+    logOutput(`📝 Submitting reveal transaction to blockchain...`);
+    const tx = await contract.revealCapsule(capsuleId, plaintext);
+    logOutput(`🚀 Reveal transaction submitted! Hash: ${tx.hash}`);
+    
+    // Wait for confirmation
+    logOutput(`⏳ Waiting for transaction confirmation...`);
+    await tx.wait();
+    logOutput(`✅ Capsule #${capsuleId} revealed successfully on blockchain!`);
+    
+  } catch (error) {
+    console.error(`Failed to reveal capsule #${capsuleId}:`, error);
+    logOutput(`❌ Reveal failed: ${error.message}`);
+  }
+}
+
+// Share Capsule on X
+async function shareCapsule() {
+  const capsuleIdInput = document.getElementById('share-capsule-id');
+  const capsuleId = parseInt(capsuleIdInput.value);
+  
+  if (!capsuleId || capsuleId < 1) {
+    logOutput('❌ Please enter a valid capsule ID');
+    return;
+  }
+  
+  try {
+    logOutput(`🐦 Sharing capsule #${capsuleId} on X...`);
+    
+    // Fetch capsule data to get title and details
+    const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
+    if (!response.data.success) {
+      throw new Error(response.data.error || "Failed to fetch capsule");
+    }
+    const cap = response.data.capsule;
+    
+    const title = cap.title || 'Untitled Capsule';
+    const revealTime = new Date(cap.revealTime * 1000);
+    
+    // Construct share URL
+    const currentUrl = window.location.origin + window.location.pathname;
+    const capsuleUrl = `${currentUrl.replace('/admin.html', '/gallery.html')}?capsule=${capsuleId}`;
+    
+    // Construct tweet text
+    const tweetText = encodeURIComponent(
+      `🎁 Check out my Time Capsule: "${title}" 🎁\n\n` +
+      `🗓️ Unlocks: ${revealTime.toLocaleDateString()}\n` +
+      `🔗 View: ${capsuleUrl}\n\n` +
+      `#TimeCapsule #Ethereum #Future #Memories`
+    );
+    
+    // Open Twitter share dialog
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
+    window.open(twitterUrl, '_blank');
+    
+    logOutput(`✅ Share dialog opened for capsule #${capsuleId}: "${title}"`);
+    logOutput(`🔗 Direct link: ${capsuleUrl}`);
+    
+  } catch (error) {
+    console.error(`Failed to share capsule #${capsuleId}:`, error);
+    logOutput(`❌ Share failed: ${error.message}`);
+  }
+}
+
+// Batch Preview Capsules
+async function batchPreviewCapsules() {
+  const batchInput = document.getElementById('batch-capsule-ids');
+  const capsuleIdsText = batchInput.value.trim();
+  
+  if (!capsuleIdsText) {
+    logOutput('❌ Please enter capsule IDs (comma-separated)');
+    return;
+  }
+  
+  try {
+    // Parse comma-separated IDs
+    const capsuleIds = capsuleIdsText.split(',')
+      .map(id => parseInt(id.trim()))
+      .filter(id => !isNaN(id) && id > 0);
+    
+    if (capsuleIds.length === 0) {
+      logOutput('❌ No valid capsule IDs found');
+      return;
+    }
+    
+    logOutput(`📦 Starting batch preview for ${capsuleIds.length} capsules: ${capsuleIds.join(', ')}`);
+    
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (const capsuleId of capsuleIds) {
+      try {
+        logOutput(`\n🔄 Processing capsule #${capsuleId}...`);
+        
+        // Fetch capsule data
+        const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
+        if (!response.data.success) {
+          throw new Error(response.data.error || "Failed to fetch capsule");
+        }
+        const cap = response.data.capsule;
+        
+        logOutput(`📦 Found: "${cap.title}" (Reveal: ${new Date(cap.revealTime * 1000).toLocaleDateString()})`);
+        
+        // Get decryption key
+        const resp = await axios.get(`${shutterApi}/get_decryption_key`, {
+          params: { identity: cap.shutterIdentity, registry: registryAddr }
+        });
+        const key = resp.data?.message?.decryption_key;
+        if (!key) {
+          throw new Error("Decryption key not available yet");
+        }
+
+        // Handle encrypted story
+        let encryptedHex;
+        if (typeof cap.encryptedStory === "string" && cap.encryptedStory.startsWith("0x")) {
+          encryptedHex = cap.encryptedStory;
+        } else if (typeof cap.encryptedStory === "string") {
+          encryptedHex = "0x" + cap.encryptedStory;
+        } else {
+          throw new Error("Unknown encryptedStory format");
+        }
+
+        // Ensure Shutter WASM is ready
+        await ensureShutterReady();
+
+        // Decrypt the story
+        const plaintextHex = await window.shutter.decrypt(encryptedHex, key);
+        const plaintext = Buffer.from(plaintextHex.slice(2), "hex").toString("utf8");
+
+        logOutput(`✅ #${capsuleId}: "${plaintext.substring(0, 100)}${plaintext.length > 100 ? '...' : ''}"`);
+        successCount++;
+        
+      } catch (error) {
+        logOutput(`❌ #${capsuleId}: ${error.message}`);
+        failCount++;
+      }
+      
+      // Small delay between capsules to prevent overwhelming the API
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    
+    logOutput(`\n📊 Batch preview complete!`);
+    logOutput(`✅ Successful: ${successCount}`);
+    logOutput(`❌ Failed: ${failCount}`);
+    logOutput(`📝 Total processed: ${capsuleIds.length}`);
+    
+  } catch (error) {
+    console.error('Batch preview failed:', error);
+    logOutput(`❌ Batch preview failed: ${error.message}`);
+  }
+}
+
+// Manual Shutter initialization (for debugging)
+async function initializeShutter() {
+  try {
+    logOutput('🔧 Manually initializing Shutter WASM...');
+    await ensureShutterReady();
+    logOutput('✅ Shutter WASM initialized successfully!');
+    logOutput(`🛠️ Available functions: ${Object.keys(window.shutter || {}).join(', ')}`);
+  } catch (error) {
+    logOutput(`❌ Shutter initialization failed: ${error.message}`);
+  }
+}
+
+// =============  EXPOSE FUNCTIONS GLOBALLY  =============
 window.previewCapsuleStory = previewCapsuleStory;
 window.revealCapsuleForever = revealCapsuleForever;
 window.shareCapsule = shareCapsule;
 window.batchPreviewCapsules = batchPreviewCapsules;
-window.clearOutput = clearOutput;
+window.initializeShutter = initializeShutter;
+window.connectWallet = connectWallet;

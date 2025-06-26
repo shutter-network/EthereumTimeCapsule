@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Figma-inspired design variables - consistent with other pages */
+    /* Copy exact CSS from working gallery.html */
     :root {
       /* Colors */
       --eth1: #ffffff;
@@ -57,7 +57,7 @@
       line-height: 1.4;
     }
 
-    /* Main container - consistent with other pages */
+    /* Main container */
     .admin-container {
       background: var(--eth1);
       border-radius: 24px;
@@ -73,7 +73,7 @@
       position: relative;
     }
 
-    /* Header - consistent with other pages */
+    /* Header */
     .header {
       background: var(--eth2);
       padding: 12px 20px 12px 20px;
@@ -95,10 +95,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-    }
-
-    .logo-icon {
-      font-size: 24px;
     }
 
     .admin-badge {
@@ -144,6 +140,66 @@
       font-size: 16px;
       font-weight: var(--intro-copy-font-weight);
       line-height: 1.4;
+    }
+
+    /* Copy exact button styles from working gallery */
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-family: var(--eth1-font-family);
+      margin: 4px;
+    }
+
+    .btn-decrypt {
+      background: var(--eth5);
+      color: var(--eth1);
+    }
+
+    .btn-decrypt:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-reveal {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .btn-reveal:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-share {
+      background: #1DA1F2;
+      color: white;
+    }
+
+    .btn-share:hover {
+      background: #1991db;
+      transform: translateY(-1px);
+    }
+
+    .btn-admin {
+      background: var(--eth5);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--eth1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: var(--small-button-font-family);
+      margin: 8px;
+    }
+
+    .btn-admin:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(36, 42, 224, 0.3);
     }
 
     /* Admin controls */
@@ -197,52 +253,6 @@
     .input-group input:focus {
       outline: none;
       border-color: var(--eth5);
-    }
-
-    .btn-admin {
-      background: var(--eth5);
-      border: none;
-      border-radius: 12px;
-      padding: 12px 24px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--eth1);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-family: var(--small-button-font-family);
-      white-space: nowrap;
-    }
-
-    .btn-admin:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(36, 42, 224, 0.3);
-    }
-
-    .btn-admin.danger {
-      background: #ff4444;
-    }
-
-    .btn-admin.danger:hover {
-      background: #cc3333;
-      box-shadow: 0 8px 25px rgba(255, 68, 68, 0.3);
-    }
-
-    .btn-admin.success {
-      background: #4CAF50;
-    }
-
-    .btn-admin.success:hover {
-      background: #45a049;
-      box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
-    }
-
-    .btn-admin.warning {
-      background: #FF9800;
-    }
-
-    .btn-admin.warning:hover {
-      background: #e68900;
-      box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
     }
 
     /* Wallet status */
@@ -389,20 +399,12 @@
           </div>
         </div>
 
-        <!-- Initialize Shutter Section -->
-        <div class="control-section">
-          <div class="section-title">⚙️ Initialize Shutter WASM</div>
-          <div class="input-group">
-            <button id="init-shutter-btn" class="btn-admin warning">Initialize Shutter</button>
-          </div>
-        </div>
-
         <!-- Preview Story Section -->
         <div class="control-section">
           <div class="section-title">🔓 Preview Capsule Story (Off-chain)</div>
           <div class="input-group">
             <input type="number" id="preview-capsule-id" placeholder="Enter Capsule ID" min="1">
-            <button id="preview-story-btn" class="btn-admin">Preview Story</button>
+            <button class="btn-small btn-decrypt" onclick="previewCapsuleStory()">🔓 Preview Story</button>
           </div>
         </div>
 
@@ -411,7 +413,7 @@
           <div class="section-title">🎉 Reveal Capsule Forever (On-chain)</div>
           <div class="input-group">
             <input type="number" id="reveal-capsule-id" placeholder="Enter Capsule ID" min="1">
-            <button id="reveal-forever-btn" class="btn-admin danger">Reveal Forever</button>
+            <button class="btn-small btn-reveal" onclick="revealCapsuleForever()">🎉 Reveal Forever</button>
           </div>
         </div>
 
@@ -420,7 +422,7 @@
           <div class="section-title">🐦 Share Capsule on X</div>
           <div class="input-group">
             <input type="number" id="share-capsule-id" placeholder="Enter Capsule ID" min="1">
-            <button id="share-capsule-btn" class="btn-admin warning">Share on X</button>
+            <button class="btn-small btn-share" onclick="shareCapsule()">🐦 Share on X</button>
           </div>
         </div>
 
@@ -429,7 +431,7 @@
           <div class="section-title">📦 Batch Operations</div>
           <div class="input-group">
             <input type="text" id="batch-capsule-ids" placeholder="Enter Capsule IDs (comma-separated): 1,2,3,4">
-            <button id="batch-preview-btn" class="btn-admin">Batch Preview</button>
+            <button class="btn-admin" onclick="batchPreviewCapsules()">Batch Preview</button>
           </div>
         </div>
       </div>
@@ -442,18 +444,15 @@
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
+  <!-- Scripts - EXACT same order as working gallery.html -->
   <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   
-  <!-- BLST WASM runtime (required for Shutter crypto) -->
+  <!-- BLST WASM runtime (required for custom shutter crypto) -->
   <script src="https://cdn.jsdelivr.net/npm/@shutter-network/blst@0.1.7/dist/blst.min.js"></script>
   
-  <!-- Custom Shutter WASM loader -->
+  <!-- Custom Shutter WASM loader and app logic with cache busting -->
   <script src="blst.js?v=2025062004"></script>
-  
-  <!-- Custom admin logic -->
+  <script type="module" src="main.js?v=2025062004"></script>
   <script type="module" src="admin.js?v=2025062004"></script>
 </body>
 </html>
