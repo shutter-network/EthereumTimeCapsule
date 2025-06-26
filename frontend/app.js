@@ -1822,167 +1822,148 @@ function viewAllCapsules() {
 }
 
 // =============  TAGS DROPDOWN FUNCTIONALITY  =============
-let selectedTags = [];
-const MAX_TAGS = 2;
-
+// =============  TAGS DROPDOWN  =============
 function initTagsDropdown() {
   console.log('🏷️ Initializing tags dropdown...');
+  
+  // Populate tags from config if available
+  if (appConfig && appConfig.available_tags) {
+    populateTagsFromConfig();
+  }
+  
   const dropdown = document.getElementById('tags-dropdown');
   const dropdownMenu = document.getElementById('dropdown-menu');
   const selectedTagsContainer = document.getElementById('selected-tags');
   const hiddenInput = document.getElementById('entry-actual-tags');
   
-  console.log('Elements found:', {
-    dropdown: !!dropdown,
-    dropdownMenu: !!dropdownMenu,
-    selectedTagsContainer: !!selectedTagsContainer,
-    hiddenInput: !!hiddenInput
-  });
-  
   if (!dropdown || !dropdownMenu || !selectedTagsContainer || !hiddenInput) {
-    console.error('❌ Tags dropdown elements not found, skipping initialization');
-    return; // Elements not found, skip initialization
+    console.warn('Tags dropdown elements not found');
+    return;
   }
   
-  console.log('✅ All elements found, setting up event listeners...');
-    // Toggle dropdown
-  dropdown.addEventListener('click', function(e) {
-    console.log('🖱️ Dropdown clicked');
-    e.stopPropagation();
-    const isOpen = dropdownMenu.classList.contains('show');
-    
-    if (isOpen) {
-      console.log('Closing dropdown');
-      closeDropdown();
-    } else {
-      console.log('Opening dropdown');
-      openDropdown();
-    }
-  });
+  let selectedTags = [];
   
-  // Handle tag selection
-  dropdownMenu.addEventListener('click', function(e) {
-    console.log('🏷️ Tag clicked:', e.target);
-    if (e.target.classList.contains('dropdown-item') && !e.target.classList.contains('disabled')) {
-      const tag = e.target.getAttribute('data-tag');
-      console.log('Selected tag:', tag);
-      toggleTag(tag);
-      e.stopPropagation();
-    }
+  // Toggle dropdown
+  dropdown.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdownMenu.classList.toggle('show');
   });
   
   // Close dropdown when clicking outside
-  document.addEventListener('click', function(e) {
-    if (!dropdown.contains(e.target)) {
-      closeDropdown();
-    }
+  document.addEventListener('click', () => {
+    dropdownMenu.classList.remove('show');
   });
   
-  // Initialize display
-  updateTagsDisplay();
-  updateDropdownItems();
-}
-
-function openDropdown() {
-  const dropdown = document.getElementById('tags-dropdown');
-  const dropdownMenu = document.getElementById('dropdown-menu');
-  
-  dropdown.classList.add('active');
-  dropdownMenu.classList.add('show');
-  updateDropdownItems();
-}
-
-function closeDropdown() {
-  const dropdown = document.getElementById('tags-dropdown');
-  const dropdownMenu = document.getElementById('dropdown-menu');
-  
-  dropdown.classList.remove('active');
-  dropdownMenu.classList.remove('show');
-}
-
-function toggleTag(tag) {
-  const index = selectedTags.indexOf(tag);
-  
-  if (index === -1) {
-    // Add tag if not selected and under limit
-    if (selectedTags.length < MAX_TAGS) {
-      selectedTags.push(tag);
+  // Handle tag selection
+  dropdownMenu.addEventListener('click', (e) => {
+    e.stopPropagation();
+    
+    if (e.target.classList.contains('tag-option')) {
+      const tagName = e.target.dataset.tag;
+      
+      if (selectedTags.includes(tagName)) {
+        // Remove tag
+        selectedTags = selectedTags.filter(tag => tag !== tagName);
+        e.target.classList.remove('selected');
+      } else {
+        // Add tag (limit to 5)
+        if (selectedTags.length < 5) {
+          selectedTags.push(tagName);
+          e.target.classList.add('selected');
+        } else {
+          alert('You can select up to 5 tags maximum.');
+          return;
+        }
+      }
+      
+      updateSelectedTagsDisplay(selectedTags, selectedTagsContainer, hiddenInput);
     }
-  } else {
-    // Remove tag if already selected
-    selectedTags.splice(index, 1);
-  }
-  
-  updateTagsDisplay();
-  updateDropdownItems();
-  updateHiddenInput();
+  });
 }
 
-function removeTag(tag) {
-  const index = selectedTags.indexOf(tag);
-  if (index !== -1) {
-    selectedTags.splice(index, 1);
-    updateTagsDisplay();
-    updateDropdownItems();
-    updateHiddenInput();
+function populateTagsFromConfig() {
+  if (!appConfig || !appConfig.available_tags) {
+    console.warn('No available_tags in config');
+    return;
   }
+  
+  const dropdownMenu = document.getElementById('dropdown-menu');
+  if (!dropdownMenu) {
+    console.warn('Dropdown menu element not found');
+    return;
+  }
+  
+  // Create emoji mapping for tags
+  const tagEmojis = {
+    'memories': '💭',
+    'dreams': '✨',
+    'goals': '🎯',
+    'love': '💕',
+    'family': '👨‍👩‍👧‍👦',
+    'travel': '✈️',
+    'art': '🎨',
+    'music': '🎵',
+    'thoughts': '💭',
+    'wishes': '🌟',
+    'secrets': '🤫',
+    'future': '🔮',
+    'present': '🎁',
+    'past': '📜',
+    'hope': '🌈',
+    'gratitude': '🙏'
+  };
+  
+  // Clear existing options
+  dropdownMenu.innerHTML = '';
+  
+  // Add each tag from config
+  appConfig.available_tags.forEach(tag => {
+    const tagOption = document.createElement('div');
+    tagOption.className = 'tag-option';
+    tagOption.dataset.tag = tag;
+    
+    const emoji = tagEmojis[tag] || '🏷️';
+    tagOption.innerHTML = `<span class="tag-emoji">${emoji}</span> ${tag}`;
+    
+    dropdownMenu.appendChild(tagOption);
+  });
+  
+  console.log('✅ Tags populated from config:', appConfig.available_tags);
 }
 
-function updateTagsDisplay() {
-  const selectedTagsContainer = document.getElementById('selected-tags');
-  if (!selectedTagsContainer) return;
-  
-  selectedTagsContainer.innerHTML = '';
-  
+function updateSelectedTagsDisplay(selectedTags, container, hiddenInput) {
   if (selectedTags.length === 0) {
-    const placeholder = document.createElement('span');
-    placeholder.className = 'tags-placeholder';
-    placeholder.textContent = 'Select tags...';
-    selectedTagsContainer.appendChild(placeholder);
+    container.innerHTML = '<span class="tags-placeholder">Select tags...</span>';
   } else {
-    selectedTags.forEach(tag => {
-      const tagBubble = document.createElement('div');
-      tagBubble.className = 'tag-bubble';
-      
-      const tagText = document.createElement('span');
-      tagText.textContent = tag;
-      
-      const removeBtn = document.createElement('span');
-      removeBtn.className = 'tag-remove';
-      removeBtn.textContent = '×';
-      removeBtn.onclick = (e) => {
+    container.innerHTML = selectedTags.map(tag => 
+      `<span class="selected-tag">${tag} <span class="remove-tag" data-tag="${tag}">×</span></span>`
+    ).join('');
+    
+    // Add remove functionality
+    container.querySelectorAll('.remove-tag').forEach(removeBtn => {
+      removeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        removeTag(tag);
-      };
-      
-      tagBubble.appendChild(tagText);
-      tagBubble.appendChild(removeBtn);
-      selectedTagsContainer.appendChild(tagBubble);
+        const tagToRemove = e.target.dataset.tag;
+        
+        // Update selectedTags array (we need to maintain this state)
+        const tagIndex = selectedTags.indexOf(tagToRemove);
+        if (tagIndex > -1) {
+          selectedTags.splice(tagIndex, 1);
+        }
+        
+        // Update UI
+        const tagOption = document.querySelector(`.tag-option[data-tag="${tagToRemove}"]`);
+        if (tagOption) {
+          tagOption.classList.remove('selected');
+        }
+        
+        updateSelectedTagsDisplay(selectedTags, container, hiddenInput);
+      });
     });
   }
-}
-
-function updateDropdownItems() {
-  const dropdownItems = document.querySelectorAll('.dropdown-item');
   
-  dropdownItems.forEach(item => {
-    const tag = item.getAttribute('data-tag');
-    const isSelected = selectedTags.includes(tag);
-    const canSelect = selectedTags.length < MAX_TAGS || isSelected;
-    
-    if (!canSelect && !isSelected) {
-      item.classList.add('disabled');
-    } else {
-      item.classList.remove('disabled');
-    }
-  });
-}
-
-function updateHiddenInput() {
-  const hiddenInput = document.getElementById('entry-actual-tags');
-  if (hiddenInput) {
-    hiddenInput.value = selectedTags.join(', ');
-  }
+  // Update hidden input
+  hiddenInput.value = selectedTags.join(', ');
 }
 
 // =============  HELPER FUNCTIONS  =============
@@ -2039,6 +2020,11 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Store the full config globally for use by other functions
     appConfig = cfgAll;
     console.log('📋 Loaded app configuration:', appConfig);
+    
+    // Populate tags dropdown if we have the DOM ready
+    if (document.getElementById('dropdown-menu')) {
+      populateTagsFromConfig();
+    }
     
     const fixedNetwork = cfgAll.default_network;
     const fixedCfg = cfgAll[fixedNetwork];
@@ -2097,6 +2083,11 @@ window.addEventListener("DOMContentLoaded", async () => {
 function setupEventListeners() {
   // Initialize tags dropdown
   initTagsDropdown();
+  
+  // Populate tags from config if not already done
+  if (appConfig && appConfig.available_tags && document.getElementById('dropdown-menu')) {
+    populateTagsFromConfig();
+  }
   
   // Navigation buttons
   document.getElementById('step1-next-btn').onclick = proceedFromStep1;

@@ -13,6 +13,9 @@ let provider, signer, contract, contractRead;
 let contractAddr, contractAbi, shutterApi, registryAddr;
 let walletConnected = false;
 
+// Configuration loaded from public_config.json
+let appConfig = null;
+
 // Gallery state
 let currentOffset = 0;
 let currentFilter = 'all'; // 'all' or specific tag name
@@ -199,6 +202,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     const cacheBuster = `?v=${Date.now()}`;
     const cfgAll = await (await fetch(`public_config.json${cacheBuster}`)).json();
     
+    // Store the full config globally
+    appConfig = cfgAll;
+    console.log('📋 Loaded app configuration:', appConfig);
+    
     const fixedNetwork = cfgAll.default_network;
     const fixedCfg = cfgAll[fixedNetwork];
     const shutterCfg = cfgAll["testnet"]; // or "mainnet"
@@ -239,8 +246,8 @@ window.addEventListener("DOMContentLoaded", async () => {
       loadCapsules();
     }
     
-    // Load popular tags for filtering
-    await loadPopularTags();
+    // Load tags from config for filtering
+    await loadTagsFromConfig();
     
   } catch (e) {
     console.error("Initialization failed:", e);
@@ -351,42 +358,28 @@ function setupEventListeners() {
 }
 
 // =============  FILTER AND SEARCH  =============
-async function loadPopularTags() {
+async function loadTagsFromConfig() {
   try {
-    console.log('🏷️ Loading popular tags...');
-    const response = await axios.get(`${getApiBaseUrl()}/api/capsules`, {
-      params: { limit: 100 } // Get a good sample of capsules to extract tags
-    });
+    console.log('🏷️ Loading tags from config...');
     
-    if (!response.data.success) {
-      console.warn('Failed to load capsules for tag extraction');
+    if (!appConfig || !appConfig.available_tags) {
+      console.warn('No available_tags in config');
       return;
     }
     
-    // Extract and count all tags
-    const tagCounts = {};
-    response.data.capsules.forEach(capsule => {
-      if (capsule.tags) {
-        const tags = capsule.tags.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag);
-        tags.forEach(tag => {
-          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-        });
-      }
-    });
+    // Use tags from config instead of extracting from capsules
+    availableTags = appConfig.available_tags.map(tag => ({ 
+      name: tag, 
+      count: 0 // We'll show count as 0 or remove it since we're not extracting
+    }));
     
-    // Sort tags by popularity and take top 10
-    availableTags = Object.entries(tagCounts)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 10)
-      .map(([tag, count]) => ({ name: tag, count }));
-    
-    console.log('✅ Popular tags loaded:', availableTags);
+    console.log('✅ Tags loaded from config:', availableTags);
     
     // Render tag filter buttons
     renderTagFilters();
     
   } catch (error) {
-    console.error('Failed to load popular tags:', error);
+    console.error('Failed to load tags from config:', error);
   }
 }
 
@@ -396,10 +389,32 @@ function renderTagFilters() {
   
   tagFiltersContainer.innerHTML = '';
   
-  availableTags.forEach(({ name, count }) => {
+  // Create emoji mapping for tags (same as in create step)
+  const tagEmojis = {
+    'memories': '💭',
+    'dreams': '✨',
+    'goals': '🎯',
+    'love': '💕',
+    'family': '👨‍👩‍👧‍👦',
+    'travel': '✈️',
+    'art': '🎨',
+    'music': '🎵',
+    'thoughts': '💭',
+    'wishes': '🌟',
+    'secrets': '🤫',
+    'future': '🔮',
+    'present': '🎁',
+    'past': '📜',
+    'hope': '🌈',
+    'gratitude': '🙏'
+  };
+  
+  availableTags.forEach(({ name }) => {
     const tagButton = document.createElement('button');
     tagButton.className = 'btn-tag-filter';
-    tagButton.textContent = `#${name} (${count})`;
+    
+    const emoji = tagEmojis[name] || '🏷️';
+    tagButton.innerHTML = `${emoji} #${name}`;
     tagButton.onclick = () => setFilter(name);
     tagFiltersContainer.appendChild(tagButton);
   });

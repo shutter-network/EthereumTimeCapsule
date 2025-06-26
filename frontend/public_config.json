@@ -22,7 +22,26 @@
     7,
     8,
     9
-  ],  "image_processing": {
+  ],
+  "available_tags": [
+    "memories",
+    "dreams",
+    "goals",
+    "love",
+    "family",
+    "travel",
+    "art",
+    "music",
+    "thoughts",
+    "wishes",
+    "secrets",
+    "future",
+    "present",
+    "past",
+    "hope",
+    "gratitude"
+  ],
+  "image_processing": {
     "target_vertical_resolution": 100,
     "smoothing_factor": 19,
     "enable_floyd_steinberg_dithering": true,

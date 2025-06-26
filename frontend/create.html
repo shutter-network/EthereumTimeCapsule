@@ -1174,33 +1174,54 @@
 
     .dropdown-item.disabled:hover {
       background: #f9f9f9;
-    }    /* Mobile optimizations */
-    @media (max-width: 480px) {
-      .dropdown-menu {
-        max-height: 200px;
-      }
-      
-      .dropdown-item {
-        padding: 14px 12px;
-        font-size: 14px;
-      }
     }
 
-    /* Character Counter Styles */
-    .character-counter {
-      margin-top: 8px;
+    /* Tag option styles */
+    .tag-option {
+      padding: 12px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      font-size: 14px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag-option:hover {
+      background: #f8f9ff;
+    }
+
+    .tag-option.selected {
+      background: var(--eth5);
+      color: white;
+    }
+
+    .tag-emoji {
+      font-size: 16px;
+    }
+
+    .selected-tag {
+      background: var(--eth5);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
       font-size: 12px;
-      color: #666;
-      text-align: right;
-      transition: color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin: 2px;
     }
 
-    .character-counter.warning {
-      color: #f59e0b;
+    .remove-tag {
+      cursor: pointer;
+      font-weight: bold;
+      padding: 0 2px;
+      border-radius: 50%;
     }
 
-    .character-counter.error {
-      color: #ef4444;
+    .remove-tag:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
   </style>
 </head>
@@ -1282,21 +1303,8 @@
                   <span class="tags-placeholder">Select tags...</span>
                 </div>
                 <div class="dropdown-arrow">▼</div>
-              </div>              <div class="dropdown-menu" id="dropdown-menu">                <div class="dropdown-item" data-tag="Family">👨‍👩‍👧‍👦 Family</div>
-                <div class="dropdown-item" data-tag="Love">💕 Love</div>
-                <div class="dropdown-item" data-tag="Dreams">🌟 Dreams</div>
-                <div class="dropdown-item" data-tag="Travel">✈️ Travel</div>
-                <div class="dropdown-item" data-tag="Career">💼 Career</div>
-                <div class="dropdown-item" data-tag="Memories">📷 Memories</div>
-                <div class="dropdown-item" data-tag="Growth">🌱 Growth</div>
-                <div class="dropdown-item" data-tag="Technology">🚀 Technology</div>
-                <div class="dropdown-item" data-tag="Art">🎨 Art</div>
-                <div class="dropdown-item" data-tag="Health">🏃‍♂️ Health</div>
-                <div class="dropdown-item" data-tag="Wisdom">💡 Wisdom</div>
-                <div class="dropdown-item" data-tag="Friendship">🤝 Friendship</div>
-                <div class="dropdown-item" data-tag="Celebrations">🎉 Celebrations</div>
-                <div class="dropdown-item" data-tag="Hobbies">🎯 Hobbies</div>
-                <div class="dropdown-item" data-tag="Hopes">🌈 Hopes</div>
+              </div>              <div class="dropdown-menu" id="dropdown-menu">
+                <!-- Tags will be populated dynamically from config -->
               </div>
             </div>
             <input type="hidden" id="entry-actual-tags" value="">
