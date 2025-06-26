@@ -635,19 +635,8 @@ function createCapsuleCard(capsule) {
     </div>
 
     <div class="capsule-actions">
-      ${!isRevealed ? `
-        <button class="btn-small btn-decrypt" onclick="decryptCapsule(${capsule.id}, '${capsule.shutterIdentity}')">
-          🔓 Preview Story
-        </button>
-        <button class="btn-small btn-reveal" onclick="revealCapsule(${capsule.id}, '${capsule.shutterIdentity}')">
-          🎉 Reveal Forever (Blockchain)
-        </button>
-      ` : ''}
       <button class="btn-small btn-expand" onclick="toggleStory(${capsule.id})">
         📖 Read More
-      </button>
-      <button class="btn-small btn-share" onclick="shareGalleryCapsule(${capsule.id}, '${capsule.title || 'Capsule'}', '${revealTime.toLocaleDateString()}')">
-        🐦 Share on X
       </button>
     </div>
   `;
