@@ -1120,11 +1120,7 @@
               // Prevent navigation for placeholder links
               e.preventDefault();
               toggleMenu();
-            } else if (href.startsWith('https://') || href.startsWith('http://')) {
-              // Open external links in new tab
-              e.preventDefault();
-              window.open(href, '_blank');
-              toggleMenu();
+
             } else {
               // Internal links - prevent default and navigate in same tab
               e.preventDefault();
