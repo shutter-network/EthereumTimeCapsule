@@ -596,6 +596,14 @@
       object-fit: cover;
     }
 
+    /* Pixelated rendering specifically for pixelated images only */
+    .preview-image.pixelated {
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -webkit-crisp-edges;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
     .issuer-tag {
       position: absolute;
       bottom: 12px;

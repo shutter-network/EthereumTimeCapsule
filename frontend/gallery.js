@@ -587,7 +587,7 @@ function createCapsuleCard(capsule) {
   // Use exact same structure as preview card
   card.innerHTML = `
     <div class="preview-image-container">
-      <img src="${imageSrc}" alt="Capsule image" class="preview-image" loading="lazy" 
+      <img src="${imageSrc}" alt="Capsule image" class="preview-image${isRevealed ? '' : ' pixelated'}" loading="lazy" 
            data-current-cid="${pixelatedCID}" data-capsule-id="${capsule.id}"
            onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})">
       <div class="issuer-tag">issued by <span>${creator}</span></div>
@@ -809,6 +809,8 @@ async function decryptAndDisplayImage(capsuleId, imageCID, shutterIdentity) {
         }
         img.src = imageUrl;
         img.alt = "Decrypted image";
+        // Remove pixelated class from decrypted images
+        img.classList.remove('pixelated');
         console.log(`✅ Successfully decrypted and displayed image for capsule #${capsuleId}`);
       } else {
         console.warn(`Image element not found in card for capsule #${capsuleId}`);
@@ -827,6 +829,8 @@ async function decryptAndDisplayImage(capsuleId, imageCID, shutterIdentity) {
             }
             img.src = imageUrl;
             img.alt = "Decrypted image";
+            // Remove pixelated class from decrypted images
+            img.classList.remove('pixelated');
             console.log(`✅ Successfully decrypted and displayed image for capsule #${capsuleId} (fallback method)`);
           }
           break;
