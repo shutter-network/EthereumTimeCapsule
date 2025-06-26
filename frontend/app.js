@@ -1271,8 +1271,7 @@ function populateCompletion() {
   // Generate and populate shareable link
   generateShareableLink();
   
-  // Setup download image functionality
-  setupDownloadImage();  // Recreate advanced dithered image in final preview
+  // Recreate advanced dithered image in final preview
   const canvas = document.getElementById('final-preview-canvas');
   const ctx = canvas.getContext('2d');
   const img = new Image();
@@ -1747,23 +1746,12 @@ function shareOnX() {
         URL.revokeObjectURL(url);
       }
       
-      // Show download success on button
-      const downloadBtn = document.getElementById('download-image-btn');
-      if (downloadBtn) {
-        if (clipboardSuccess) {
-          downloadBtn.textContent = '📋 Copied!';
-        } else {
-          downloadBtn.textContent = '✅ Downloaded!';
-        }
-        downloadBtn.classList.add('downloaded');
-      }
-      
       // Wait a moment then open Twitter with appropriate instructions
       setTimeout(() => {
         window.open(twitterUrl, '_blank');
         
         if (clipboardSuccess) {
-          alert('� Perfect! Your capsule image is copied to your clipboard.\n\nJust paste it (Ctrl+V / Cmd+V) directly in your tweet! 🚀');
+          alert('🎨 Perfect! Your capsule image is now copied to your clipboard.\n\n📋 Just paste it (Ctrl+V / Cmd+V) into your tweet before clicking "Post"! 🚀\n\nTip: The image will appear as an attachment when you paste it.');
         } else {
           alert('📷 Your capsule image has been downloaded.\n\nAttach the downloaded file to your tweet to show off your time capsule! 🚀');
         }
