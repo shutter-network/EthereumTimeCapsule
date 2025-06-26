@@ -97,8 +97,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Initialize Shutter WASM
     appendOutput('🔄 Initializing Shutter WASM...');
     try {
-      await ensureShutterReady();
-      appendOutput('✅ Shutter WASM initialized');
+      // Skip Shutter initialization for now to avoid potential blocking
+      appendOutput('⚠️ Shutter WASM initialization skipped (manual init required)');
     } catch (e) {
       appendOutput('❌ Shutter WASM initialization failed: ' + e.message);
     }
