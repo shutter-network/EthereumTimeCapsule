@@ -1542,9 +1542,12 @@
               window.open(href, '_blank');
               toggleMenu();
             } else {
-              // Internal links - close menu and allow navigation
+              // Internal links - prevent default and navigate in same tab
+              e.preventDefault();
               toggleMenu();
-              // Don't prevent default - allow navigation to proceed
+              setTimeout(() => {
+                window.location.href = href;
+              }, 300); // Wait for menu to close
             }
           } else {
             toggleMenu();
