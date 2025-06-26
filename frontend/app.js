@@ -1770,8 +1770,13 @@ function shareOnX() {
 }
 
 function viewInGallery() {
-  // Navigate to gallery view
-  window.location.href = 'gallery.html';
+  // Navigate to the specific capsule in the gallery if we have an ID
+  if (capsuleData.capsuleId !== null && capsuleData.capsuleId !== undefined) {
+    window.location.href = `gallery.html?capsule=${capsuleData.capsuleId}`;
+  } else {
+    // Fallback to general gallery if no capsule ID available
+    window.location.href = 'gallery.html';
+  }
 }
 
 function encryptAnotherEntry() {
