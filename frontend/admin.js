@@ -99,10 +99,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Initialize Shutter WASM
     appendOutput('🔄 Initializing Shutter WASM...');
     try {
-      // Skip Shutter initialization for now to avoid potential blocking
-      appendOutput('⚠️ Shutter WASM initialization skipped (manual init required)');
+      await ensureShutterReady();
+      appendOutput('✅ Shutter WASM ready');
     } catch (e) {
-      appendOutput('❌ Shutter WASM initialization failed: ' + e.message);
+      appendOutput('⚠️ Shutter WASM not ready yet, will retry when needed: ' + e.message);
     }
     
     appendOutput('🎉 Admin panel ready!');
@@ -237,26 +237,26 @@ async function previewCapsuleStory() {
     
     appendOutput(`🔑 Decryption key obtained (${key.length} chars)`);
     
-    // Decrypt the story
+    // Handle encrypted story from database API
     let encryptedHex;
     if (typeof capsule.encryptedStory === "string" && capsule.encryptedStory.startsWith("0x")) {
-      encryptedHex = capsule.encryptedStory.slice(2);
-    } else if (typeof capsule.encryptedStory === "string") {
       encryptedHex = capsule.encryptedStory;
+    } else if (typeof capsule.encryptedStory === "string") {
+      encryptedHex = "0x" + capsule.encryptedStory;
     } else {
       appendOutput(`❌ Invalid encrypted story format for capsule #${capsuleId}`);
       return;
     }
     
-    appendOutput(`🔓 Decrypting story (${encryptedHex.length} hex chars)...`);
+    appendOutput(`🔓 Decrypting story...`);
     
-    // Decrypt using Shutter WASM
-    const decryptedBytes = window.shutter.decryptData(
-      new Uint8Array(Buffer.from(encryptedHex, 'hex')),
-      new Uint8Array(Buffer.from(key, 'hex'))
-    );
+    // Ensure Shutter WASM is ready before decryption
+    await ensureShutterReady();
     
-    const decryptedStory = new TextDecoder().decode(decryptedBytes);
+    // Decrypt the story using the same method as gallery.js
+    const plaintextHex = await window.shutter.decrypt(encryptedHex, key);
+    const decryptedStory = Buffer.from(plaintextHex.slice(2), "hex").toString("utf8");
+    
     appendOutput(`📖 Decrypted story: ${decryptedStory}`);
     appendOutput(`✅ Successfully previewed capsule #${capsuleId} story`);
     
@@ -319,24 +319,23 @@ async function revealCapsuleForever() {
     
     appendOutput(`🔑 Decryption key obtained`);
     
-    // Decrypt story and image
+    // Handle encrypted story from database API
     let encryptedHex;
     if (typeof capsule.encryptedStory === "string" && capsule.encryptedStory.startsWith("0x")) {
-      encryptedHex = capsule.encryptedStory.slice(2);
-    } else if (typeof capsule.encryptedStory === "string") {
       encryptedHex = capsule.encryptedStory;
+    } else if (typeof capsule.encryptedStory === "string") {
+      encryptedHex = "0x" + capsule.encryptedStory;
     } else {
       appendOutput(`❌ Invalid encrypted story format for capsule #${capsuleId}`);
       return;
     }
     
+    // Ensure Shutter WASM is ready before decryption
     await ensureShutterReady();
     
-    const decryptedBytes = window.shutter.decryptData(
-      new Uint8Array(Buffer.from(encryptedHex, 'hex')),
-      new Uint8Array(Buffer.from(key, 'hex'))
-    );
-    const decryptedStory = new TextDecoder().decode(decryptedBytes);
+    // Decrypt the story using the same method as gallery.js
+    const plaintextHex = await window.shutter.decrypt(encryptedHex, key);
+    const decryptedStory = Buffer.from(plaintextHex.slice(2), "hex").toString("utf8");
     
     appendOutput(`📖 Decrypted story: ${decryptedStory}`);
     
@@ -474,26 +473,16 @@ async function initializeShutter() {
 // =============  UTILITY FUNCTIONS  =============
 async function ensureShutterReady() {
   let tries = 0;
-  const maxTries = 200; // Increased from 100 to 200 (10 seconds)
-  
   while (
     (!window.shutter || typeof window.shutter.encryptData !== "function") &&
-    tries < maxTries
+    tries < 100
   ) {
     await new Promise(res => setTimeout(res, 50));
     tries++;
-    
-    // Log progress every 2 seconds
-    if (tries % 40 === 0) {
-      appendOutput(`⏳ Still waiting for Shutter WASM... (${tries * 50}ms)`);
-    }
   }
-  
   if (!window.shutter || typeof window.shutter.encryptData !== "function") {
-    throw new Error(`Shutter WASM not ready after ${maxTries * 50}ms`);
+    throw new Error("Shutter WASM not loaded!");
   }
-  
-  appendOutput('✅ Shutter WASM is ready');
 }
 
 // Expose functions globally for HTML onclick handlers
