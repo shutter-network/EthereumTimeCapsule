@@ -80,23 +80,75 @@ function getIPFSUrls(cid) {
 }
 
 // Helper: handle image loading errors with fallback
-function handleImageError(imgElement, imageCID, capsuleId) {
+async function handleImageError(imgElement, imageCID, capsuleId) {
   console.error(`Failed to load image for capsule #${capsuleId}:`, imgElement.src);
   
-  // If we're currently trying the IPFS endpoint, fallback to pixelated endpoint
+  // If we're currently trying the IPFS endpoint, try multiple fallback strategies
   if (imgElement.src.includes('/ipfs/')) {
-    console.log(`Falling back to pixelated endpoint for capsule #${capsuleId}`);
+    console.log(`Trying fallback strategies for capsule #${capsuleId}`);
+    
+    // Strategy 1: Try pixelated endpoint with same CID
     const timestamp = Date.now();
-    imgElement.src = `${getApiBaseUrl()}/pixelated/${imageCID}?t=${timestamp}`;
-    imgElement.onerror = function() {
-      console.error(`Pixelated fallback also failed for capsule #${capsuleId}:`, this.src);
-      this.style.display = 'none';
-    };
+    const pixelatedUrl = `${getApiBaseUrl()}/pixelated/${imageCID}?t=${timestamp}`;
+    
+    try {
+      // Test if the pixelated endpoint exists before setting it
+      const testResponse = await fetch(pixelatedUrl, { method: 'HEAD' });
+      if (testResponse.ok) {
+        console.log(`Using pixelated endpoint for capsule #${capsuleId}`);
+        imgElement.src = pixelatedUrl;
+        imgElement.onerror = () => tryAlternateCID(imgElement, capsuleId);
+        return;
+      }
+    } catch (e) {
+      console.log(`Pixelated endpoint test failed for capsule #${capsuleId}:`, e.message);
+    }
+    
+    // Strategy 2: Try to get fresh capsule data and use correct CID
+    tryAlternateCID(imgElement, capsuleId);
   } else {
-    // Both endpoints failed, hide the image
+    // All strategies failed, hide the image
     console.error(`All image sources failed for capsule #${capsuleId}`);
     imgElement.style.display = 'none';
   }
+}
+
+// Helper: Try to get correct CID from direct capsule API
+async function tryAlternateCID(imgElement, capsuleId) {
+  try {
+    console.log(`Fetching fresh capsule data for #${capsuleId} to get correct CID`);
+    const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
+    
+    if (response.data.success && response.data.capsule) {
+      const capsule = response.data.capsule;
+      const correctPixelatedCID = (capsule.pixelatedImageCID && capsule.pixelatedImageCID.trim()) || capsule.imageCID;
+      
+      if (correctPixelatedCID && correctPixelatedCID !== imgElement.getAttribute('data-current-cid')) {
+        console.log(`Trying correct CID for capsule #${capsuleId}: ${correctPixelatedCID}`);
+        imgElement.setAttribute('data-current-cid', correctPixelatedCID);
+        
+        const timestamp = Date.now();
+        const newUrl = `${getApiBaseUrl()}/ipfs/${correctPixelatedCID}?t=${timestamp}`;
+        imgElement.src = newUrl;
+        
+        imgElement.onerror = function() {
+          console.log(`Trying pixelated endpoint with correct CID for capsule #${capsuleId}`);
+          this.src = `${getApiBaseUrl()}/pixelated/${correctPixelatedCID}?t=${timestamp}`;
+          this.onerror = function() {
+            console.error(`All fallbacks failed for capsule #${capsuleId}`);
+            this.style.display = 'none';
+          };
+        };
+        return;
+      }
+    }
+  } catch (e) {
+    console.error(`Failed to fetch fresh capsule data for #${capsuleId}:`, e);
+  }
+  
+  // Final fallback: hide the image
+  console.error(`All image loading strategies failed for capsule #${capsuleId}`);
+  imgElement.style.display = 'none';
 }
 
 // Helper: fetch from redundant URLs with fallbacks
@@ -501,6 +553,13 @@ function createCapsuleCard(capsule) {
   const card = document.createElement('div');
   card.className = 'capsule-card-gallery';
   card.setAttribute('data-capsule-id', capsule.id); // Add unique identifier
+  
+  // Debug logging for CID inconsistencies
+  console.log(`Creating card for capsule #${capsule.id}:`);
+  console.log(`- imageCID: ${capsule.imageCID}`);
+  console.log(`- pixelatedImageCID: ${capsule.pixelatedImageCID}`);
+  console.log(`- pixelatedImageCID (trimmed): ${capsule.pixelatedImageCID && capsule.pixelatedImageCID.trim()}`);
+  
   const isRevealed = capsule.isRevealed;
   const revealTime = new Date(capsule.revealTime * 1000);
   const creator = `${capsule.creator.slice(0, 6)}...${capsule.creator.slice(-4)}`;
@@ -540,7 +599,8 @@ function createCapsuleCard(capsule) {
     </div>
 
     <img src="${imageSrc}" alt="Capsule image" class="capsule-image" loading="lazy" 
-         onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})">
+         data-current-cid="${pixelatedCID}" data-capsule-id="${capsule.id}"
+         onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})">>
          
     <div class="capsule-title">${capsule.title || 'Untitled Capsule'}</div>
     
@@ -812,6 +872,7 @@ window.revealCapsule = revealCapsule;
 window.toggleStory = toggleStory;
 window.decryptAndDisplayImage = decryptAndDisplayImage;
 window.handleImageError = handleImageError;
+window.tryAlternateCID = tryAlternateCID;
 window.filterByTag = function(tagName) {
   console.log(`🏷️ Filtering by tag: ${tagName}`);
   setFilter(tagName);
