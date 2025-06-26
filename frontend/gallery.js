@@ -801,7 +801,7 @@ async function decryptAndDisplayImage(capsuleId, imageCID, shutterIdentity) {
     
     if (targetCard) {
       console.log(`Found exact matching card for capsule #${capsuleId}!`);
-      const img = targetCard.querySelector('.capsule-image');
+      const img = targetCard.querySelector('.preview-image');
       if (img) {
         // Clean up previous object URL to prevent memory leaks
         if (img.src.startsWith('blob:')) {
@@ -818,9 +818,9 @@ async function decryptAndDisplayImage(capsuleId, imageCID, shutterIdentity) {
       // Fallback to the old method if data attribute fails
       const capsuleCards = document.querySelectorAll('.capsule-card-gallery');
       for (const card of capsuleCards) {
-        const capsuleIdElement = card.querySelector('.capsule-id');
-        if (capsuleIdElement && capsuleIdElement.textContent.trim() === `ID #${capsuleId}`) {
-          const img = card.querySelector('.capsule-image');
+        const titleElement = card.querySelector('.preview-title');
+        if (titleElement && card.getAttribute('data-capsule-id') === capsuleId.toString()) {
+          const img = card.querySelector('.preview-image');
           if (img) {
             if (img.src.startsWith('blob:')) {
               URL.revokeObjectURL(img.src);
