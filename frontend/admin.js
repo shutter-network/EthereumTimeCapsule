@@ -51,7 +51,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Initialize global storage
     window.ipfsUrls = {};
     
-    // Load system information
+    // Load system information (optional, skip if not available)
     try {
       const sysResp = await axios.get(`${getApiBaseUrl()}/api/system_info`);
       if (sysResp.data.success) {
@@ -59,7 +59,9 @@ window.addEventListener("DOMContentLoaded", async () => {
         appendOutput('✅ System information loaded');
       }
     } catch (e) {
-      appendOutput('⚠️ Failed to load system info: ' + e.message);
+      appendOutput('⚠️ System info endpoint not available (skipping)');
+      // Initialize empty system info
+      window.systemInfo = {};
     }
     
     // Load configs & ABI
@@ -163,6 +165,9 @@ function setupEventListeners() {
   // Wallet connection
   document.getElementById('connect-wallet-btn').onclick = connectWallet;
   
+  // Manual Shutter initialization
+  document.getElementById('init-shutter-btn').onclick = initializeShutter;
+  
   // Preview story
   document.getElementById('preview-story-btn').onclick = previewCapsuleStory;
   
@@ -194,6 +199,10 @@ async function previewCapsuleStory() {
   try {
     appendOutput(`🔓 Previewing story for capsule #${capsuleId}...`);
     
+    // Ensure Shutter WASM is ready first
+    appendOutput('🔄 Checking Shutter WASM availability...');
+    await ensureShutterReady();
+    
     // Fetch capsule data from database API
     const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
     if (!response.data.success) {
@@ -213,17 +222,20 @@ async function previewCapsuleStory() {
     }
     
     // Get decryption key from Shutter
+    appendOutput(`🔑 Requesting decryption key from Shutter API...`);
     const resp = await axios.get(`${shutterApi}/get_decryption_key`, {
-      params: { identity: capsule.shutterIdentity, registry: registryAddr }
+      params: { identity: capsule.shutterIdentity, registry: registryAddr },
+      timeout: 10000 // 10 second timeout
     });
     
     const key = resp.data?.message?.decryption_key;
     if (!key) {
       appendOutput(`❌ No decryption key available for capsule #${capsuleId}`);
+      appendOutput(`🔍 Shutter response: ${JSON.stringify(resp.data)}`);
       return;
     }
     
-    appendOutput(`🔑 Decryption key obtained`);
+    appendOutput(`🔑 Decryption key obtained (${key.length} chars)`);
     
     // Decrypt the story
     let encryptedHex;
@@ -236,8 +248,7 @@ async function previewCapsuleStory() {
       return;
     }
     
-    // Ensure Shutter WASM is ready
-    await ensureShutterReady();
+    appendOutput(`🔓 Decrypting story (${encryptedHex.length} hex chars)...`);
     
     // Decrypt using Shutter WASM
     const decryptedBytes = window.shutter.decryptData(
@@ -251,6 +262,14 @@ async function previewCapsuleStory() {
     
   } catch (error) {
     appendOutput(`❌ Failed to preview capsule #${capsuleId}: ${error.message}`);
+    
+    // More specific error handling
+    if (error.message.includes('Network Error') || error.message.includes('timeout')) {
+      appendOutput('🌐 This might be a network connectivity issue with the Shutter API');
+    } else if (error.message.includes('Shutter WASM')) {
+      appendOutput('⚙️ Try refreshing the page to reload the Shutter WASM module');
+    }
+    
     console.error('Preview failed:', error);
   }
 }
@@ -430,23 +449,56 @@ async function batchPreviewCapsules() {
   appendOutput(`\n✅ Batch preview completed for ${ids.length} capsules`);
 }
 
+// =============  MANUAL SHUTTER INITIALIZATION  =============
+async function initializeShutter() {
+  try {
+    appendOutput('🔄 Manually initializing Shutter WASM...');
+    
+    // Check if already initialized
+    if (window.shutter && typeof window.shutter.encryptData === "function") {
+      appendOutput('✅ Shutter WASM already initialized');
+      return;
+    }
+    
+    // Try to initialize
+    await ensureShutterReady();
+    appendOutput('✅ Shutter WASM manually initialized successfully');
+    
+  } catch (error) {
+    appendOutput('❌ Manual Shutter initialization failed: ' + error.message);
+    appendOutput('⚠️ Try refreshing the page to reload all scripts');
+    console.error('Manual Shutter init failed:', error);
+  }
+}
+
 // =============  UTILITY FUNCTIONS  =============
 async function ensureShutterReady() {
   let tries = 0;
+  const maxTries = 200; // Increased from 100 to 200 (10 seconds)
+  
   while (
     (!window.shutter || typeof window.shutter.encryptData !== "function") &&
-    tries < 100
+    tries < maxTries
   ) {
     await new Promise(res => setTimeout(res, 50));
     tries++;
+    
+    // Log progress every 2 seconds
+    if (tries % 40 === 0) {
+      appendOutput(`⏳ Still waiting for Shutter WASM... (${tries * 50}ms)`);
+    }
   }
+  
   if (!window.shutter || typeof window.shutter.encryptData !== "function") {
-    throw new Error("Shutter WASM not ready after 5 seconds");
+    throw new Error(`Shutter WASM not ready after ${maxTries * 50}ms`);
   }
+  
+  appendOutput('✅ Shutter WASM is ready');
 }
 
 // Expose functions globally for HTML onclick handlers
 window.connectWallet = connectWallet;
+window.initializeShutter = initializeShutter;
 window.previewCapsuleStory = previewCapsuleStory;
 window.revealCapsuleForever = revealCapsuleForever;
 window.shareCapsule = shareCapsule;
