@@ -9,6 +9,21 @@ import { Buffer } from "https://esm.sh/buffer";
 // UMD bundle already loaded, grab default export:
 const WalletConnectProvider = window.WalletConnectProvider.default;
 
+// =============  CONFIGURATION  =============
+// Chain configuration - change this to switch networks
+const CHAIN_CONFIG = {
+  chainId: 100,                    // Chain ID as number
+  chainIdHex: '0x64',              // Chain ID in hex format
+  chainName: 'Gnosis',             // Display name
+  nativeCurrency: {
+    name: 'xDAI',
+    symbol: 'XDAI',
+    decimals: 18,
+  },
+  rpcUrls: ['https://rpc.gnosischain.com/'],
+  blockExplorerUrls: ['https://gnosisscan.io/'],
+};
+
 // =============  GLOBALS (EXACT COPY FROM GALLERY.JS)  =============
 let provider, signer, contract, contractRead;
 let contractAddr, contractAbi, shutterApi, registryAddr;
@@ -175,8 +190,8 @@ async function connectWallet(manual = false) {
     if (!eth) {
       // fallback to WalletConnect
       const wc = new WalletConnectProvider({
-        rpc: { 100: "https://rpc.gnosischain.com" },
-        chainId: 100
+        rpc: { [CHAIN_CONFIG.chainId]: CHAIN_CONFIG.rpcUrls[0] },
+        chainId: CHAIN_CONFIG.chainId
       });
       await wc.enable();
       eth = wc;
@@ -192,12 +207,12 @@ async function connectWallet(manual = false) {
     signer = provider.getSigner();
     
     const net = await provider.getNetwork();
-    if (net.chainId !== 100) {
-      // Try to switch to Gnosis Chain
+    if (net.chainId !== CHAIN_CONFIG.chainId) {
+      // Try to switch to target chain
       try {
         await eth.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x64' }], // 100 in hex
+          params: [{ chainId: CHAIN_CONFIG.chainIdHex }],
         });
         
         // IMPORTANT: Recreate provider after network switch
@@ -206,8 +221,8 @@ async function connectWallet(manual = false) {
         
         // Verify the switch worked
         const newNet = await provider.getNetwork();
-        if (newNet.chainId !== 100) {
-          throw new Error(`Network switch failed. Expected chain ID 100, got ${newNet.chainId}`);
+        if (newNet.chainId !== CHAIN_CONFIG.chainId) {
+          throw new Error(`Network switch failed. Expected chain ID ${CHAIN_CONFIG.chainId}, got ${newNet.chainId}`);
         }
         
       } catch (switchError) {
@@ -216,15 +231,11 @@ async function connectWallet(manual = false) {
           await eth.request({
             method: 'wallet_addEthereumChain',
             params: [{
-              chainId: '0x64',
-              chainName: 'Gnosis',
-              nativeCurrency: {
-                name: 'xDAI',
-                symbol: 'XDAI',
-                decimals: 18,
-              },
-              rpcUrls: ['https://rpc.gnosischain.com/'],
-              blockExplorerUrls: ['https://gnosisscan.io/'],
+              chainId: CHAIN_CONFIG.chainIdHex,
+              chainName: CHAIN_CONFIG.chainName,
+              nativeCurrency: CHAIN_CONFIG.nativeCurrency,
+              rpcUrls: CHAIN_CONFIG.rpcUrls,
+              blockExplorerUrls: CHAIN_CONFIG.blockExplorerUrls,
             }],
           });
           
@@ -233,7 +244,7 @@ async function connectWallet(manual = false) {
           signer = provider.getSigner();
           
         } else {
-          throw new Error("Please switch to Gnosis Chain (network ID 100) in your wallet");
+          throw new Error(`Please switch to ${CHAIN_CONFIG.chainName} (network ID ${CHAIN_CONFIG.chainId}) in your wallet`);
         }
       }
     }
