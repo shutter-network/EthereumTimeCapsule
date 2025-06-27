@@ -38,6 +38,11 @@ heroku config:set PINATA_JWT="your-actual-jwt-token"
 heroku config:set PINATA_API_KEY="your-actual-api-key"
 heroku config:set PINATA_SECRET_API_KEY="your-actual-secret"
 
+# Set Shutter Network configuration (optional)
+heroku config:set SHUTTER_BEARER_TOKEN="your-actual-bearer-token"
+heroku config:set SHUTTER_API_BASE="https://shutter-api.shutter.network/api"
+heroku config:set SHUTTER_REGISTRY_ADDRESS="0x694e5de9345d39C148DA90e6939A3fd2142267D9"
+
 # Mark as production environment  
 heroku config:set HEROKU=true
 heroku config:set FLASK_ENV=production

@@ -25,6 +25,11 @@ try:
     # Check if we're in production
     IS_PRODUCTION = getattr(config, 'IS_PRODUCTION', False)
     
+    # Import Shutter configuration from config.py
+    SHUTTER_API_BASE = getattr(config, 'SHUTTER_API_BASE', None)
+    SHUTTER_REGISTRY = getattr(config, 'SHUTTER_REGISTRY_ADDRESS', None)
+    SHUTTER_BEARER_TOKEN = getattr(config, 'SHUTTER_BEARER_TOKEN', None)
+    
     # Check for V3 API (JWT) first, then fall back to V2 API
     if PINATA_JWT and PINATA_JWT != "your_pinata_jwt_token_here":
         PINATA_ENABLED = True
@@ -42,7 +47,12 @@ except ImportError:
     PINATA_API_KEY = os.environ.get('PINATA_API_KEY')
     PINATA_SECRET_API_KEY = os.environ.get('PINATA_SECRET_API_KEY')
     PINATA_GATEWAY = os.environ.get('PINATA_GATEWAY', 'https://gateway.pinata.cloud')
-    
+
+    # Shutter configuration from environment variables only
+    SHUTTER_API_BASE = os.environ.get("SHUTTER_API_BASE")
+    SHUTTER_REGISTRY = os.environ.get("SHUTTER_REGISTRY_ADDRESS")
+    SHUTTER_BEARER_TOKEN = os.environ.get("SHUTTER_BEARER_TOKEN")
+
     # Check for V3 API (JWT) first, then fall back to V2 API
     if PINATA_JWT and PINATA_JWT != "your_pinata_jwt_token_here":
         PINATA_ENABLED = True
@@ -56,12 +66,22 @@ except ImportError:
         PINATA_ENABLED = False
         PINATA_VERSION = None
         print("❌ Pinata not configured - no valid credentials found")
-    
+
     # Detect production environment (Heroku provides PORT env var)
     IS_PRODUCTION = os.environ.get('PORT') is not None or os.environ.get('DYNO') is not None
 
-SHUTTER_API_BASE   = os.getenv("SHUTTER_API_BASE", "https://shutter-api.chiado.staging.shutter.network/api")
-SHUTTER_REGISTRY   = os.getenv("SHUTTER_REGISTRY_ADDRESS", "0x2693a4Fb363AdD4356e6b80Ac5A27fF05FeA6D9F")
+# Apply defaults for Shutter configuration if not set
+SHUTTER_API_BASE = SHUTTER_API_BASE or "https://shutter-api.chiado.staging.shutter.network/api"
+SHUTTER_REGISTRY = SHUTTER_REGISTRY or "0x2693a4Fb363AdD4356e6b80Ac5A27fF05FeA6D9F"
+
+# Log Shutter configuration status
+if SHUTTER_BEARER_TOKEN:
+    print("✅ Shutter API bearer token configured")
+else:
+    print("ℹ️ Shutter API bearer token not configured - requests will be unauthenticated")
+print(f"🔗 Shutter API Base: {SHUTTER_API_BASE}")
+print(f"📋 Shutter Registry: {SHUTTER_REGISTRY}")
+
 ONE_YEAR_SECONDS   = 365 * 24 * 60 * 60
 
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
@@ -219,6 +239,13 @@ if 'IMAGE_PROCESSING_CONFIG' not in globals():
         "max_processing_dimension": 800,
         "disable_dithering_on_large_images": True
     }
+
+def get_shutter_headers():
+    """Get headers for Shutter API requests including bearer token if configured"""
+    headers = {'Content-Type': 'application/json'}
+    if SHUTTER_BEARER_TOKEN:
+        headers['Authorization'] = f'Bearer {SHUTTER_BEARER_TOKEN}'
+    return headers
     print("⚠️  Using fallback image processing config")
 
 # ---------- helpers ----------
@@ -406,11 +433,14 @@ def advanced_dither(img):
 def shutter_encrypt(hex_msg, enc_meta):
     """Call the Shutter WebAssembly bundle via CLI bridge (simplest)"""
     # For demo we POST to a helper endpoint Shutter exposes (works for small payloads)
-    r = requests.post(f"{SHUTTER_API_BASE}/encrypt_hex", json={
-        "data": hex_msg,
-        "identity":   enc_meta["identity"],
-        "eon_key":    enc_meta["eon_key"]
-    })
+    r = requests.post(f"{SHUTTER_API_BASE}/encrypt_hex", 
+        json={
+            "data": hex_msg,
+            "identity":   enc_meta["identity"],
+            "eon_key":    enc_meta["eon_key"]
+        },
+        headers=get_shutter_headers()
+    )
     r.raise_for_status()
     return r.json()["ciphertext"]
 
@@ -580,11 +610,13 @@ def submit_capsule():
         # 2) Register Shutter identity
         reveal_ts = int(request.form.get("revealTimestamp") or time.time() + 30)
         identity_prefix = os.urandom(32).hex()
-        reg_resp = requests.post(f"{SHUTTER_API_BASE}/register_identity", json={
-            "decryptionTimestamp": reveal_ts,
-            "identityPrefix": identity_prefix,
-            "registry": SHUTTER_REGISTRY
-        })
+        reg_resp = requests.post(f"{SHUTTER_API_BASE}/register_identity", 
+                                json={
+                                    "decryptionTimestamp": reveal_ts,
+                                    "identityPrefix": identity_prefix,
+                                    "registry": SHUTTER_REGISTRY
+                                },
+                                headers=get_shutter_headers())
         reg_json = reg_resp.json()
         if "message" not in reg_json:
             print("Unexpected Shutter API response:", reg_json)
@@ -594,7 +626,8 @@ def submit_capsule():
         # 3) Fetch encryption data
         enc_meta_resp = requests.get(
             f"{SHUTTER_API_BASE}/get_data_for_encryption",
-            params={"address": SHUTTER_REGISTRY, "identityPrefix": reg["identity_prefix"]}
+            params={"address": SHUTTER_REGISTRY, "identityPrefix": reg["identity_prefix"]},
+            headers=get_shutter_headers()
         )
         enc_meta_json = enc_meta_resp.json()
         if "message" not in enc_meta_json:

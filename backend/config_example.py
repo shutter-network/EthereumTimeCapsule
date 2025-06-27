@@ -20,5 +20,15 @@ PINATA_SECRET_API_KEY = ""
 # If you have a dedicated gateway, enter it here
 PINATA_GATEWAY = ""  # e.g., "https://your-gateway.mypinata.cloud"
 
+# Shutter Network Configuration
+# API base URL (leave empty to use default)
+SHUTTER_API_BASE = ""  # e.g., "https://shutter-api.shutter.network/api"
+
+# Registry contract address (leave empty to use default)
+SHUTTER_REGISTRY_ADDRESS = ""  # e.g., "0x694e5de9345d39C148DA90e6939A3fd2142267D9"
+
+# Bearer token for Shutter API authentication (required for authenticated endpoints)
+SHUTTER_BEARER_TOKEN = ""  # Your actual bearer token
+
 # Note: If you don't want to use Pinata, just leave the keys as they are.
 # The system will automatically detect this and use local storage only.
