@@ -2,7 +2,7 @@ import os, io, time, base64, json, re
 import numpy as np
 from flask import Flask, request, jsonify, send_from_directory, redirect
 from flask_cors import CORS
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageFile
 import requests
 import secrets
 import hashlib
@@ -14,6 +14,10 @@ from database import CapsuleDatabase
 from blockchain_sync import BlockchainSyncService
 
 # Note: S3 storage removed - using IPFS + Pinata only
+
+# Prevent decompression bomb attacks
+ImageFile.LOAD_TRUNCATED_IMAGES = False
+ImageFile.MAX_IMAGE_PIXELS = 4096 * 4096
 
 # Import private config
 try:
