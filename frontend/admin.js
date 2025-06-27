@@ -14,14 +14,8 @@ const WalletConnectProvider = window.WalletConnectProvider.default;
 const CHAIN_CONFIG = {
   chainId: 100,                    // Chain ID as number
   chainIdHex: '0x64',              // Chain ID in hex format
-  chainName: 'Gnosis',             // Display name
-  nativeCurrency: {
-    name: 'xDAI',
-    symbol: 'XDAI',
-    decimals: 18,
-  },
-  rpcUrls: ['https://rpc.gnosischain.com/'],
-  blockExplorerUrls: ['https://gnosisscan.io/'],
+  chainName: 'Gnosis',             // Display name (for error messages)
+  rpcUrl: 'https://rpc.gnosischain.com', // RPC endpoint
 };
 
 // =============  GLOBALS (EXACT COPY FROM GALLERY.JS)  =============
@@ -190,7 +184,7 @@ async function connectWallet(manual = false) {
     if (!eth) {
       // fallback to WalletConnect
       const wc = new WalletConnectProvider({
-        rpc: { [CHAIN_CONFIG.chainId]: CHAIN_CONFIG.rpcUrls[0] },
+        rpc: { [CHAIN_CONFIG.chainId]: CHAIN_CONFIG.rpcUrl },
         chainId: CHAIN_CONFIG.chainId
       });
       await wc.enable();
@@ -226,26 +220,7 @@ async function connectWallet(manual = false) {
         }
         
       } catch (switchError) {
-        if (switchError.code === 4902) {
-          // Chain not added, try to add it
-          await eth.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: CHAIN_CONFIG.chainIdHex,
-              chainName: CHAIN_CONFIG.chainName,
-              nativeCurrency: CHAIN_CONFIG.nativeCurrency,
-              rpcUrls: CHAIN_CONFIG.rpcUrls,
-              blockExplorerUrls: CHAIN_CONFIG.blockExplorerUrls,
-            }],
-          });
-          
-          // Recreate provider after adding network
-          provider = new ethers.providers.Web3Provider(eth);
-          signer = provider.getSigner();
-          
-        } else {
-          throw new Error(`Please switch to ${CHAIN_CONFIG.chainName} (network ID ${CHAIN_CONFIG.chainId}) in your wallet`);
-        }
+        throw new Error(`Please switch to ${CHAIN_CONFIG.chainName} (network ID ${CHAIN_CONFIG.chainId}) in your wallet. If you don't have this network, please add it manually.`);
       }
     }
     
