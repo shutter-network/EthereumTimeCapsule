@@ -1171,6 +1171,8 @@ async function submitToChain() {
       shutterIdentity: capsuleData.encryptionData.shutterIdentity,
       imageCID: capsuleData.encryptionData.imageCID,
       pixelatedImageCID: capsuleData.encryptionData.pixelatedCid || "" // Pixelated image CID
+    }, {
+      value: ethers.utils.parseEther("0.001") // 0.001 ether fee
     });
     
     console.log('✅ Transaction created:', tx);
