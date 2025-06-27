@@ -246,7 +246,7 @@ async function previewCapsuleStory() {
   const capsuleIdInput = document.getElementById('preview-capsule-id');
   const capsuleId = parseInt(capsuleIdInput.value);
   
-  if (!capsuleId || capsuleId < 1) {
+  if (isNaN(capsuleId) || capsuleId < 0) {
     logOutput('❌ Please enter a valid capsule ID');
     return;
   }
@@ -306,7 +306,7 @@ async function revealCapsuleForever() {
   const capsuleIdInput = document.getElementById('reveal-capsule-id');
   const capsuleId = parseInt(capsuleIdInput.value);
   
-  if (!capsuleId || capsuleId < 1) {
+  if (isNaN(capsuleId) || capsuleId < 0) {
     logOutput('❌ Please enter a valid capsule ID');
     return;
   }
@@ -384,7 +384,7 @@ async function shareCapsule() {
   const capsuleIdInput = document.getElementById('share-capsule-id');
   const capsuleId = parseInt(capsuleIdInput.value);
   
-  if (!capsuleId || capsuleId < 1) {
+  if (isNaN(capsuleId) || capsuleId < 0) {
     logOutput('❌ Please enter a valid capsule ID');
     return;
   }
