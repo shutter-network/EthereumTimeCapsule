@@ -60,7 +60,7 @@ except ImportError:
     # Detect production environment (Heroku provides PORT env var)
     IS_PRODUCTION = os.environ.get('PORT') is not None or os.environ.get('DYNO') is not None
 
-SHUTTER_API_BASE   = "https://shutter-api.chiado.staging.shutter.network/api"
+SHUTTER_API_BASE   = os.getenv("SHUTTER_API_BASE", "https://shutter-api.chiado.staging.shutter.network/api")
 SHUTTER_REGISTRY   = os.getenv("SHUTTER_REGISTRY_ADDRESS", "0x2693a4Fb363AdD4356e6b80Ac5A27fF05FeA6D9F")
 ONE_YEAR_SECONDS   = 365 * 24 * 60 * 60
 
