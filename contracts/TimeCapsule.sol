@@ -28,6 +28,10 @@ contract TimeCapsule {
     mapping(uint256 => Capsule) public capsules;
     uint256 public capsuleCount;
 
+    // Fee configuration
+    uint256 public constant COMMIT_FEE = 0.001 ether;
+    address public beneficiary;
+
     event CapsuleCreated(
         uint256 indexed id,
         address indexed creator,
@@ -43,6 +47,17 @@ contract TimeCapsule {
         address indexed revealer,
         string plaintextStory
     );
+    event FeeWithdrawn(address indexed beneficiary, address indexed to, uint256 amount);
+
+    modifier onlyBeneficiary() {
+        require(msg.sender == beneficiary, "Only beneficiary can call this function");
+        _;
+    }
+
+    constructor(address _beneficiary) {
+        require(_beneficiary != address(0), "Beneficiary cannot be zero address");
+        beneficiary = _beneficiary;
+    }
 
     /**
      * @dev Commit a new time capsule with encrypted content.
@@ -50,7 +65,9 @@ contract TimeCapsule {
      */
     function commitCapsule(CapsuleData calldata data)
         external
+        payable
     {
+        require(msg.value == COMMIT_FEE, "Must pay exactly 0.001 ether to commit a capsule");
         require(data.revealTime > block.timestamp, "Reveal time must be in the future");
         // (Optional) enforce roughly one-year lockup:
         // require(data.revealTime >= block.timestamp + 365 days, "Reveal time must be ~1 year out");
@@ -85,6 +102,21 @@ contract TimeCapsule {
         c.decryptedStory = _plaintext;
         c.isRevealed = true;
         emit CapsuleRevealed(_id, msg.sender, _plaintext);
+    }
+
+    /**
+     * @dev Withdraw collected fees. Only callable by the beneficiary.
+     * @param to The address to send the withdrawn fees to.
+     */
+    function withdrawFees(address to) external onlyBeneficiary {
+        require(to != address(0), "Cannot withdraw to zero address");
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No fees to withdraw");
+
+        (bool success, ) = payable(to).call{value: balance}("");
+        require(success, "Failed to withdraw fees");
+
+        emit FeeWithdrawn(beneficiary, to, balance);
     }
 
     // (Optional) a helper to retrieve capsule data in one go
