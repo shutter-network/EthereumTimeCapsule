@@ -30,5 +30,9 @@ SHUTTER_REGISTRY_ADDRESS = ""  # e.g., "0x694e5de9345d39C148DA90e6939A3fd2142267
 # Bearer token for Shutter API authentication (required for authenticated endpoints)
 SHUTTER_BEARER_TOKEN = ""  # Your actual bearer token
 
+# Image Upload Configuration
+# Maximum image file size in megabytes (default: 10MB)
+MAX_IMAGE_SIZE_MB = 10
+
 # Note: If you don't want to use Pinata, just leave the keys as they are.
 # The system will automatically detect this and use local storage only.

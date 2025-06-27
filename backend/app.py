@@ -29,7 +29,10 @@ try:
     SHUTTER_API_BASE = getattr(config, 'SHUTTER_API_BASE', None)
     SHUTTER_REGISTRY = getattr(config, 'SHUTTER_REGISTRY_ADDRESS', None)
     SHUTTER_BEARER_TOKEN = getattr(config, 'SHUTTER_BEARER_TOKEN', None)
-    
+
+    # Import image upload configuration from config.py
+    MAX_IMAGE_SIZE_MB = getattr(config, 'MAX_IMAGE_SIZE_MB', None)
+
     # Check for V3 API (JWT) first, then fall back to V2 API
     if PINATA_JWT and PINATA_JWT != "your_pinata_jwt_token_here":
         PINATA_ENABLED = True
@@ -53,6 +56,9 @@ except ImportError:
     SHUTTER_REGISTRY = os.environ.get("SHUTTER_REGISTRY_ADDRESS")
     SHUTTER_BEARER_TOKEN = os.environ.get("SHUTTER_BEARER_TOKEN")
 
+    # Image upload configuration from environment variables only
+    MAX_IMAGE_SIZE_MB = os.environ.get('MAX_IMAGE_SIZE_MB')
+
     # Check for V3 API (JWT) first, then fall back to V2 API
     if PINATA_JWT and PINATA_JWT != "your_pinata_jwt_token_here":
         PINATA_ENABLED = True
@@ -74,6 +80,9 @@ except ImportError:
 SHUTTER_API_BASE = SHUTTER_API_BASE or "https://shutter-api.chiado.staging.shutter.network/api"
 SHUTTER_REGISTRY = SHUTTER_REGISTRY or "0x2693a4Fb363AdD4356e6b80Ac5A27fF05FeA6D9F"
 
+# Apply defaults for image upload configuration if not set
+MAX_IMAGE_SIZE_MB = MAX_IMAGE_SIZE_MB or int(os.environ.get('MAX_IMAGE_SIZE_MB', 10))  # Default 10MB
+
 # Log Shutter configuration status
 if SHUTTER_BEARER_TOKEN:
     print("✅ Shutter API bearer token configured")
@@ -82,9 +91,16 @@ else:
 print(f"🔗 Shutter API Base: {SHUTTER_API_BASE}")
 print(f"📋 Shutter Registry: {SHUTTER_REGISTRY}")
 
+# Log image upload configuration
+print(f"📁 Max image size: {MAX_IMAGE_SIZE_MB}MB")
+
 ONE_YEAR_SECONDS   = 365 * 24 * 60 * 60
 
+# Image upload configuration (converted to bytes)
+MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024
+
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
+app.config["MAX_CONTENT_LENGTH"] = MAX_IMAGE_SIZE_BYTES  # Set max upload size in bytes
 CORS(app, origins=["http://localhost:8080", "http://localhost:5000", "https://ethereum-time-capsule-luis-e873bebc232f.herokuapp.com"] if not IS_PRODUCTION else ["*"])
 
 # Frontend routes for production deployment
