@@ -83,7 +83,6 @@ let capsuleData = {
   tags: '',
   story: '',
   image: null,
-  userName: '',
   encryptionData: null,
   txHash: null,
   capsuleId: null
@@ -486,14 +485,13 @@ function showError(message) {
 
 // =============  STEP 1: FILL ENTRY  =============
 function validateStep1() {
-  const userName = document.getElementById('entry-title').value.trim(); // Your name
-  const entryTitle = document.getElementById('entry-tags').value.trim(); // Title of your entry  
+  const entryTitle = document.getElementById('entry-title').value.trim(); // Title of your entry  
   const story = document.getElementById('entry-story').value.trim();
   const tags = document.getElementById('entry-actual-tags').value.trim(); // Actual tags
   const image = document.getElementById('entry-image').files[0];
   
-  if (!userName || !entryTitle || !story) {
-    alert('Please fill in all required fields (name, title, and story). Image is optional.');
+  if (!entryTitle || !story) {
+    alert('Please fill in all required fields (title and story). Image and tags are optional.');
     return false;
   }
   
@@ -504,13 +502,12 @@ function validateStep1() {
   }
   
   // Sanitize all text inputs to prevent XSS
-  const sanitizedUserName = sanitizeInput(userName);
   const sanitizedEntryTitle = sanitizeInput(entryTitle);
   const sanitizedStory = sanitizeInput(story);
   const sanitizedTags = sanitizeInput(tags);
   
   // Check if sanitization changed the input (potential XSS attempt)
-  if (sanitizedUserName !== userName || sanitizedEntryTitle !== entryTitle || 
+  if (sanitizedEntryTitle !== entryTitle || 
       sanitizedStory !== story || sanitizedTags !== tags) {
     alert('Invalid characters detected in input. Please remove any HTML tags or script content.');
     return false;
@@ -521,7 +518,6 @@ function validateStep1() {
   capsuleData.tags = sanitizedTags || sanitizedEntryTitle;  // Use actual tags if provided, otherwise use title
   capsuleData.story = sanitizedStory;
   capsuleData.image = image; // Can be null if no image is uploaded
-  capsuleData.userName = sanitizedUserName;    // Store the user name separately
   
   return true;
 }
@@ -789,8 +785,17 @@ function populatePreview() {
   // Update the title (this is the actual entry title)
   document.getElementById('preview-title').textContent = capsuleData.title;
   
-  // Update the issuer (this is the user's name)
-  document.getElementById('preview-issuer').textContent = capsuleData.userName;
+  // Update the issuer (use wallet address)
+  if (signer) {
+    signer.getAddress().then(address => {
+      const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+      document.getElementById('preview-issuer').textContent = truncatedAddress;
+    }).catch(() => {
+      document.getElementById('preview-issuer').textContent = 'anonymous';
+    });
+  } else {
+    document.getElementById('preview-issuer').textContent = 'anonymous';
+  }
   // Update unlock date (configurable reveal time)
   const revealTimeSeconds = REVEAL_TIME_CONFIG[REVEAL_TIME_CONFIG.current];
   const unlockDate = new Date();
@@ -1226,7 +1231,18 @@ async function submitToChain() {
 function populateCompletion() {
   // Update the preview card with final data
   document.getElementById('final-preview-title').textContent = capsuleData.title;
-  document.getElementById('final-preview-issuer').textContent = capsuleData.userName;
+  
+  // Update the issuer (use wallet address)
+  if (signer) {
+    signer.getAddress().then(address => {
+      const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+      document.getElementById('final-preview-issuer').textContent = truncatedAddress;
+    }).catch(() => {
+      document.getElementById('final-preview-issuer').textContent = 'anonymous';
+    });
+  } else {
+    document.getElementById('final-preview-issuer').textContent = 'anonymous';
+  }
   // Update unlock date
   const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
   const revealTimeSeconds = REVEAL_TIME_CONFIG[REVEAL_TIME_CONFIG.current];
@@ -1391,7 +1407,7 @@ let generatedImageBlob = null;
 function generateCapsuleImage() {
   console.log('🎨 Starting preview-style image generation...');
   
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     try {
       // Get the canvas element from the final preview
       const canvas = document.getElementById('final-preview-canvas');
@@ -1471,7 +1487,16 @@ function generateCapsuleImage() {
       downloadCtx.shadowBlur = 0;
       downloadCtx.shadowOffsetY = 0;
         // 2. Issuer overlay on image (matching exact style, with proper width constraints)
-      const issuerText = `issued by ${capsuleData.userName || 'anonymous'}`;
+      let issuerText = 'issued by anonymous';
+      if (signer) {
+        try {
+          const address = await signer.getAddress();
+          const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+          issuerText = `issued by ${truncatedAddress}`;
+        } catch (error) {
+          console.log('Could not get wallet address, using anonymous');
+        }
+      }
       
       // Set font first to measure text properly
       downloadCtx.font = '12px system-ui, -apple-system, sans-serif';
@@ -1775,7 +1800,6 @@ function encryptAnotherEntry() {
     tags: '',
     story: '',
     image: null,
-    userName: '',
     encryptionData: null,
     txHash: null,
     capsuleId: null
@@ -1990,6 +2014,28 @@ async function uploadToIPFS(hexData) {
   return res.data;
 }
 
+// Helper function to get current wallet address
+async function getCurrentWalletAddress() {
+  if (!signer) {
+    return 'anonymous';
+  }
+  try {
+    const address = await signer.getAddress();
+    return address;
+  } catch (error) {
+    console.error('Error getting wallet address:', error);
+    return 'anonymous';
+  }
+}
+
+// Helper function to truncate wallet address for display
+function truncateAddress(address) {
+  if (!address || address === 'anonymous') {
+    return 'anonymous';
+  }
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
 // =============  INITIALIZATION  =============
 window.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -2138,8 +2184,7 @@ function setupEventListeners() {
 // Setup XSS protection for form inputs
 function setupXSSProtection() {
   const textInputs = [
-    'entry-title',    // Your name
-    'entry-tags',     // Entry title
+    'entry-title',    // Entry title
     'entry-story'     // Story content
   ];
   
