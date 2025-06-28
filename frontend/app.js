@@ -1848,14 +1848,12 @@ function initTagsDropdown() {
         selectedTags = selectedTags.filter(tag => tag !== tagName);
         e.target.classList.remove('selected');
       } else {
-        // Add tag (limit to 5)
-        if (selectedTags.length < 5) {
+        // Add tag (limit to 2)
+        if (selectedTags.length < 2) {
           selectedTags.push(tagName);
           e.target.classList.add('selected');
-        } else {
-          alert('You can select up to 5 tags maximum.');
-          return;
         }
+        // If limit reached, silently ignore the click (no alert)
       }
       
       updateSelectedTagsDisplay(selectedTags, selectedTagsContainer, hiddenInput);
