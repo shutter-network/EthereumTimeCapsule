@@ -11,7 +11,7 @@ from html import escape
 
 # Import database and blockchain sync
 from database import CapsuleDatabase
-from blockchain_sync import BlockchainSyncService
+from blockchain_sync_events import EventBasedBlockchainSyncService
 
 # Note: S3 storage removed - using IPFS + Pinata only
 
@@ -229,20 +229,20 @@ try:    # Handle different working directories (local vs Heroku)
     default_network = config_data.get("default_network", "testnet")
     network_config = config_data[default_network]
     
-    # Initialize blockchain sync service
-    sync_service = BlockchainSyncService(
+    # Initialize event-based blockchain sync service  
+    sync_service = EventBasedBlockchainSyncService(
         rpc_url=network_config["rpc_url"],
         contract_address=network_config["contract_address"],
         contract_abi=contract_abi,
         db=db
     )
     
-    print(f"📊 Database initialized, blockchain sync ready for {network_config['contract_address']}")
+    print(f"📊 Database initialized, ultra-optimized event-based sync ready for {network_config['contract_address']}")
     
     # Start sync service automatically
-    print("🔄 Starting blockchain sync service...")
+    print("🔄 Starting ultra-optimized blockchain sync service...")
     sync_service.start_sync()
-    print("✅ Blockchain sync service started")
+    print("✅ Ultra-optimized blockchain sync service started (zero RPC calls!)")
     
 except Exception as e:
     print(f"⚠️  Warning: Could not initialize blockchain sync: {e}")
