@@ -240,10 +240,19 @@ class EventBasedBlockchainSyncService:
                 toBlock=to_block
             )
             
+            logger.info(f"DEBUG: Raw events found: {len(events)} for {event_filter}")
+            if len(events) > 0:
+                logger.info(f"DEBUG: First event: {events[0]}")
+                if hasattr(events[0], 'args'):
+                    logger.info(f"DEBUG: First event args: {events[0].args}")
+            
             return sorted(events, key=lambda x: (x['blockNumber'], x['transactionIndex']))
             
         except Exception as e:
             logger.error(f"Error fetching events from {from_block} to {to_block}: {e}")
+            logger.error(f"Event filter: {event_filter}")
+            import traceback
+            logger.error(f"Full traceback: {traceback.format_exc()}")
             return []
     
     def _process_capsule_created_event(self, event: AttributeDict) -> bool:
@@ -259,6 +268,14 @@ class EventBasedBlockchainSyncService:
         try:
             args = event['args']
             capsule_id = args['id']
+            
+            logger.info(f"DEBUG: Processing CapsuleCreated event {capsule_id}")
+            logger.info(f"DEBUG: Event args keys: {list(args.keys())}")
+            
+            # Check if encryptedStory exists in the event
+            if 'encryptedStory' not in args:
+                logger.error(f"DEBUG: encryptedStory not found in event args! Available: {list(args.keys())}")
+                return False
             
             # All data is now available in the event - NO blockchain calls needed!
             # This achieves true zero-RPC event-based syncing
