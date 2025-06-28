@@ -64,10 +64,17 @@
       padding: 0;
     }
 
+    /* Global overflow control */
+    html, body {
+      overflow-x: hidden;
+    }
+
     body {
       font-family: var(--eth1-font-family);
       background: var(--eth1);
       color: var(--eth3);
+      margin: 0;
+      padding: 0;
     }
 
     /* Main container */
@@ -411,23 +418,14 @@
       justify-content: center;
     }    /* New section styles */
     .section-container {
-      background: var(--eth2);
-      border-radius: 16px;
-      padding: 24px;
+      padding: 0 40px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 24px;
       align-items: center;
       justify-content: center;
       width: 100%;
-      max-width: 400px;
-      margin: 00px auto 40px auto;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .section-container:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      flex: 1;
     }
 
     .section-visual {
@@ -689,7 +687,7 @@
       }
 
       .section-container {
-        padding: 16px;
+        padding: 0 20px;
       }
 
       .section-heading {
@@ -734,6 +732,13 @@
 
     .learn-more:hover {
       text-decoration: underline;
+    }
+
+    /* Full-width section images */
+    .section-image {
+      width: 100%;
+      padding: 0px 40px 20px 20px;
+      margin-bottom: 30px;
     }
 
     @media (min-width: 768px) {
@@ -784,72 +789,52 @@
       <a href="/create.html" class="button-add-your-entry">
         <div class="add-your-entry">add your entry</div>
       </a>
+
+      <img class="section-image" src="open.png"></img>
       
       <!-- Open to all section -->
       <div class="section-container">
-        <div class="section-visual">
-          <div class="visual-placeholder large">
-            <div class="visual-item"></div>
-            <div class="visual-item small"></div>
-          </div>
+        <div class="section-heading">Open to all</div>
+        <div class="section-text">
+          Every builder, user, artist, and dreamer is invited to leave their mark. Stories of triumph, failure, growth, and evolution. Drops, timeless memes, project skills, visions for Ethereum's future — even love letters to what makes blockchain unlock new future.
         </div>
-        
-        <div class="section-content">
-          <div class="section-heading">Open to all</div>
-          <div class="section-text">
-            Every builder, user, artist, and dreamer is invited to leave their mark. Stories of triumph, failure, growth, and evolution. Drops, timeless memes, project skills, visions for Ethereum's future — even love letters to what makes blockchain unlock new future.
-          </div>
-          <a href="/gallery.html" class="button-secondary">
-            <div class="button-text">see submissions</div>
-          </a>
-        </div>
+        <a href="/gallery.html" class="button-secondary">
+          <div class="button-text">see submissions</div>
+        </a>
       </div>
+
+      <!-- Full-width image after "Open to all" -->
+      <img class="section-image" src="how.png"></img>
       
       <!-- How it works section -->
       <div class="section-container">
-        <div class="section-visual">
-          <div class="visual-placeholder medium">
-            <div class="visual-grid">
-              <div class="grid-item"></div>
-              <div class="grid-item"></div>
-              <div class="grid-item"></div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="section-content">
-          <div class="section-heading">How it works</div>
-          <ul class="section-list">
-            <li>Entries are submitted immediately</li>
-            <li>Sealed until July 30, 2025</li>
-            <li>Submissions are sealed with Shutter Ditto ⚡ encrypted encryption</li>
-          </ul>
-          <a href="#" class="button-secondary">
-            <div class="button-text">learn about shutter API</div>
-          </a>
-        </div>
+        <div class="section-heading">How it works</div>
+        <ul class="section-list">
+          <li>Entries are submitted immediately</li>
+          <li>Sealed until July 30, 2025</li>
+          <li>Submissions are sealed with Shutter Ditto ⚡ encrypted encryption</li>
+        </ul>
+        <a href="#" class="button-secondary">
+          <div class="button-text">learn about shutter API</div>
+        </a>
       </div>
+
+      <!-- Full-width image after "How it works" -->
+      <img class="section-image" src="fee.png"></img>
       
       <!-- Small fee section -->
       <div class="section-container">
-        <div class="section-visual">
-          <div class="visual-placeholder small-circles">
-            <div class="circle-top"></div>
-            <div class="circle-bottom-left"></div>
-            <div class="circle-bottom-right"></div>
-          </div>
+        <div class="section-heading">A small fee, a big impact</div>
+        <div class="section-text fee-text">
+          Each submission costs 0.001 ETH (~$2.62)
         </div>
-        
-        <div class="section-content">
-          <div class="section-heading">A small fee, a big impact</div>
-          <div class="section-text fee-text">
-            Each submission costs 0.001 ETH (~$2.62)
-          </div>
-          <div class="section-text">
-            All funds go to Protocol Guild, supporting the core developers who keep advancing and securing Ethereum.
-          </div>
+        <div class="section-text">
+          All funds go to Protocol Guild, supporting the core developers who keep advancing and securing Ethereum.
         </div>
       </div>
+
+      <!-- Full-width image after "A small fee, a big impact" -->
+      <img class="section-image" src="ready.png"></img>
       
       <!-- Final CTA section -->
       <div class="section-container final-cta">
@@ -862,6 +847,8 @@
           </a>
         </div>
       </div>
+
+      <!-- Full-width image after final CTA -->
     </div>
 
     <!-- Footer -->
