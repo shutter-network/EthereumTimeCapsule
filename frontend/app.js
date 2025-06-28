@@ -1487,17 +1487,8 @@ function generateCapsuleImage() {
       downloadCtx.shadowBlur = 0;
       downloadCtx.shadowOffsetY = 0;
         // 2. Issuer overlay on image (matching exact style, with proper width constraints)
-      let issuerText = 'issued by anonymous';
-      if (signer) {
-        try {
-          const address = await signer.getAddress();
-          const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
-          issuerText = `issued by ${truncatedAddress}`;
-        } catch (error) {
-          console.log('Could not get wallet address, using anonymous');
-        }
-      }
-      
+      let issuerText = 'issued by you';
+
       // Set font first to measure text properly
       downloadCtx.font = '12px system-ui, -apple-system, sans-serif';
       const textWidth = downloadCtx.measureText(issuerText).width;
