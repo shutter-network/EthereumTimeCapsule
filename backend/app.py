@@ -229,15 +229,20 @@ try:    # Handle different working directories (local vs Heroku)
     default_network = config_data.get("default_network", "testnet")
     network_config = config_data[default_network]
     
+    # Get start block configuration (optional)
+    start_block = network_config.get("start_block", 0)
+    
     # Initialize event-based blockchain sync service  
     sync_service = EventBasedBlockchainSyncService(
         rpc_url=network_config["rpc_url"],
         contract_address=network_config["contract_address"],
         contract_abi=contract_abi,
-        db=db
+        db=db,
+        start_block=start_block
     )
     
     print(f"📊 Database initialized, ultra-optimized event-based sync ready for {network_config['contract_address']}")
+    print(f"🔄 Sync configured to start from block {start_block} (0 = genesis)")
     
     # Start sync service automatically
     print("🔄 Starting ultra-optimized blockchain sync service...")

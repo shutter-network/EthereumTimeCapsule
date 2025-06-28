@@ -37,7 +37,7 @@ class EventBasedBlockchainSyncService:
     - Perfect separation of concerns
     - Ultimate blockchain optimization achieved
     """
-    def __init__(self, rpc_url: str, contract_address: str, contract_abi: list, db: CapsuleDatabase):
+    def __init__(self, rpc_url: str, contract_address: str, contract_abi: list, db: CapsuleDatabase, start_block: int = 0):
         """
         Initialize event-based blockchain sync service
         
@@ -46,11 +46,13 @@ class EventBasedBlockchainSyncService:
             contract_address: TimeCapsule contract address  
             contract_abi: Contract ABI definition
             db: Database instance for storing capsule data
+            start_block: Block number to start syncing from (default: 0, use contract deployment block for efficiency)
         """
         self.rpc_url = rpc_url
         self.contract_address = contract_address
         self.contract_abi = contract_abi
         self.db = db
+        self.start_block = start_block
         
         # Initialize Web3 connection
         self.w3 = Web3(Web3.HTTPProvider(rpc_url))
@@ -74,6 +76,7 @@ class EventBasedBlockchainSyncService:
         self.capsule_revealed_event = self.contract.events.CapsuleRevealed
         
         logger.info(f"Event-based blockchain sync service initialized for contract {contract_address}")
+        logger.info(f"Sync will start from block {self.start_block} (0 = genesis, >0 = custom start block)")
     
     def start_sync(self):
         """Start the periodic synchronization in a background thread"""
@@ -130,7 +133,8 @@ class EventBasedBlockchainSyncService:
             sync_status = self.db.get_sync_status()
             
             # Determine the range to sync
-            from_block = sync_status.get('last_synced_block', 0) + 1
+            last_synced = sync_status.get('last_synced_block', self.start_block - 1)
+            from_block = max(last_synced + 1, self.start_block)  # Never go below start_block
             to_block = min(current_block, from_block + self._batch_size - 1)
             
             sync_result["from_block"] = from_block
@@ -409,7 +413,9 @@ class EventBasedBlockchainSyncService:
                 "sync_drift": blockchain_capsules - database_capsules,
                 "recent_errors": sync_status.get('sync_errors', ''),
                 "sync_interval": self._sync_interval,
-                "batch_size": self._batch_size
+                "batch_size": self._batch_size,
+                "start_block": self.start_block,
+                "blocks_processed": max(0, sync_status.get('last_synced_block', 0) - self.start_block + 1)
             }
             
         except Exception as e:
@@ -421,15 +427,60 @@ class EventBasedBlockchainSyncService:
     
     def resync_from_genesis(self) -> Dict[str, Any]:
         """
-        Resync all events from the contract deployment block
-        WARNING: This will clear existing data and resync everything
+        Resync all events from the configured start block
+        WARNING: This will reset sync status and resync everything
         """
-        logger.warning("Starting full resync from genesis - this may take a while")
+        logger.warning(f"Starting full resync from block {self.start_block} - this may take a while")
         
-        # Reset sync status
-        self.db.update_sync_status(last_block=0, total_capsules=0, errors='')
+        # Reset sync status to start block - 1 (so next sync starts from start_block)
+        self.db.update_sync_status(last_block=self.start_block - 1, total_capsules=0, errors='')
         
         # Clear existing capsule data (optional - you might want to keep it)
         # self.db.clear_all_capsules()
         
         return self.sync_events()
+    
+    def resync_from_block(self, block_number: int) -> Dict[str, Any]:
+        """
+        Resync all events from a specific block number
+        
+        Args:
+            block_number: Block number to start resyncing from
+            
+        Returns:
+            Sync results dictionary
+        """
+        logger.warning(f"Starting resync from block {block_number}")
+        
+        # Update start block temporarily for this resync
+        old_start_block = self.start_block
+        self.start_block = block_number
+        
+        # Reset sync status to block_number - 1 (so next sync starts from block_number)
+        self.db.update_sync_status(last_block=block_number - 1, total_capsules=0, errors='')
+        
+        try:
+            result = self.sync_events()
+            return result
+        finally:
+            # Restore original start block
+            self.start_block = old_start_block
+    
+    def set_start_block(self, block_number: int):
+        """
+        Update the start block number for future syncs
+        
+        Args:
+            block_number: New start block number
+        """
+        logger.info(f"Updating start block from {self.start_block} to {block_number}")
+        self.start_block = block_number
+    
+    def get_start_block(self) -> int:
+        """
+        Get the current start block number
+        
+        Returns:
+            Current start block number
+        """
+        return self.start_block
