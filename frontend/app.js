@@ -1930,7 +1930,13 @@ function populateTagsFromConfig() {
     'present': '🎁',
     'past': '📜',
     'hope': '🌈',
-    'gratitude': '🙏'
+    'gratitude': '🙏',
+    'BUIDL': '🦾',
+    'DearFutureMe': '🙌',
+    'LFG': '🚀',
+    'OnChainValues': '🫶',
+    'shill': '😎',
+    'lol': '🤣',
   };
   
   // Clear existing options
