@@ -1747,8 +1747,15 @@ function followOnX() {
 
 function shareOnX() {
   const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
-  const text = `I just created a time capsule on Ethereum! 🕰️✨ It will unlock on ${unlockDate.toLocaleString()}`;
   const shareUrl = `${window.location.origin}/gallery.html?capsule=${capsuleData.capsuleId}`;
+  const formattedDate = unlockDate.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+  const text = `I just created an entry on the @EthTimeCapsule 🕰️✨ It will be revealed on ${formattedDate}.
+
+View my encrypted entry and create your own: ${shareUrl}`;
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
     // Generate image and auto-copy to clipboard, then open Twitter
   generateCapsuleImage().then(async (blob) => {
