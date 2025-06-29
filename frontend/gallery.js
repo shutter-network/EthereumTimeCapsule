@@ -17,6 +17,8 @@ const CHAIN_CONFIG = {
   rpcUrl: 'https://eth-mainnet.g.alchemy.com/v2/kDge5GGs1WZE7tiYVnE3E', // RPC endpoint
 };
 
+const ensProvider = new ethers.providers.JsonRpcProvider(CHAIN_CONFIG.rpcUrl);
+
 // =============  GLOBALS  =============
 let provider, signer, contract, contractRead;
 let contractAddr, contractAbi, shutterApi, registryAddr;
@@ -475,7 +477,7 @@ async function loadCapsules() {
     }
     
     // Render capsules
-    renderCapsules(filteredCapsules);
+    await renderCapsules(filteredCapsules);
     
     // Update pagination
     if (!currentSearch) {
@@ -514,16 +516,16 @@ function loadMoreCapsules() {
 }
 
 // =============  RENDER CAPSULES  =============
-function renderCapsules(capsules) {
+async function renderCapsules(capsules) {
   const grid = document.getElementById('capsules-grid');
   
-  capsules.forEach(capsule => {
-    const capsuleCard = createCapsuleCard(capsule);
+  capsules.forEach(async capsule => {
+    const capsuleCard = await createCapsuleCard(capsule);
     grid.appendChild(capsuleCard);
   });
 }
 
-function createCapsuleCard(capsule) {
+async function createCapsuleCard(capsule) {
   const card = document.createElement('div');
   card.className = 'capsule-card-gallery';
   card.setAttribute('data-capsule-id', capsule.id); // Add unique identifier
@@ -536,7 +538,18 @@ function createCapsuleCard(capsule) {
   
   const isRevealed = capsule.isRevealed;
   const revealTime = new Date(capsule.revealTime * 1000);
-  const creator = `${capsule.creator.slice(0, 6)}...${capsule.creator.slice(-4)}`;
+  let creator;
+  try {
+    const ensName = await ensProvider.lookupAddress(capsule.creator);
+    if (ensName !== null) {
+      creator = ensName;
+    }
+  } catch (e) {
+    console.error("failed to lookup ENS name", e);
+  }
+  if (!creator) {
+    creator = `${capsule.creator.slice(0, 6)}...${capsule.creator.slice(-4)}`;
+  }
   
   // Process tags into clickable chips using the exact same format as preview card
   const tags = capsule.tags ? capsule.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
@@ -892,7 +905,7 @@ async function loadDirectCapsule(capsuleId) {
     const gallery = document.getElementById('capsules-grid');
     if (gallery) {
       gallery.innerHTML = '';
-      displayCapsule(capsule);
+      await displayCapsule(capsule);
       
       // Update page title to reflect the specific capsule
       document.title = `Time Capsule: ${capsule.title} - Ethereum Time Capsule`;
@@ -918,11 +931,11 @@ async function loadDirectCapsule(capsuleId) {
 }
 
 // Helper function to display a single capsule (extracted from existing code)
-function displayCapsule(capsule) {
+async function displayCapsule(capsule) {
   const gallery = document.getElementById('capsules-grid');
   if (!gallery) return;
   
   // Create capsule card using the existing capsule rendering logic
-  const capsuleCard = createCapsuleCard(capsule);
+  const capsuleCard = await createCapsuleCard(capsule);
   gallery.appendChild(capsuleCard);
 }
