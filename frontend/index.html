@@ -1057,6 +1057,7 @@
       thumbnail.className = 'intro-thumbnail';
       
       let creator;
+      const ensProvider = new ethers.providers.JsonRpcProvider('https://eth-mainnet.g.alchemy.com/v2/kDge5GGs1WZE7tiYVnE3E');
       try {
         const ensName = await ensProvider.lookupAddress(capsule.creator);
         if (ensName !== null) {
