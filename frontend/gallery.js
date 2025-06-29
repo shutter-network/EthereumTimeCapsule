@@ -367,7 +367,13 @@ function renderTagFilters() {
     'present': '🎁',
     'past': '📜',
     'hope': '🌈',
-    'gratitude': '🙏'
+    'gratitude': '🙏',
+    'BUIDL': '🦾',
+    'DearFutureMe': '🙌',
+    'LFG': '🚀',
+    'OnChainValues': '🫶',
+    'shill': '😎',
+    'lol': '🤣',
   };
   
   availableTags.forEach(({ name }) => {
