@@ -709,7 +709,7 @@
 
     /* Footer - consistent with create.html */
     .footer {
-      background: var(--eth2);
+      background: #D5D6F5;
       padding: 18px;
       display: flex;
       flex-direction: column;
@@ -717,21 +717,21 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      height: 58px;
+      min-height: 58px;
     }
 
-    .learn-more {
-      color: #000000;
-      text-align: center;
-      font-family: var(--eth1-font-family);
-      font-size: var(--eth1-font-size);
-      font-weight: var(--eth1-font-weight);
-      cursor: pointer;
-      text-decoration: none;
+    .footer-logos {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 25px;
+      margin-top: 15px;
+      margin-bottom: 15px;
     }
 
-    .learn-more:hover {
-      text-decoration: underline;
+    .footer-logo {
+      height: 80px;
+      width: auto;
     }
 
     /* Full-width section images */
@@ -850,7 +850,11 @@
 
     <!-- Footer -->
     <div class="footer">
-      <a href="/faq.html" class="learn-more">learn more</a>
+      <div class="footer-logos">
+        <img src="shutter_api.svg" alt="Shutter API" class="footer-logo">
+        <img src="protocol_guild_color.svg" alt="Protocol Guild" class="footer-logo">
+        <img src="ethcc.svg" alt="EthCC" class="footer-logo">
+      </div>
     </div>
   </div>
   <!-- Scripts -->
