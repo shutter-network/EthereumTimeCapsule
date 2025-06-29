@@ -31,7 +31,13 @@
     "present",
     "past",
     "hope",
-    "gratitude"
+    "gratitude",
+    "LFG",
+    "shill",
+    "lol",
+    "BUIDL",
+    "DearFutureMe",
+    "OnChainValues"
   ],
   "image_processing": {
     "target_vertical_resolution": 100,
