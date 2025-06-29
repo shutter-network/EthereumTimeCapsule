@@ -1032,8 +1032,8 @@
         if (capsules.length > 0) {
           const carousel = document.getElementById('thumbCarousel');
           carousel.innerHTML = ''; // Clear loading indicator
-          capsules.forEach(capsule => {
-            const thumbnail = createThumbnail(capsule);
+          capsules.forEach(async capsule => {
+            const thumbnail = await createThumbnail(capsule);
             carousel.appendChild(thumbnail);
           });
           
@@ -1052,11 +1052,22 @@
       }
     }
 
-    function createThumbnail(capsule) {
+    async function createThumbnail(capsule) {
       const thumbnail = document.createElement('div');
       thumbnail.className = 'intro-thumbnail';
       
-      const creator = `${capsule.creator.slice(0, 6)}...${capsule.creator.slice(-4)}`;
+      let creator;
+      try {
+        const ensName = await ensProvider.lookupAddress(capsule.creator);
+        if (ensName !== null) {
+          creator = ensName;
+        }
+      } catch (e) {
+        console.error("failed to lookup ENS name", e);
+      }
+      if (!creator) {
+        creator = `${capsule.creator.slice(0, 6)}...${capsule.creator.slice(-4)}`;
+      }
       const isRevealed = capsule.isRevealed;
         // For the homepage carousel, always show pixelated images (even for revealed capsules)
       // This keeps the carousel consistent and avoids needing decryption logic here

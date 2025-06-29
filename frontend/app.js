@@ -31,6 +31,8 @@ const CHAIN_CONFIG = {
   rpcUrl: 'https://eth-mainnet.g.alchemy.com/v2/kDge5GGs1WZE7tiYVnE3E', // RPC endpoint
 };
 
+const ensProvider = new ethers.providers.JsonRpcProvider(CHAIN_CONFIG.rpcUrl);
+
 // =============  HELPER FUNCTIONS  =============
 // Helper: get API base URL (production vs development)
 function getApiBaseUrl() {
