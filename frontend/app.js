@@ -7,11 +7,17 @@ const WalletConnectProvider = window.WalletConnectProvider.default;
 // =============  CONFIGURATION  =============
 // Reveal time configuration - change this for testing vs production
 const REVEAL_TIME_CONFIG = {
-  // For testing: 2 minutes from now
-  testing: 2 * 60, // 2 minutes in seconds
+  // For testing: 2 minutes from now (relative)
+  testing: {
+    type: 'relative',
+    value: 2 * 60 // 2 minutes in seconds
+  },
   
-  // For production: 1 year from now
-  production: 365 * 24 * 60 * 60, // 1 year in seconds
+  // For production: fixed timestamp (absolute)
+  production: {
+    type: 'absolute',
+    value: 1785369600 // July 30, 2026 12:00:00 AM
+  },
   
   // Current mode - change this to switch between testing and production
   current: 'production' // Change to 'production' for live deployment
@@ -797,23 +803,22 @@ function populatePreview() {
     document.getElementById('preview-issuer').textContent = 'anonymous';
   }
   // Update unlock date (configurable reveal time)
-  const revealTimeSeconds = REVEAL_TIME_CONFIG[REVEAL_TIME_CONFIG.current];
-  const unlockDate = new Date();
-  unlockDate.setSeconds(unlockDate.getSeconds() + revealTimeSeconds);
+  const config = REVEAL_TIME_CONFIG[REVEAL_TIME_CONFIG.current];
+  let unlockDate;
+  let formatOptions;
   
-  const formatOptions = revealTimeSeconds < 86400 ? // Less than 1 day
-    { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    } : 
-    { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric'
-    };
+  if (config.type === 'relative') {
+    // For testing: current time + offset
+    unlockDate = new Date();
+    unlockDate.setSeconds(unlockDate.getSeconds() + config.value);
+    formatOptions = config.value < 86400 ? // Less than 1 day
+      { hour: '2-digit', minute: '2-digit', second: '2-digit' } :
+      { year: 'numeric', month: 'long', day: 'numeric' };
+  } else {
+    // For production: fixed timestamp
+    unlockDate = new Date(config.value * 1000);
+    formatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+  }
   
   document.getElementById('preview-unlock-date').textContent = 
     unlockDate.toLocaleString('en-US', formatOptions);
@@ -922,7 +927,17 @@ async function startEncryptionInBackground() {
     document.getElementById('preview-encryption-status').textContent = 'Preparing encryption...';
     document.getElementById('preview-encryption-progress').style.width = '10%';    // 1. Get Shutter identity and encryption metadata from backend
     document.getElementById('preview-encryption-status').textContent = 'Getting encryption parameters...';
-    const revealTimestamp = Math.floor(Date.now() / 1000) + REVEAL_TIME_CONFIG[REVEAL_TIME_CONFIG.current];
+    
+    // Calculate reveal timestamp based on configuration
+    const config = REVEAL_TIME_CONFIG[REVEAL_TIME_CONFIG.current];
+    let revealTimestamp;
+    if (config.type === 'relative') {
+      // For testing: current time + offset
+      revealTimestamp = Math.floor(Date.now() / 1000) + config.value;
+    } else {
+      // For production: fixed timestamp
+      revealTimestamp = config.value;
+    }
       // Prepare image for encryption - use uploaded image or default
     let imageToEncrypt = capsuleData.image;
     
@@ -1245,9 +1260,10 @@ function populateCompletion() {
   }
   // Update unlock date
   const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
-  const revealTimeSeconds = REVEAL_TIME_CONFIG[REVEAL_TIME_CONFIG.current];
+  const config = REVEAL_TIME_CONFIG[REVEAL_TIME_CONFIG.current];
   
-  const formatOptions = revealTimeSeconds < 86400 ? // Less than 1 day
+  // For display formatting, check if it's a short-term reveal (testing mode)
+  const formatOptions = (config.type === 'relative' && config.value < 86400) ? // Less than 1 day for testing
     { 
       year: 'numeric', 
       month: 'long', 
