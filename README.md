@@ -6,7 +6,7 @@
 
 ## 🚀 Deployment Status
 
-**LIVE ON HEROKU**: https://ethereum-time-capsule-49394b184e45.herokuapp.com/
+**LIVE ON MAINNET**: https://ethtimecapsule.com
 
 ### ✅ Fully Operational Features:
 - **Automatic blockchain sync** - runs every seconds, no manual intervention needed
