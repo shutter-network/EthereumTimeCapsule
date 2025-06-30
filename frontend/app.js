@@ -1757,7 +1757,7 @@ function shareOnX() {
   });
   const text = `I just created an entry on the @EthTimeCapsule 🕰️✨ It will be revealed on ${formattedDate}.
 
-View my encrypted entry and create your own: ${shareUrl}`;
+View my encrypted entry and create your own:`;
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
     // Generate image and auto-copy to clipboard, then open Twitter
   generateCapsuleImage().then(async (blob) => {
