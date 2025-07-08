@@ -1937,6 +1937,7 @@ function populateTagsFromConfig() {
     'OnChainValues': '🫶',
     'shill': '😎',
     'lol': '🤣',
+    'ETHDublin': '🇮🇪',
   };
   
   // Clear existing options

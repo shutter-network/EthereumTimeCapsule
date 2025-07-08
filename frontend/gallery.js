@@ -374,6 +374,7 @@ function renderTagFilters() {
     'OnChainValues': '🫶',
     'shill': '😎',
     'lol': '🤣',
+    'ETHDublin': '🇮🇪',
   };
   
   availableTags.forEach(({ name }) => {
