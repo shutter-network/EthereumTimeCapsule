@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="matomo.js"></script>
   <style>
     /* Figma-inspired design variables - consistent with other pages */
     :root {
@@ -19,7 +20,7 @@
       --eth4: #c0c0c0;
       --eth5: #242ae0;
       --d9d9d9: #d9d9d9;
-      
+
       /* Fonts */
       --eth1-font-family: 'Inter', sans-serif;
       --eth1-font-size: 12px;
@@ -418,11 +419,11 @@
           <div class="section-content">
             <div class="info-line bold">District Court (Registergericht)</div>
             <div class="info-line">Amtsgericht Mainz, HRB 52070</div>
-            
+
             <div class="info-line bold">VAT Number</div>
             <div class="info-line">Umsatzsteuer-Identifikationsnummer</div>
             <div class="info-line">DE 231725642</div>
-            
+
             <div class="info-line bold">Aufsichtsbehörde</div>
             <div class="info-line">Landratsamt Mainz</div>
           </div>
@@ -468,7 +469,7 @@
       // Create new full-screen menu
       const menu = document.createElement('div');
       menu.className = 'menu-dropdown';
-      
+
       const links = [
         { text: 'home', href: '/' },
         { text: 'create entry', href: '/create.html' },
@@ -477,7 +478,7 @@
         { text: 'faq', href: '/faq.html' },
         { text: 'imprint', href: '/imprint.html' }
       ];
-      
+
       links.forEach((link, index) => {
         const a = document.createElement('a');
         a.href = link.href;
@@ -491,15 +492,15 @@
       backButton.innerHTML = '&lt;';
       backButton.addEventListener('click', toggleMenu);
       menu.appendChild(backButton);
-      
+
       // Append to body for full-screen overlay
       document.body.appendChild(menu);
-      
+
       // Trigger animation
       setTimeout(() => {
         menu.classList.add('show');
       }, 10);
-      
+
       // Remove menu when clicking outside or on links
       menu.addEventListener('click', (e) => {
         if (e.target === menu || e.target.tagName === 'A') {

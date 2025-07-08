@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ethereum Time Capsule - Create Your Digital Legacy</title>
   <link rel="stylesheet" href="styles.css">
+  <script type="text/javascript" src="matomo.js"></script>
 </head>
 <body>
   <!-- Header -->
@@ -49,36 +50,36 @@
   <!-- Main Content -->
   <main class="main">
     <div class="container">
-      
+
       <!-- Step 1: Fill Your Entry -->
       <div id="step-1" class="step">
         <div class="step-header">
           <h2>Fill Your Entry</h2>
           <p>Create your message for the future. All information will be encrypted and stored on the blockchain.</p>
         </div>
-        
+
         <form id="capsule-form" class="capsule-form">
           <div class="form-group">
             <label for="entry-title">Your Name</label>
             <input type="text" id="entry-title" placeholder="Enter your name..." maxlength="100" required>
           </div>
-          
+
           <div class="form-group">
             <label for="entry-tags">Title of Your Entry</label>
             <input type="text" id="entry-tags" placeholder="What is this entry about?" maxlength="200" required>
           </div>
-          
+
           <div class="form-group">
             <label for="entry-story">Your Message</label>
             <textarea id="entry-story" rows="8" placeholder="Write your message to the future..." required></textarea>
           </div>
-          
+
           <div class="form-group">
             <label for="entry-image">Upload an Image</label>
             <input type="file" id="entry-image" accept="image/*" required>
             <small>JPG, PNG, GIF up to 10MB</small>
           </div>
-          
+
           <div class="form-actions">
             <button type="button" id="step1-next-btn" class="btn-primary">Preview Your Entry</button>
           </div>
@@ -91,7 +92,7 @@
           <h2>Preview Your Entry</h2>
           <p>Review your entry before encryption. You can still go back and make changes.</p>
         </div>
-        
+
         <div class="preview-card">
           <div class="preview-image-container">
             <img id="preview-image" src="" alt="Preview image" class="preview-image">
@@ -106,7 +107,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="encryption-info">
           <h4>🔒 Encryption Details</h4>
           <ul>
@@ -116,7 +117,7 @@
             <li>What you will, again, more about Shutter Network</li>
           </ul>
         </div>
-        
+
         <div class="form-actions">
           <button type="button" id="step2-back-btn" class="btn-secondary">Edit Entry</button>
           <button type="button" id="step2-confirm-btn" class="btn-primary">Connect your wallet and encrypt</button>
@@ -129,7 +130,7 @@
           <h2>Encryption</h2>
           <p>Your entry is being encrypted and prepared for submission to the blockchain.</p>
         </div>
-        
+
         <div class="process-container">
           <div class="process-section">
             <h3>🔐 Encrypting Your Data</h3>
@@ -139,7 +140,7 @@
             <div id="encryption-status" class="status-text">Ready to start encryption...</div>
             <button id="encrypt-btn" class="btn-primary">Start Encryption</button>
           </div>
-          
+
           <div class="process-section">
             <h3>⛓️ Submit to Blockchain</h3>
             <div class="progress-bar">
@@ -149,7 +150,7 @@
             <button id="submit-to-chain-btn" class="btn-primary" disabled>Submit to Chain</button>
           </div>
         </div>
-        
+
         <div class="form-actions">
           <button type="button" id="step3-back-btn" class="btn-secondary">Back to Preview</button>
         </div>
@@ -159,7 +160,7 @@
           <h2>Submitting to Blockchain</h2>
           <p>Your encrypted capsule is being submitted to the Ethereum blockchain.</p>
         </div>
-        
+
         <div class="process-container">
           <div class="process-section">
             <h3>⛓️ Blockchain Submission</h3>
@@ -169,7 +170,7 @@
             <div id="chain-status" class="status-text">Preparing transaction...</div>
           </div>
         </div>
-        
+
         <div class="submission-progress">
           <div class="progress-animation">
             <div class="spinner"></div>
@@ -186,15 +187,15 @@
           <h2>My Amazing Entry to the Ethereum Time Capsule</h2>
           <p>Your time capsule has been successfully created and stored on the blockchain!</p>
         </div>
-        
+
         <div class="completion-card">
           <div class="completion-image">
             <img id="final-preview-image" src="" alt="Pixelated preview" class="pixelated-preview">
           </div>
-          
+
           <div class="completion-details">
             <h3 id="final-title" class="capsule-title"></h3>
-            
+
             <div class="capsule-info">
               <div class="info-item">
                 <span class="info-label">Capsule ID:</span>
@@ -211,19 +212,19 @@
             </div>
           </div>
         </div>
-        
+
         <div class="share-section">
           <h4>Share Your Time Capsule</h4>
           <div class="share-url-container">
             <input type="text" id="share-url" readonly class="share-url-input">
             <button id="copy-url-btn" class="btn-secondary">Copy Link</button>
           </div>
-          
+
           <div class="share-buttons">
             <button id="share-twitter-btn" class="btn-social twitter">Share on X</button>
           </div>
         </div>
-        
+
         <div class="final-actions">
           <button id="create-another-btn" class="btn-primary">Encrypt Another Entry</button>
           <button id="view-all-btn" class="btn-secondary">See Your Entry in the Gallery</button>
@@ -240,10 +241,10 @@
     </div>
   </footer>  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-  
+
   <!-- BLST WASM runtime (required for custom shutter crypto) -->
   <script src="https://cdn.jsdelivr.net/npm/@shutter-network/blst@0.1.7/dist/blst.min.js"></script>
-  
+
   <!-- Custom Shutter WASM loader and app logic -->
   <script src="blst.js"></script>
   <script type="module" src="main.js"></script>

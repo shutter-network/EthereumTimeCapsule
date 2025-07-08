@@ -4,7 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ethereum Time Capsule | Be Part of Ethereum’s Living History</title>
   <meta name="description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.">
-  
+
   <!-- OpenGraph meta tags -->
   <meta property="og:title" content="Ethereum Time Capsule | Be Part of Ethereum’s Living History">
   <meta property="og:description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.
@@ -12,18 +12,20 @@
   <meta property="og:image" content="https://ethtimecapsule.com/media_preview.png">
   <meta property="og:type" content="website">
   <meta property="og:url" content="">
-  
+
   <!-- Twitter meta tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ethereum Time Capsule | Be Part of Ethereum’s Living History">
   <meta name="twitter:description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.
 ">
   <meta name="twitter:image" content="https://ethtimecapsule.com/media_preview.png">
-  
+
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="matomo.js"></script>
+  <style>
     /* Figma-inspired design variables - consistent with index.html */
     :root {
       /* Colors */
@@ -33,7 +35,7 @@
       --eth4: #c0c0c0;
       --eth5: #242ae0;
       --d9d9d9: #d9d9d9;
-      
+
       /* Fonts */
       --eth1-font-family: 'Inter', sans-serif;
       --eth1-font-size: 12px;
@@ -886,7 +888,7 @@
         border: none;
         min-height: 100vh;
       }
-      
+
       .progress-section {
         padding: 20px 16px;
       }
@@ -895,23 +897,23 @@
         margin-left: -8px;
         margin-right: -8px;
       }
-      
+
       .progress-steps::before {
         left: 22px;
         right: 22px;
       }
-      
+
       .step-label {
         font-size: 10px;
       }
-      
+
       .form-group {
         margin-bottom: 16px;
       }
-      
+
       .form-group label {
         font-size: 14px;
-      }      
+      }
       .upload-area {
         height: 120px;
       }
@@ -1205,9 +1207,9 @@
         <img src="logo.svg" alt="Time Capsule" class="logo-icon" style="width: 60px; height: auto;">
         <img src="headertext.png" alt="Time Capsule" style="height: 45px; width: auto;">
       </a>
-      
+
       <div id="wallet-status" class="wallet-status">❌ Wallet Not Connected</div>
-      
+
       <div class="menu" id="menuButton">
         <div class="menu-line"></div>
         <div class="menu-line"></div>
@@ -1234,7 +1236,7 @@
           <div class="step-label">Complete</div>
         </div>
       </div>
-      
+
       <div class="step-title">
         <div class="step-number-text">Step 1</div>
         <div class="step-description">Fill up your entry</div>
@@ -1280,7 +1282,7 @@
           </div>
         </form>
       </div>
-      
+
       <div class="info-section">
         <div class="info-icon">i</div>
         <div class="info-content">
@@ -1288,7 +1290,7 @@
           This entry will be decrypted on <span class="info-highlight">July 30th, 2026</span>
         </div>
       </div>
-      
+
       <button type="button" id="step1-next-btn" class="primary-button">PREVIEW YOUR ENTRY</button>
     </div>    <!-- Step 2: Preview -->
     <div id="step-2" class="step-container">
@@ -1297,10 +1299,10 @@
           <canvas id="preview-canvas" class="preview-image"></canvas>
           <div class="issuer-tag">issued by <span id="preview-issuer">xyz</span></div>
         </div>
-        
+
         <div class="preview-content">
           <h2 id="preview-title" class="preview-title">My amazing entry to the Ethereum time capsule</h2>
-          
+
           <div class="preview-meta">
             <div class="meta-item">
               <div class="meta-icon">🔒</div>
@@ -1317,14 +1319,14 @@
               </div>
             </div>
           </div>
-          
+
           <div class="preview-tags">
             <span class="tag">#lol</span>
             <span class="tag">#OnChainValues</span>
           </div>
         </div>
       </div>
-      
+
       <!-- Encryption Status Section - moved outside preview card -->
       <div class="encryption-status-section" id="encryption-status-section" style="margin: 20px; padding: 16px; background: #f8f9fa; border-radius: 12px; display: none;">
         <div class="encryption-progress">
@@ -1334,7 +1336,7 @@
           <div id="preview-encryption-status" class="status-text">Starting encryption...</div>
         </div>
       </div>
-      
+
       <div class="info-section">
         <div class="info-icon">i</div>
         <div class="info-content">
@@ -1344,7 +1346,7 @@
       </div>
         <button type="button" id="step2-confirm-btn" class="primary-button">SUBMIT TO BLOCKCHAIN</button>
     </div>
-    
+
     <!-- Step 3: Blockchain Submission -->
     <div id="step-3" class="step-container">
       <div class="process-section">
@@ -1352,14 +1354,14 @@
           <div class="step-number-text">Step 3</div>
           <div class="step-description">Submitting to Blockchain</div>
         </div>
-        
+
         <!-- Wallet Connection Status -->
         <div class="wallet-connection-section" id="wallet-connection-section">
           <h3>🔗 Connect Your Wallet</h3>
           <div id="wallet-connection-status" class="status-text">Please connect your wallet to continue...</div>
           <button id="connect-wallet-for-submission" class="primary-button">CONNECT WALLET</button>
         </div>
-        
+
         <!-- Blockchain Submission Progress -->
         <div class="blockchain-submission-section" id="blockchain-submission-section" style="display: none;">
           <h3>⛓️ Blockchain Submission</h3>
@@ -1379,17 +1381,17 @@
         <div class="step-number-text">Step 4</div>
         <div class="step-description">Preview your entry</div>
       </div>
-      
+
       <!-- Preview card showing the completed entry -->
       <div class="preview-card">
         <div class="preview-image-container">
           <canvas id="final-preview-canvas" class="preview-image"></canvas>
           <div class="issuer-tag">issued by <span id="final-preview-issuer">xyz</span></div>
         </div>
-        
+
         <div class="preview-content">
           <h2 id="final-preview-title" class="preview-title">My amazing entry to the Ethereum time capsule</h2>
-          
+
           <div class="preview-meta">
             <div class="meta-item">
               <div class="meta-icon">🔒</div>
@@ -1406,7 +1408,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="preview-tags" id="final-preview-tags">
             <span class="tag">#lol</span>
             <span class="tag">#OnChainValues</span>
@@ -1422,7 +1424,7 @@
             <button id="copy-link-btn" class="copy-link-btn">Copy Link</button>
           </div>
         </div>
-        
+
         <button id="follow-x-btn" class="follow-button">Follow us on X</button>
         <button id="share-x-btn" class="share-button">📋 Share on X (copies image)</button>
         <button id="gallery-btn" class="gallery-button">See your entry in the gallery</button>
@@ -1445,7 +1447,7 @@
   <script type="module" src="encryptDataBlst.js?v=2025062004"></script>
   <script type="module" src="main.js?v=2025062004"></script>
   <script src="app.js?v=2025012016"></script>
-  
+
   <script>
     // Menu toggle functionality - consistent with index.html
     function toggleMenu() {
@@ -1468,7 +1470,7 @@
         { text: 'faq', href: '/faq.html' },
         { text: 'imprint', href: '/imprint.html' }
       ];
-      
+
       links.forEach((link, index) => {
         const a = document.createElement('a');
         a.href = link.href;
@@ -1482,10 +1484,10 @@
       backButton.innerHTML = '&lt;';
       backButton.addEventListener('click', toggleMenu);
       menu.appendChild(backButton);
-      
+
       // Append to body for full-screen overlay
       document.body.appendChild(menu);
-      
+
       // Trigger animation
       setTimeout(() => {
         menu.classList.add('show');
@@ -1518,10 +1520,10 @@
     // Handle file upload change event
     document.addEventListener('DOMContentLoaded', function() {      // Add event listener for menu button
       document.getElementById('menuButton').addEventListener('click', toggleMenu);
-      
+
       const fileInput = document.querySelector('#entry-image');
       const uploadArea = document.querySelector('.upload-area');
-      
+
       if (fileInput && uploadArea) {
         fileInput.addEventListener('change', function(e) {
           if (e.target.files && e.target.files[0]) {
@@ -1531,7 +1533,7 @@
           }
         });
       }
-      
+
       // Initialize wallet discovery when page loads
       initWalletDiscovery();
     });
