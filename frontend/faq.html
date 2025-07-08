@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ethereum Time Capsule | Be Part of Ethereum’s Living History</title>
   <meta name="description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.">
-  
+
   <!-- OpenGraph meta tags -->
   <meta property="og:title" content="Ethereum Time Capsule | Be Part of Ethereum’s Living History">
   <meta property="og:description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.
@@ -13,18 +13,19 @@
   <meta property="og:image" content="https://ethtimecapsule.com/media_preview.png">
   <meta property="og:type" content="website">
   <meta property="og:url" content="">
-  
+
   <!-- Twitter meta tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ethereum Time Capsule | Be Part of Ethereum’s Living History">
   <meta name="twitter:description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.
 ">
   <meta name="twitter:image" content="https://ethtimecapsule.com/media_preview.png">
-  
+
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="matomo.js"></script>
   <style>
     /* Figma-inspired design variables - consistent with other pages */
     :root {
@@ -35,7 +36,7 @@
       --eth4: #c0c0c0;
       --eth5: #242ae0;
       --d9d9d9: #d9d9d9;
-      
+
       /* Fonts */
       --eth1-font-family: 'Inter', sans-serif;
       --eth1-font-size: 12px;
@@ -504,7 +505,7 @@
             <span class="category-icon">🚀</span>
             Getting Started
           </div>
-          
+
           <div class="faq-item">
             <div class="faq-question" onclick="toggleFAQ(this)">
               <div class="faq-question-text">What is Ethereum Time Capsule?</div>
@@ -552,7 +553,7 @@
             <span class="category-icon">⚙️</span>
             Technical Details
           </div>
-          
+
           <div class="faq-item">
             <div class="faq-question" onclick="toggleFAQ(this)">
               <div class="faq-question-text">How does time-lock encryption work?</div>
@@ -608,7 +609,7 @@
             <span class="category-icon">💡</span>
             Usage & Features
           </div>
-          
+
           <div class="faq-item">
             <div class="faq-question" onclick="toggleFAQ(this)">
               <div class="faq-question-text">Can I edit or delete a capsule after creating it?</div>
@@ -676,7 +677,7 @@
             <span class="category-icon">🔧</span>
             Troubleshooting
           </div>
-          
+
           <div class="faq-item">
             <div class="faq-question" onclick="toggleFAQ(this)">
               <div class="faq-question-text">My wallet won't connect. What should I do?</div>
@@ -756,7 +757,7 @@
         { text: 'documentation', href: 'https://github.com/shutter-network/EthereumTimeCapsule' },
         { text: 'imprint', href: '/imprint.html' }
       ];
-      
+
       links.forEach((link, index) => {
         const a = document.createElement('a');
         a.href = link.href;
@@ -770,10 +771,10 @@
       backButton.innerHTML = '&lt;';
       backButton.addEventListener('click', toggleMenu);
       menu.appendChild(backButton);
-      
+
       // Append to body for full-screen overlay
       document.body.appendChild(menu);
-      
+
       // Trigger animation
       setTimeout(() => {
         menu.classList.add('show');
@@ -807,14 +808,14 @@
     function toggleFAQ(element) {
       const faqItem = element.parentNode;
       const isActive = faqItem.classList.contains('active');
-      
+
       // Close all other FAQ items
       document.querySelectorAll('.faq-item.active').forEach(item => {
         if (item !== faqItem) {
           item.classList.remove('active');
         }
       });
-      
+
       // Toggle current item
       if (isActive) {
         faqItem.classList.remove('active');
@@ -829,7 +830,7 @@
       if (menuButton) {
         menuButton.addEventListener('click', toggleMenu);
       }
-      
+
       console.log("FAQ page loaded successfully");
     });
   </script>

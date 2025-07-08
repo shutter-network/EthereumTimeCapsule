@@ -4,25 +4,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ethereum Time Capsule | Be Part of Ethereum’s Living History</title>
   <meta name="description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.">
-  
+
   <!-- OpenGraph meta tags -->
   <meta property="og:title" content="Ethereum Time Capsule | Be Part of Ethereum’s Living History">
   <meta property="og:description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.">
   <meta property="og:image" content="https://ethtimecapsule.com/media_preview.png">
   <meta property="og:type" content="website">
   <meta property="og:url" content="">
-  
+
   <!-- Twitter meta tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ethereum Time Capsule | Be Part of Ethereum’s Living History">
   <meta name="twitter:description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.
 ">
   <meta name="twitter:image" content="https://ethtimecapsule.com/media_preview.png">
-  
+
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="matomo.js"></script>
   <style>
     /* Figma-inspired design variables */
     :root {
@@ -33,7 +34,7 @@
       --eth4: #c0c0c0;
       --eth5: #242ae0;
       --d9d9d9: #d9d9d9;
-      
+
       /* Fonts */
       --eth1-font-family: 'Inter', sans-serif;
       --eth1-font-size: 12px;
@@ -780,10 +781,10 @@
           of Ethereum's<br />
           living history
         </div>
-        
+
         <div class="intro-copy">
           To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule<br />
-          — privately sealed now, revealed one year later, and immutably recorded onchain forever. 
+          — privately sealed now, revealed one year later, and immutably recorded onchain forever.
         </div>
       </div>
 
@@ -792,7 +793,7 @@
       </a>
 
       <img class="section-image" src="opened_capsule_with_flares.svg"></img>
-      
+
       <!-- Open to all section -->
       <div class="section-container">
         <div class="section-heading">Open to all</div>
@@ -806,7 +807,7 @@
 
       <!-- Full-width image after "Open to all" -->
       <img class="section-image" src="meme_card.svg" style="padding: 20px 80px 20px 80px; margin-top: 80px;"></img>
-      
+
       <!-- How it works section -->
       <div class="section-container">
         <div class="section-heading">How it works</div>
@@ -822,7 +823,7 @@
 
       <!-- Full-width image after "How it works" -->
       <img class="section-image" src="protocol_guild.jpeg" style="padding: 20px 80px 20px 80px; margin-top: 80px;"></img>
-      
+
       <!-- Small fee section -->
       <div class="section-container">
         <div class="section-heading">A small fee, a big impact</div>
@@ -952,7 +953,7 @@
 
       const maxScroll = carousel.scrollWidth - carousel.clientWidth;
       const scrollPercentage = carousel.scrollLeft / maxScroll;
-      
+
       // Add subtle visual feedback for scroll position
       if (scrollPercentage <= 0.1) {
         carousel.style.maskImage = 'linear-gradient(to right, black 80%, transparent 100%)';
@@ -965,7 +966,7 @@
     // Handle image loading errors with fallback logic
     function handleImageError(imgElement, imageCID, capsuleId) {
       console.error(`Failed to load image for capsule #${capsuleId}:`, imgElement.src);
-      
+
       // If we're currently trying the IPFS endpoint, fallback to pixelated endpoint
       if (imgElement.src.includes('/ipfs/')) {
         console.log(`Falling back to pixelated endpoint for capsule #${capsuleId}`);
@@ -990,21 +991,21 @@
         loadingIndicator.style.display = 'flex';
 
         console.log('🔄 Loading capsules for homepage carousel...');
-        
+
         // Load public config to check for custom capsule IDs
         const config = await loadPublicConfig();
         const customCapsuleIds = config?.homepage_carousel_capsules || [];
-        
+
         let capsules = [];
-        
+
         if (customCapsuleIds.length > 0) {
           console.log('📋 Using configured capsule IDs:', customCapsuleIds);
-          
+
           // Load specific capsules by ID using the individual capsule endpoint
           for (const capsuleId of customCapsuleIds) {
             try {
               const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
-              
+
               if (response.data.success && response.data.capsule) {
                 capsules.push(response.data.capsule);
                 console.log(`✅ Loaded capsule ${capsuleId}:`, response.data.capsule.title);
@@ -1017,7 +1018,7 @@
           }
         } else {
           console.log('📋 No custom capsule IDs configured, loading latest capsules');
-          
+
           // Load up to 9 capsules from the API (fallback behavior)
           const response = await axios.get(`${getApiBaseUrl()}/api/capsules`, {
             params: {
@@ -1026,16 +1027,16 @@
               revealed_only: false
             }
           });
-          
+
           if (!response.data.success) {
             throw new Error(response.data.message || 'Failed to load capsules');
           }
-          
+
           capsules = response.data.capsules;
         }
 
         console.log(`✅ Loaded ${capsules.length} capsules for carousel`);
-        
+
         if (capsules.length > 0) {
           const carousel = document.getElementById('thumbCarousel');
           carousel.innerHTML = ''; // Clear loading indicator
@@ -1043,7 +1044,7 @@
             const thumbnail = await createThumbnail(capsule);
             carousel.appendChild(thumbnail);
           });
-          
+
           // Setup touch/swipe functionality after capsules are loaded
           setupCarouselTouch();
         } else {
@@ -1062,7 +1063,7 @@
     async function createThumbnail(capsule) {
       const thumbnail = document.createElement('div');
       thumbnail.className = 'intro-thumbnail';
-      
+
       let creator;
       const ensProvider = new ethers.providers.JsonRpcProvider('https://eth-mainnet.g.alchemy.com/v2/kDge5GGs1WZE7tiYVnE3E');
       try {
@@ -1081,17 +1082,17 @@
       // This keeps the carousel consistent and avoids needing decryption logic here
       let imageSrc;
       let pixelatedCID;
-      
+
       // Add timestamp to prevent caching issues
       const timestamp = Date.now();
-      
+
       // Use pixelated image CID if available, otherwise fall back to encrypted image CID
       pixelatedCID = capsule.pixelatedImageCID || capsule.imageCID;
-      
+
       // Try IPFS endpoint first (for new pixelated images uploaded to IPFS)
       imageSrc = `${getApiBaseUrl()}/ipfs/${pixelatedCID}?t=${timestamp}`;
       console.log(`Setting pixelated image src for carousel capsule #${capsule.id}: ${imageSrc} (IPFS, CID: ${pixelatedCID})`);
-      
+
       // Truncate title if too long for thumbnail
       let title = capsule.title;
       if (title.length > 30) {
@@ -1102,7 +1103,7 @@
           title = title.substring(0, 27) + '...';
         }
       }
-      
+
       // Get first tag for display
       const firstTag = capsule.tags.split(',')[0].trim() || 'uncategorized';
         thumbnail.innerHTML = `
@@ -1115,16 +1116,16 @@
             <div class="onchain-values">#${firstTag}</div>
           </div>
         </div>
-        <img class="image-cropped" src="${imageSrc}" alt="Capsule image" loading="lazy" 
+        <img class="image-cropped" src="${imageSrc}" alt="Capsule image" loading="lazy"
              onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})" />
         <div class="image-placeholder" style="display: none;">🔒</div>
       `;
-      
+
       // Add click handler to view capsule in gallery
       thumbnail.addEventListener('click', () => {
         window.location.href = `/gallery.html?capsule=${capsule.id}`;
       });
-      
+
       return thumbnail;
     }function toggleMenu() {
       // Remove existing menu if present
@@ -1146,7 +1147,7 @@
         { text: 'faq', href: '/faq.html' },
         { text: 'imprint', href: '/imprint.html' }
       ];
-      
+
       links.forEach((link, index) => {
         const a = document.createElement('a');
         a.href = link.href;
@@ -1160,10 +1161,10 @@
       backButton.innerHTML = '&lt;';
       backButton.addEventListener('click', toggleMenu);
       menu.appendChild(backButton);
-      
+
       // Append to body for full-screen overlay
       document.body.appendChild(menu);
-      
+
       // Trigger animation
       setTimeout(() => {
         menu.classList.add('show');

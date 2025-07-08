@@ -5,24 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ethereum Time Capsule - Admin Panel</title>
   <meta name="description" content="Create encrypted time capsules on Ethereum that are locked for one year. Store memories, messages, and images that will be revealed after exactly 365 days.">
-  
+
   <!-- OpenGraph meta tags -->
   <meta property="og:title" content="Ethereum Time Capsule - Admin Panel">
   <meta property="og:description" content="Create encrypted time capsules on Ethereum that are locked for one year. Store memories, messages, and images that will be revealed after exactly 365 days.">
   <meta property="og:image" content="https://ethtimecapsule.com/media_preview.png">
   <meta property="og:type" content="website">
   <meta property="og:url" content="">
-  
+
   <!-- Twitter meta tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ethereum Time Capsule - Admin Panel">
   <meta name="twitter:description" content="Create encrypted time capsules on Ethereum that are locked for one year. Store memories, messages, and images that will be revealed after exactly 365 days.">
   <meta name="twitter:image" content="https://ethtimecapsule.com/media_preview.png">
-  
+
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="matomo.js"></script>
   <style>
     /* Copy exact CSS from working gallery.html */
     :root {
@@ -33,7 +34,7 @@
       --eth4: #c0c0c0;
       --eth5: #242ae0;
       --d9d9d9: #d9d9d9;
-      
+
       /* Fonts */
       --eth1-font-family: 'Inter', sans-serif;
       --eth1-font-size: 12px;
@@ -461,10 +462,10 @@
 
   <!-- Scripts - EXACT same order as working gallery.html -->
   <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-  
+
   <!-- BLST WASM runtime (required for custom shutter crypto) -->
   <script src="https://cdn.jsdelivr.net/npm/@shutter-network/blst@0.1.7/dist/blst.min.js"></script>
-  
+
   <!-- Custom Shutter WASM loader and app logic with cache busting -->
   <script src="blst.js?v=2025062004"></script>
   <script type="module" src="main.js?v=2025062004"></script>
