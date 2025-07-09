@@ -1913,33 +1913,6 @@ function populateTagsFromConfig() {
     return;
   }
   
-  // Create emoji mapping for tags
-  const tagEmojis = {
-    'memories': '💭',
-    'dreams': '✨',
-    'goals': '🎯',
-    'love': '💕',
-    'family': '👨‍👩‍👧‍👦',
-    'travel': '✈️',
-    'art': '🎨',
-    'music': '🎵',
-    'thoughts': '💭',
-    'wishes': '🌟',
-    'secrets': '🤫',
-    'future': '🔮',
-    'present': '🎁',
-    'past': '📜',
-    'hope': '🌈',
-    'gratitude': '🙏',
-    'BUIDL': '🦾',
-    'DearFutureMe': '🙌',
-    'LFG': '🚀',
-    'OnChainValues': '🫶',
-    'shill': '😎',
-    'lol': '🤣',
-    'ETHDublin': '🇮🇪',
-  };
-  
   // Clear existing options
   dropdownMenu.innerHTML = '';
   
@@ -1952,13 +1925,13 @@ function populateTagsFromConfig() {
     dropdownMenu.appendChild(sectionHeader);
     
     // Add tags for this section
-    section.tags.forEach(tag => {
+    section.tags.forEach(tagObj => {
       const tagOption = document.createElement('div');
       tagOption.className = 'tag-option';
-      tagOption.dataset.tag = tag;
+      tagOption.dataset.tag = tagObj.name;
       
-      const emoji = tagEmojis[tag] || '🏷️';
-      tagOption.innerHTML = `<span class="tag-emoji">${emoji}</span> ${tag}`;
+      const emoji = tagObj.emoji || '🏷️';
+      tagOption.innerHTML = `<span class="tag-emoji">${emoji}</span> ${tagObj.name}`;
       
       dropdownMenu.appendChild(tagOption);
     });

@@ -331,8 +331,8 @@ async function loadTagsFromConfig() {
     // Extract all tags from all sections (flatten the sections)
     const allTags = [];
     appConfig.tag_sections.forEach(section => {
-      section.tags.forEach(tag => {
-        allTags.push(tag);
+      section.tags.forEach(tagObj => {
+        allTags.push(tagObj.name);
       });
     });
     
@@ -358,38 +358,21 @@ function renderTagFilters() {
   
   tagFiltersContainer.innerHTML = '';
   
-  // Create emoji mapping for tags (same as in create step)
-  const tagEmojis = {
-    'memories': '💭',
-    'dreams': '✨',
-    'goals': '🎯',
-    'love': '💕',
-    'family': '👨‍👩‍👧‍👦',
-    'travel': '✈️',
-    'art': '🎨',
-    'music': '🎵',
-    'thoughts': '💭',
-    'wishes': '🌟',
-    'secrets': '🤫',
-    'future': '🔮',
-    'present': '🎁',
-    'past': '📜',
-    'hope': '🌈',
-    'gratitude': '🙏',
-    'BUIDL': '🦾',
-    'DearFutureMe': '🙌',
-    'LFG': '🚀',
-    'OnChainValues': '🫶',
-    'shill': '😎',
-    'lol': '🤣',
-    'ETHDublin': '🇮🇪',
-  };
+  // Create emoji mapping for tags from config
+  const tagEmojiMap = {};
+  if (appConfig && appConfig.tag_sections) {
+    appConfig.tag_sections.forEach(section => {
+      section.tags.forEach(tagObj => {
+        tagEmojiMap[tagObj.name] = tagObj.emoji;
+      });
+    });
+  }
   
   availableTags.forEach(({ name }) => {
     const tagButton = document.createElement('button');
     tagButton.className = 'btn-tag-filter';
     
-    const emoji = tagEmojis[name] || '🏷️';
+    const emoji = tagEmojiMap[name] || '🏷️';
     tagButton.innerHTML = `${emoji} #${name}`;
     tagButton.onclick = () => setFilter(name);
     tagFiltersContainer.appendChild(tagButton);
