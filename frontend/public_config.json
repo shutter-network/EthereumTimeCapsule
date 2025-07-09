@@ -1,10 +1,10 @@
 {
   "testnet": {
-    "contract_address": "0x635e325c4b130e7AbfB9ef8D0beD5D79e1e32a64",
+    "contract_address": "0x374248Bf74C38fd643FA7d8C5e65656A36D52D79",
     "registry_address": "0x694e5de9345d39C148DA90e6939A3fd2142267D9",
     "shutter_api_base": "https://shutter-api.shutter.network/api",
-    "rpc_url": "https://eth-mainnet.g.alchemy.com/v2/kDge5GGs1WZE7tiYVnE3E",
-    "start_block": 22806303
+    "rpc_url": "https://eth-sepolia.g.alchemy.com/v2/YKFc7LN9GJ55rAR9FScn4",
+    "start_block": 8649577
   },
   "mainnet": {
     "contract_address": "0x635e325c4b130e7AbfB9ef8D0beD5D79e1e32a64",
