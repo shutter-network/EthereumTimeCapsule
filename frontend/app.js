@@ -279,7 +279,6 @@ async function connectToWallet(walletProvider, walletInfo) {
     await initializeContracts();
       console.log('✅ Wallet connected:', walletInfo.name);
     walletConnected = true;
-    updateWalletStatus(true, accounts[0]);
     
     // Setup event listeners for account/chain changes
     if (walletProvider.on) {
@@ -341,7 +340,6 @@ async function connectWallet(manual = false) {
   } catch (error) {
     console.error("❌ Wallet connection failed:", error);
     walletConnected = false;
-    updateWalletStatus(false);
     return false;
   }
 }
@@ -375,7 +373,6 @@ async function connectLegacyWallet() {
     await initializeContracts();
       console.log('✅ Legacy wallet connected');
     walletConnected = true;
-    updateWalletStatus(true, accounts[0]);
     
     // Setup event listeners for account/chain changes
     if (window.ethereum.on) {
@@ -439,7 +436,6 @@ function handleAccountsChanged(accounts) {
   if (accounts.length === 0) {
     console.log('Wallet disconnected');
     walletConnected = false;
-    updateWalletStatus(false);
     provider = null;
     signer = null;
     contract = null;
@@ -453,23 +449,6 @@ function handleChainChanged(chainId) {
   console.log('🔗 Chain changed to:', chainId);
   // Reload the page to reset the dapp state
   window.location.reload();
-}
-
-function updateWalletStatus(connected) {
-  const walletStatus = document.getElementById('wallet-status');
-  
-  if (connected) {
-    if (walletStatus) {
-      walletStatus.textContent = '✅ Wallet Connected';
-      walletStatus.className = 'wallet-status connected';
-      walletStatus.style.cursor = 'default';
-    }
-  } else {
-    if (walletStatus) {
-      walletStatus.textContent = '❌ Click to Connect';
-      walletStatus.className = 'wallet-status disconnected';
-      walletStatus.style.cursor = 'pointer';
-    }  }
 }
 
 function closeWalletModal() {
@@ -2170,16 +2149,6 @@ function setupEventListeners() {
   if (galleryBtn) galleryBtn.onclick = viewInGallery;
   if (encryptAnotherBtn) encryptAnotherBtn.onclick = encryptAnotherEntry;
   
-  // Wallet status click to connect
-  const walletStatus = document.getElementById('wallet-status');
-  if (walletStatus) {
-    walletStatus.onclick = async () => {
-      if (!walletConnected) {
-        await connectWallet(true);
-      }
-    };
-    walletStatus.style.cursor = 'pointer';
-  }
   // Progress step navigation
   document.querySelectorAll('.progress-step').forEach((step, index) => {
     step.onclick = () => goToStep(index + 1);
