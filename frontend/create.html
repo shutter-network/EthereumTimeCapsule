@@ -1173,6 +1173,37 @@
       color: white;
     }
 
+    .tag-section-header {
+      padding: 12px 16px 12px 28px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #4a5568;
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      border-bottom: 2px solid #e2e8f0;
+      border-top: 1px solid #e2e8f0;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .tag-section-header:first-child {
+      margin-top: 0;
+      border-top: none;
+    }
+
+    .tag-section-header::before {
+      content: '';
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 14px;
+      background: var(--eth5);
+      border-radius: 2px;
+    }
+
     .tag-emoji {
       font-size: 16px;
     }

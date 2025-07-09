@@ -1849,7 +1849,7 @@ function initTagsDropdown() {
   console.log('🏷️ Initializing tags dropdown...');
   
   // Populate tags from config if available
-  if (appConfig && appConfig.available_tags) {
+  if (appConfig && appConfig.tag_sections) {
     populateTagsFromConfig();
   }
   
@@ -1902,8 +1902,8 @@ function initTagsDropdown() {
 }
 
 function populateTagsFromConfig() {
-  if (!appConfig || !appConfig.available_tags) {
-    console.warn('No available_tags in config');
+  if (!appConfig || !appConfig.tag_sections) {
+    console.warn('No tag_sections in config');
     return;
   }
   
@@ -1943,19 +1943,28 @@ function populateTagsFromConfig() {
   // Clear existing options
   dropdownMenu.innerHTML = '';
   
-  // Add each tag from config
-  appConfig.available_tags.forEach(tag => {
-    const tagOption = document.createElement('div');
-    tagOption.className = 'tag-option';
-    tagOption.dataset.tag = tag;
+  // Add each section from config
+  appConfig.tag_sections.forEach((section, sectionIndex) => {
+    // Add section header
+    const sectionHeader = document.createElement('div');
+    sectionHeader.className = 'tag-section-header';
+    sectionHeader.textContent = section.title;
+    dropdownMenu.appendChild(sectionHeader);
     
-    const emoji = tagEmojis[tag] || '🏷️';
-    tagOption.innerHTML = `<span class="tag-emoji">${emoji}</span> ${tag}`;
-    
-    dropdownMenu.appendChild(tagOption);
+    // Add tags for this section
+    section.tags.forEach(tag => {
+      const tagOption = document.createElement('div');
+      tagOption.className = 'tag-option';
+      tagOption.dataset.tag = tag;
+      
+      const emoji = tagEmojis[tag] || '🏷️';
+      tagOption.innerHTML = `<span class="tag-emoji">${emoji}</span> ${tag}`;
+      
+      dropdownMenu.appendChild(tagOption);
+    });
   });
   
-  console.log('✅ Tags populated from config:', appConfig.available_tags);
+  console.log('✅ Tags populated from config with sections:', appConfig.tag_sections.map(s => ({ title: s.title, tagCount: s.tags.length })));
 }
 
 function updateSelectedTagsDisplay(selectedTags, container, hiddenInput) {
@@ -2134,7 +2143,7 @@ function setupEventListeners() {
   initTagsDropdown();
   
   // Populate tags from config if not already done
-  if (appConfig && appConfig.available_tags && document.getElementById('dropdown-menu')) {
+  if (appConfig && appConfig.tag_sections && document.getElementById('dropdown-menu')) {
     populateTagsFromConfig();
   }
   

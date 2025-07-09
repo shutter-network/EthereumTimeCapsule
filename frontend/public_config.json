@@ -15,30 +15,65 @@
   },
   "default_network": "testnet",
   "homepage_carousel_capsules": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-  "available_tags": [
-    "art",
-    "BUIDL",
-    "DearFutureMe",
-    "dreams",
-    "ETHDublin",
-    "family",
-    "future",
-    "goals",
-    "gratitude",
-    "hope",
-    "LFG",
-    "lol",
-    "love",
-    "memories",
-    "music",
-    "OnChainValues",
-    "past",
-    "present",
-    "secrets",
-    "shill",
-    "thoughts",
-    "travel",
-    "wishes"
+  "tag_sections": [
+    {
+      "title": "Key Moments",
+      "tags": [
+        "Crypto Winter 21/22",
+        "CryptoKitties craze",
+        "Ethereum Hard Fork",
+        "Ethereum Mainnet Launch",
+        "Ethereum Whitepaper",
+        "Ethereum Yellow Paper",
+        "Shanghai DoS attacks",
+        "The DAO Hack",
+        "The Merge"
+      ]
+    },
+    {
+      "title": "Communities",
+      "tags": [
+        "Arbitrum",
+        "Base",
+        "DappCon",
+        "Devcon",
+        "Devconnect",
+        "ETHDenver",
+        "EthCC",
+        "ETHTaipei",
+        "Optimism",
+        "Polygon",
+        "zkSync"
+      ]
+    },
+    {
+      "title": "General",
+      "tags": [
+        "art",
+        "BUIDL",
+        "DearFutureMe",
+        "dreams",
+        "ETHDublin",
+        "family",
+        "future",
+        "goals",
+        "gratitude",
+        "hope",
+        "LFG",
+        "lol",
+        "love",
+        "memories",
+        "music",
+        "OnChainValues",
+        "past",
+        "present",
+        "secrets",
+        "shill",
+        "thoughts",
+        "travel",
+        "wishes"
+      ]
+    }
   ],
   "image_processing": {
     "target_vertical_resolution": 100,

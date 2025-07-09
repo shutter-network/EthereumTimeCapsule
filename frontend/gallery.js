@@ -323,13 +323,21 @@ async function loadTagsFromConfig() {
   try {
     console.log('🏷️ Loading tags from config...');
     
-    if (!appConfig || !appConfig.available_tags) {
-      console.warn('No available_tags in config');
+    if (!appConfig || !appConfig.tag_sections) {
+      console.warn('No tag_sections in config');
       return;
     }
     
+    // Extract all tags from all sections (flatten the sections)
+    const allTags = [];
+    appConfig.tag_sections.forEach(section => {
+      section.tags.forEach(tag => {
+        allTags.push(tag);
+      });
+    });
+    
     // Use tags from config instead of extracting from capsules
-    availableTags = appConfig.available_tags.map(tag => ({ 
+    availableTags = allTags.map(tag => ({ 
       name: tag, 
       count: 0 // We'll show count as 0 or remove it since we're not extracting
     }));
