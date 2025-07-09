@@ -1180,10 +1180,29 @@ async function submitToChain() {
     if (submissionProgress) submissionProgress.style.width = '75%';
     if (submissionMessage) submissionMessage.textContent = 'Transaction confirmed! Finalizing your capsule...';
     
-    // Get capsule ID from transaction logs or contract call
-    const capsuleCount = await contractRead.capsuleCount();
-    capsuleData.capsuleId = capsuleCount.toNumber() - 1;
-    
+    // Get capsule ID from transaction receipt logs
+    try {
+      // Find the CapsuleCreated event in the transaction logs
+      const capsuleCreatedEvent = receipt.logs.find(log => {
+        try {
+          const parsedLog = contract.interface.parseLog(log);
+          return parsedLog.name === 'CapsuleCreated';
+        } catch (e) {
+          return false;
+        }
+      });
+      
+      if (capsuleCreatedEvent) {
+        const parsedEvent = contract.interface.parseLog(capsuleCreatedEvent);
+        capsuleData.capsuleId = parsedEvent.args.id.toNumber();
+        console.log(`✅ Capsule ID extracted from event: ${capsuleData.capsuleId}`);
+      } else {
+        console.warn('CapsuleCreated event not found in transaction logs');
+      }
+    } catch (error) {
+      console.error('Failed to parse capsule ID from transaction logs:', error);
+    }
+
     if (submissionStatus) submissionStatus.textContent = 'Success! Preparing completion screen...';
     if (submissionProgress) submissionProgress.style.width = '100%';
     if (submissionMessage) submissionMessage.textContent = 'Success! Your time capsule has been created!';
