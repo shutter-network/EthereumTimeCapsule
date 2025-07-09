@@ -1040,8 +1040,13 @@
         if (capsules.length > 0) {
           const carousel = document.getElementById('thumbCarousel');
           carousel.innerHTML = ''; // Clear loading indicator
-          capsules.forEach(async capsule => {
-            const thumbnail = await createThumbnail(capsule);
+
+          // Create all thumbnails in parallel but maintain order
+          const thumbnailPromises = capsules.map(capsule => createThumbnail(capsule));
+          const thumbnails = await Promise.all(thumbnailPromises);
+
+          // Append thumbnails in the correct order
+          thumbnails.forEach(thumbnail => {
             carousel.appendChild(thumbnail);
           });
 

@@ -520,10 +520,14 @@ function loadMoreCapsules() {
 // =============  RENDER CAPSULES  =============
 async function renderCapsules(capsules) {
   const grid = document.getElementById('capsules-grid');
-  
-  capsules.forEach(async capsule => {
-    const capsuleCard = await createCapsuleCard(capsule);
-    grid.appendChild(capsuleCard);
+
+  // Create all cards in parallel but maintain order when appending
+  const cardPromises = capsules.map(capsule => createCapsuleCard(capsule));
+  const cards = await Promise.all(cardPromises);
+
+  // Append cards in the correct order
+  cards.forEach(card => {
+    grid.appendChild(card);
   });
 }
 
