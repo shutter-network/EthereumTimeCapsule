@@ -372,8 +372,12 @@ function renderTagFilters() {
     const tagButton = document.createElement('button');
     tagButton.className = 'btn-tag-filter';
     
-    const emoji = tagEmojiMap[name] || '🏷️';
-    tagButton.innerHTML = `${emoji} #${name}`;
+    const emoji = tagEmojiMap[name];
+    if (emoji) {
+      tagButton.innerHTML = `${emoji} #${name}`;
+    } else {
+      tagButton.innerHTML = `#${name}`;
+    }
     tagButton.onclick = () => setFilter(name);
     tagFiltersContainer.appendChild(tagButton);
   });

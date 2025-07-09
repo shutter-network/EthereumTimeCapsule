@@ -1930,8 +1930,11 @@ function populateTagsFromConfig() {
       tagOption.className = 'tag-option';
       tagOption.dataset.tag = tagObj.name;
       
-      const emoji = tagObj.emoji || '🏷️';
-      tagOption.innerHTML = `<span class="tag-emoji">${emoji}</span> ${tagObj.name}`;
+      if (tagObj.emoji) {
+        tagOption.innerHTML = `<span class="tag-emoji">${tagObj.emoji}</span> ${tagObj.name}`;
+      } else {
+        tagOption.innerHTML = tagObj.name;
+      }
       
       dropdownMenu.appendChild(tagOption);
     });
