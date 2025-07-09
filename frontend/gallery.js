@@ -489,11 +489,13 @@ async function loadCapsules() {
       hasMore = false; // Search shows all results at once
     }
     
-    // Update load status
+    // Update load status - count what we actually loaded, not DOM children
     const grid = document.getElementById('capsules-grid');
-    const totalDisplayed = grid.children.length;
+    const previousCount = grid.children.length - filteredCapsules.length;
+    const totalDisplayed = previousCount + filteredCapsules.length;
+
     loadStatus.textContent = `Showing ${totalDisplayed} of ${totalCount} capsules`;
-    
+
     // Update load more button
     const loadMoreBtn = document.getElementById('load-more-btn');
     if (hasMore) {
