@@ -794,11 +794,11 @@ function populatePreview() {
     unlockDate.setSeconds(unlockDate.getSeconds() + config.value);
     formatOptions = config.value < 86400 ? // Less than 1 day
       { hour: '2-digit', minute: '2-digit', second: '2-digit' } :
-      { year: 'numeric', month: 'long', day: 'numeric' };
+      { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' };
   } else {
     // For production: fixed timestamp
     unlockDate = new Date(config.value * 1000);
-    formatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    formatOptions = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' };
   }
   
   document.getElementById('preview-unlock-date').textContent = 
@@ -1255,7 +1255,8 @@ function populateCompletion() {
     { 
       year: 'numeric', 
       month: 'long', 
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'UTC'
     };
   
   document.getElementById('final-unlock-date').textContent = 
@@ -1559,7 +1560,8 @@ function generateCapsuleImage() {
         month: 'long', 
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
+        timeZone: 'UTC'
       });
       downloadCtx.fillText(formattedDate, contentX, contentY + 18);
       
@@ -1732,7 +1734,8 @@ function shareOnX() {
   const formattedDate = unlockDate.toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'long',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'UTC'
   });
   const text = `I just created an entry on the @EthTimeCapsule 🕰️✨ It will be revealed on ${formattedDate}.
 

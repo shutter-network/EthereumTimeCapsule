@@ -581,7 +581,8 @@ async function createCapsuleCard(capsule) {
   const formatOptions = { 
     year: 'numeric', 
     month: 'long', 
-    day: 'numeric'
+    day: 'numeric',
+    timeZone: 'UTC',
   };
   const formattedDate = unlockDate.toLocaleString('en-US', formatOptions);
 

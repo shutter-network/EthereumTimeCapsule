@@ -409,7 +409,7 @@ async function shareCapsule() {
     // Construct tweet text
     const tweetText = encodeURIComponent(
       `🎁 Check out my Time Capsule: "${title}" 🎁\n\n` +
-      `🗓️ Unlocks: ${revealTime.toLocaleDateString()}\n` +
+      `🗓️ Unlocks: ${revealTime.toLocaleDateString('en-US', { timeZone: 'UTC' })}\n` +
       `🔗 View: ${capsuleUrl}\n\n` +
       `#TimeCapsule #Ethereum #Future #Memories`
     );
@@ -464,7 +464,7 @@ async function batchPreviewCapsules() {
         }
         const cap = response.data.capsule;
         
-        logOutput(`📦 Found: "${cap.title}" (Reveal: ${new Date(cap.revealTime * 1000).toLocaleDateString()})`);
+        logOutput(`📦 Found: "${cap.title}" (Reveal: ${new Date(cap.revealTime * 1000).toLocaleDateString('en-US', { timeZone: 'UTC' })})`);
         
         // Get decryption key
         const resp = await axios.get(`${shutterApi}/get_decryption_key`, {
