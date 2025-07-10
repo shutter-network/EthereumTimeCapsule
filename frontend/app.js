@@ -20,7 +20,7 @@ const REVEAL_TIME_CONFIG = {
   },
   
   // Current mode - change this to switch between testing and production
-  current: 'testing' // Change to 'production' for live deployment
+  current: 'production' // Change to 'production' for live deployment
 };
 
 // Chain configuration - change this to switch networks
