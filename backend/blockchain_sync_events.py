@@ -112,11 +112,12 @@ class EventBasedBlockchainSyncService:
                     # If we're lagging behind, use faster interval to catch up quickly
                     if to_block >= current_block:
                         sleep_time = self._sync_interval
+                        # Only log at debug level when caught up to reduce noise
                         logger.debug(f"Caught up to block {current_block}, sleeping {sleep_time}s")
                     else:
                         sleep_time = self._fast_sync_interval
                         blocks_behind = current_block - to_block
-                        logger.info(f"Lagging {blocks_behind} blocks behind (current: {current_block}, synced: {to_block}), using fast sync interval {sleep_time}s")
+                        logger.info(f"Fast sync mode: {blocks_behind} blocks behind, sleeping {sleep_time}s")
                 else:
                     # On error, use normal interval
                     sleep_time = self._sync_interval
@@ -152,83 +153,84 @@ class EventBasedBlockchainSyncService:
             # Get current blockchain state
             current_block = self.w3.eth.block_number
             sync_status = self.db.get_sync_status()
-            
+
             # Determine the range to sync
             last_synced = sync_status.get('last_synced_block', self.start_block - 1)
             from_block = max(last_synced + 1, self.start_block)  # Never go below start_block
             to_block = min(current_block, from_block + self._batch_size - 1)
-            
+
             sync_result["current_block"] = current_block
             sync_result["from_block"] = from_block
             sync_result["to_block"] = to_block
-            
+
             if from_block > current_block:
                 # Already up to date
-                logger.debug("Blockchain already synced")
                 sync_result["success"] = True
                 sync_result["sync_time"] = time.time() - start_time
                 return sync_result
-            
-            logger.info(f"Syncing events from block {from_block} to {to_block}")
-            
+
             # Fetch CapsuleCreated events
             created_events = self._get_events(
                 self.capsule_created_event,
                 from_block,
                 to_block
             )
-            
+
             # Fetch CapsuleRevealed events
             revealed_events = self._get_events(
                 self.capsule_revealed_event,
                 from_block,
                 to_block
             )
-            
+
+            # Calculate sync status for main log message
+            blocks_behind = current_block - to_block
+            total_events = len(created_events) + len(revealed_events)
+
+            # Main sync iteration log message
+            logger.info(f"Sync to block {to_block}, {blocks_behind} blocks behind, checked range: {from_block}-{to_block}, found {total_events} events ({len(created_events)} created, {len(revealed_events)} revealed)")
+
             # Process CapsuleCreated events
             for event in created_events:
                 try:
                     if self._process_capsule_created_event(event):
                         sync_result["capsules_created"] += 1
+                        logger.info(f"  → CapsuleCreated #{event['args']['id']} in block {event['blockNumber']} (tx: {event['transactionHash'].hex()[:10]}...)")
                     sync_result["events_processed"] += 1
                 except Exception as e:
                     error_msg = f"Error processing CapsuleCreated event {event['transactionHash'].hex()}: {e}"
                     logger.error(error_msg)
                     sync_result["errors"].append(error_msg)
-            
+
             # Process CapsuleRevealed events
             for event in revealed_events:
                 try:
                     if self._process_capsule_revealed_event(event):
                         sync_result["capsules_revealed"] += 1
+                        logger.info(f"  → CapsuleRevealed #{event['args']['id']} in block {event['blockNumber']} (tx: {event['transactionHash'].hex()[:10]}...)")
                     sync_result["events_processed"] += 1
                 except Exception as e:
                     error_msg = f"Error processing CapsuleRevealed event {event['transactionHash'].hex()}: {e}"
                     logger.error(error_msg)
                     sync_result["errors"].append(error_msg)
-            
+
             # Update sync status
             sync_result["database_total"] = self.db.get_capsule_count()
             error_summary = "; ".join(sync_result["errors"][-5:])  # Keep last 5 errors
-            
+
             self.db.update_sync_status(
                 last_block=to_block,
                 total_capsules=sync_result["database_total"],
                 errors=error_summary
             )
-            
+
             sync_result["success"] = True
             sync_result["sync_time"] = time.time() - start_time
-            
-            logger.info(f"Event sync completed: {sync_result['capsules_created']} created, "
-                       f"{sync_result['capsules_revealed']} revealed, "
-                       f"{len(sync_result['errors'])} errors, "
-                       f"{sync_result['sync_time']:.2f}s")
-            
+
         except Exception as e:
             sync_result["errors"].append(f"Sync failed: {e}")
             logger.error(f"Event sync failed: {e}")
-            
+
             # Still update sync status to track errors
             try:
                 sync_status = self.db.get_sync_status()
@@ -239,7 +241,7 @@ class EventBasedBlockchainSyncService:
                 )
             except Exception:
                 pass
-        
+
         return sync_result
     
     def _get_events(self, event_filter, from_block: int, to_block: int) -> List[AttributeDict]:
@@ -261,12 +263,6 @@ class EventBasedBlockchainSyncService:
                 fromBlock=from_block,
                 toBlock=to_block
             )
-            
-            logger.info(f"DEBUG: Raw events found: {len(events)} for {event_filter}")
-            if len(events) > 0:
-                logger.info(f"DEBUG: First event: {events[0]}")
-                if hasattr(events[0], 'args'):
-                    logger.info(f"DEBUG: First event args: {events[0].args}")
             
             return sorted(events, key=lambda x: (x['blockNumber'], x['transactionIndex']))
             
@@ -291,12 +287,9 @@ class EventBasedBlockchainSyncService:
             args = event['args']
             capsule_id = args['id']
             
-            logger.info(f"DEBUG: Processing CapsuleCreated event {capsule_id}")
-            logger.info(f"DEBUG: Event args keys: {list(args.keys())}")
-            
             # Check if encryptedStory exists in the event
             if 'encryptedStory' not in args:
-                logger.error(f"DEBUG: encryptedStory not found in event args! Available: {list(args.keys())}")
+                logger.error(f"encryptedStory not found in CapsuleCreated event {capsule_id}! Available: {list(args.keys())}")
                 return False
             
             # All data is now available in the event - NO blockchain calls needed!
