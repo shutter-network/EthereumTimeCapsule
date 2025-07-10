@@ -602,8 +602,8 @@ def submit_capsule():
         tags = sanitize_text_input(tags)
         story = sanitize_text_input(story)
         
-        if not all([title, tags, story]):
-            return {"error": "Missing required field (title, tags, or story)"}, 400
+        if not all([title, story]):
+            return {"error": "Missing required field (title or story)"}, 400
 
         # Additional validation after sanitization
         if len(story) > 280:
