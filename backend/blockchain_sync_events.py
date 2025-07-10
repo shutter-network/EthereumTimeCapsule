@@ -53,24 +53,25 @@ class EventBasedBlockchainSyncService:
         self.contract_abi = contract_abi
         self.db = db
         self.start_block = start_block
-        
+
         # Initialize Web3 connection
         self.w3 = Web3(Web3.HTTPProvider(rpc_url))
         if not self.w3.is_connected():
             raise Exception(f"Failed to connect to blockchain at {rpc_url}")
-        
+
         # Initialize contract
         self.contract = self.w3.eth.contract(
             address=Web3.to_checksum_address(contract_address),
             abi=contract_abi
         )
-        
+
         # Sync control
         self._stop_sync = False
         self._sync_thread = None
-        self._sync_interval = 10  # seconds
+        self._sync_interval = 10  # seconds (when caught up)
+        self._fast_sync_interval = 1  # seconds (when lagging behind)
         self._batch_size = 1000  # blocks to process in each batch
-        
+
         # Event signatures
         self.capsule_created_event = self.contract.events.CapsuleCreated
         self.capsule_revealed_event = self.contract.events.CapsuleRevealed
@@ -97,16 +98,35 @@ class EventBasedBlockchainSyncService:
         logger.info("Event-based blockchain sync service stopped")
     
     def _sync_loop(self):
-        """Main synchronization loop"""
+        """Main synchronization loop with adaptive timing"""
         while not self._stop_sync:
             try:
-                self.sync_events()
-                time.sleep(self._sync_interval)
+                sync_result = self.sync_events()
+
+                # Adaptive sleep timing based on sync status
+                if sync_result.get("success", False):
+                    current_block = sync_result.get("current_block", 0)
+                    to_block = sync_result.get("to_block", 0)
+
+                    # If we're caught up (processed up to current block), use normal interval
+                    # If we're lagging behind, use faster interval to catch up quickly
+                    if to_block >= current_block:
+                        sleep_time = self._sync_interval
+                        logger.debug(f"Caught up to block {current_block}, sleeping {sleep_time}s")
+                    else:
+                        sleep_time = self._fast_sync_interval
+                        blocks_behind = current_block - to_block
+                        logger.info(f"Lagging {blocks_behind} blocks behind (current: {current_block}, synced: {to_block}), using fast sync interval {sleep_time}s")
+                else:
+                    # On error, use normal interval
+                    sleep_time = self._sync_interval
+
+                time.sleep(sleep_time)
             except Exception as e:
                 logger.error(f"Error in sync loop: {e}")
                 # Continue running despite errors
                 time.sleep(self._sync_interval)
-    
+
     def sync_events(self) -> Dict[str, Any]:
         """
         Synchronize events from blockchain to database
@@ -124,6 +144,7 @@ class EventBasedBlockchainSyncService:
             "sync_time": 0,
             "from_block": 0,
             "to_block": 0,
+            "current_block": 0,
             "database_total": 0
         }
         
@@ -137,6 +158,7 @@ class EventBasedBlockchainSyncService:
             from_block = max(last_synced + 1, self.start_block)  # Never go below start_block
             to_block = min(current_block, from_block + self._batch_size - 1)
             
+            sync_result["current_block"] = current_block
             sync_result["from_block"] = from_block
             sync_result["to_block"] = to_block
             
@@ -430,6 +452,7 @@ class EventBasedBlockchainSyncService:
                 "sync_drift": blockchain_capsules - database_capsules,
                 "recent_errors": sync_status.get('sync_errors', ''),
                 "sync_interval": self._sync_interval,
+                "fast_sync_interval": self._fast_sync_interval,
                 "batch_size": self._batch_size,
                 "start_block": self.start_block,
                 "blocks_processed": max(0, sync_status.get('last_synced_block', 0) - self.start_block + 1)
