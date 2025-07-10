@@ -112,12 +112,8 @@ class EventBasedBlockchainSyncService:
                     # If we're lagging behind, use faster interval to catch up quickly
                     if to_block >= current_block:
                         sleep_time = self._sync_interval
-                        # Only log at debug level when caught up to reduce noise
-                        logger.debug(f"Caught up to block {current_block}, sleeping {sleep_time}s")
                     else:
                         sleep_time = self._fast_sync_interval
-                        blocks_behind = current_block - to_block
-                        logger.info(f"Fast sync mode: {blocks_behind} blocks behind, sleeping {sleep_time}s")
                 else:
                     # On error, use normal interval
                     sleep_time = self._sync_interval
