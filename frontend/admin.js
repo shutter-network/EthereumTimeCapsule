@@ -11,18 +11,18 @@ const WalletConnectProvider = window.WalletConnectProvider.default;
 
 // =============  CONFIGURATION  =============
 // Chain configuration - change this to switch networks
-// const CHAIN_CONFIG = {
-//   chainId: 1,                    // Chain ID as number
-//   chainIdHex: '0x1',              // Chain ID in hex format
-//   chainName: 'Ethereum',             // Display name (for error messages)
-//   rpcUrl: 'https://eth-mainnet.g.alchemy.com/v2/kDge5GGs1WZE7tiYVnE3E', // RPC endpoint
-// };
 const CHAIN_CONFIG = {
-  chainId: 11155111,                    // Chain ID as number
-  chainIdHex: '0xaa36a7',              // Chain ID in hex format
-  chainName: 'Sepolia',             // Display name (for error messages)
-  rpcUrl: 'https://eth-sepolia.g.alchemy.com/v2/YKFc7LN9GJ55rAR9FScn4', // RPC endpoint
+  chainId: 1,                    // Chain ID as number
+  chainIdHex: '0x1',              // Chain ID in hex format
+  chainName: 'Ethereum',             // Display name (for error messages)
+  rpcUrl: 'https://eth-mainnet.g.alchemy.com/v2/kDge5GGs1WZE7tiYVnE3E', // RPC endpoint
 };
+// const CHAIN_CONFIG = {
+//   chainId: 11155111,                    // Chain ID as number
+//   chainIdHex: '0xaa36a7',              // Chain ID in hex format
+//   chainName: 'Sepolia',             // Display name (for error messages)
+//   rpcUrl: 'https://eth-sepolia.g.alchemy.com/v2/YKFc7LN9GJ55rAR9FScn4', // RPC endpoint
+// };
 
 // =============  GLOBALS (EXACT COPY FROM GALLERY.JS)  =============
 let provider, signer, contract, contractRead;
