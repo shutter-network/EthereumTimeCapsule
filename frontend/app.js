@@ -502,7 +502,7 @@ function validateStep1() {
   
   // Save sanitized data
   capsuleData.title = sanitizedEntryTitle;     // Title of the entry
-  capsuleData.tags = sanitizedTags || sanitizedEntryTitle;  // Use actual tags if provided, otherwise use title
+  capsuleData.tags = sanitizedTags;
   capsuleData.story = sanitizedStory;
   capsuleData.image = image; // Can be null if no image is uploaded
   
