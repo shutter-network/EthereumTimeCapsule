@@ -560,7 +560,10 @@ async function createCapsuleCard(capsule) {
   }
   
   // Process tags into clickable chips using the exact same format as preview card
-  const tags = capsule.tags ? capsule.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+  // Only include tags that are defined in public_config.json
+  const allTags = capsule.tags ? capsule.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+  const validTagNames = availableTags.map(tag => tag.name.toLowerCase());
+  const tags = allTags.filter(tag => validTagNames.includes(tag.toLowerCase()));
   
   // Determine the image source and CID to use
   let imageSrc;
