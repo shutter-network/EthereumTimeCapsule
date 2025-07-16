@@ -12,7 +12,7 @@ from html import escape
 # Import database and blockchain sync
 from database import CapsuleDatabase
 from blockchain_sync_events import EventBasedBlockchainSyncService
-from config import public_config as config_data, public_config_path
+from public_config import public_config as config_data, public_config_path
 
 # Note: S3 storage removed - using IPFS + Pinata only
 
