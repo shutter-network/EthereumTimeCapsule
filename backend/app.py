@@ -12,6 +12,7 @@ from html import escape
 # Import database and blockchain sync
 from database import CapsuleDatabase
 from blockchain_sync_events import EventBasedBlockchainSyncService
+from config import public_config as config_data, public_config_path
 
 # Note: S3 storage removed - using IPFS + Pinata only
 
@@ -106,6 +107,10 @@ def gallery_html():
 def default_image():
     return app.send_static_file('default.jpg')
 
+@app.route('/public_config.json')
+def public_config():
+    return config_data
+
 # Initialize database
 # Use PostgreSQL on Heroku, SQLite locally
 if IS_PRODUCTION and 'DATABASE_URL' in os.environ:
@@ -173,12 +178,7 @@ def sanitize_capsule_data(data):
 try:    # Handle different working directories (local vs Heroku)
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     frontend_dir = os.path.join(base_dir, "frontend")
-    
-    config_path = os.path.join(frontend_dir, "public_config.json")
     abi_path = os.path.join(frontend_dir, "contract_abi.json")
-    
-    with open(config_path, "r") as f:
-        config_data = json.load(f)
     
     with open(abi_path, "r") as f:
         contract_abi = json.load(f)      # Store image processing config globally
@@ -1176,21 +1176,13 @@ def test_speed_comparison():
 def debug_contract():
     """Debug endpoint to show current contract configuration"""
     try:
-        # Load the same config that the frontend uses
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        frontend_dir = os.path.join(base_dir, "frontend")
-        config_path = os.path.join(frontend_dir, "public_config.json")
-        
-        with open(config_path, "r") as f:
-            config_data = json.load(f)
-        
         # Get current network config
         default_network = config_data.get("default_network", "testnet")
         network_config = config_data[default_network]
         
         return jsonify({
             "success": True,
-            "config_source": config_path,
+            "config_source": public_config_path,
             "default_network": default_network,
             "current_config": network_config,
             "backend_contract_address": sync_service.contract_address if sync_service else "Not initialized",

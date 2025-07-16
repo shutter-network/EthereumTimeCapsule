@@ -1,0 +1,89 @@
+{
+  "testnet": {
+    "contract_address": "0x374248Bf74C38fd643FA7d8C5e65656A36D52D79",
+    "registry_address": "0x694e5de9345d39C148DA90e6939A3fd2142267D9",
+    "shutter_api_base": "https://shutter-api.shutter.network/api",
+    "rpc_url": "https://eth-sepolia.g.alchemy.com/v2/YKFc7LN9GJ55rAR9FScn4",
+    "start_block": 8649577
+  },
+  "mainnet": {
+    "contract_address": "0x635e325c4b130e7AbfB9ef8D0beD5D79e1e32a64",
+    "registry_address": "0x694e5de9345d39C148DA90e6939A3fd2142267D9",
+    "shutter_api_base": "https://shutter-api.shutter.network/api",
+    "rpc_url": "https://eth-mainnet.g.alchemy.com/v2/kDge5GGs1WZE7tiYVnE3E",
+    "start_block": 22806303
+  },
+  "default_network": "mainnet",
+  "homepage_carousel_capsules": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+  "tag_sections": [
+    {
+      "title": "Key Moments",
+      "tags": [
+        { "name": "Crypto Winter 21/22", "emoji": null },
+        { "name": "CryptoKitties craze", "emoji": null },
+        { "name": "Ethereum Hard Fork", "emoji": null },
+        { "name": "Ethereum Mainnet Launch", "emoji": null },
+        { "name": "Ethereum Whitepaper", "emoji": null },
+        { "name": "Ethereum Yellow Paper", "emoji": null },
+        { "name": "Shanghai DoS attacks", "emoji": null },
+        { "name": "The DAO Hack", "emoji": null },
+        { "name": "The Merge", "emoji": null }
+      ]
+    },
+    {
+      "title": "Communities",
+      "tags": [
+        { "name": "Arbitrum", "emoji": null },
+        { "name": "Base", "emoji": null },
+        { "name": "DappCon", "emoji": null },
+        { "name": "Devcon", "emoji": null },
+        { "name": "Devconnect", "emoji": null },
+        { "name": "ETHDenver", "emoji": null },
+        { "name": "EthCC", "emoji": null },
+        { "name": "ETHDublin", "emoji": null },
+        { "name": "ETHTaipei", "emoji": null },
+        { "name": "Optimism", "emoji": null },
+        { "name": "Polygon", "emoji": null },
+        { "name": "zkSync", "emoji": null }
+      ]
+    },
+    {
+      "title": "General",
+      "tags": [
+        { "name": "NFT", "emoji": null },
+        { "name": "EIP", "emoji": null },
+        { "name": "art", "emoji": "🎨" },
+        { "name": "BUIDL", "emoji": "🦾" },
+        { "name": "DearFutureMe", "emoji": "🙌" },
+        { "name": "dreams", "emoji": "✨" },
+        { "name": "family", "emoji": "👨‍👩‍👧‍👦" },
+        { "name": "future", "emoji": "🔮" },
+        { "name": "goals", "emoji": "🎯" },
+        { "name": "gratitude", "emoji": "🙏" },
+        { "name": "hope", "emoji": "🌈" },
+        { "name": "LFG", "emoji": "🔥" },
+        { "name": "lol", "emoji": "🤣" },
+        { "name": "love", "emoji": "💕" },
+        { "name": "memories", "emoji": "💭" },
+        { "name": "music", "emoji": "🎵" },
+        { "name": "OnChainValues", "emoji": "🫶" },
+        { "name": "past", "emoji": "📜" },
+        { "name": "present", "emoji": "🎁" },
+        { "name": "secrets", "emoji": "🤫" },
+        { "name": "shill", "emoji": "😎" },
+        { "name": "thoughts", "emoji": "💭" },
+        { "name": "travel", "emoji": "✈️" },
+        { "name": "wishes", "emoji": "🌟" }
+      ]
+    }
+  ],
+  "image_processing": {
+    "target_vertical_resolution": 100,
+    "smoothing_factor": 19,
+    "enable_floyd_steinberg_dithering": true,
+    "enable_black_white_dithering": true,
+    "enable_advanced_dithering": true,
+    "max_processing_dimension": 800,
+    "disable_dithering_on_large_images": true
+  }
+}
