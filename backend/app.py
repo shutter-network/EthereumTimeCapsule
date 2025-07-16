@@ -19,66 +19,35 @@ from blockchain_sync_events import EventBasedBlockchainSyncService
 ImageFile.LOAD_TRUNCATED_IMAGES = False
 ImageFile.MAX_IMAGE_PIXELS = 4096 * 4096
 
-# Import private config
-try:
-    import config
-    from config import PINATA_API_KEY, PINATA_SECRET_API_KEY, PINATA_GATEWAY
-    # Try to import JWT token for V3 API
-    PINATA_JWT = getattr(config, 'PINATA_JWT', None)
-    
-    # Check if we're in production
-    IS_PRODUCTION = getattr(config, 'IS_PRODUCTION', False)
-    
-    # Import Shutter configuration from config.py
-    SHUTTER_API_BASE = getattr(config, 'SHUTTER_API_BASE', None)
-    SHUTTER_REGISTRY = getattr(config, 'SHUTTER_REGISTRY_ADDRESS', None)
-    SHUTTER_BEARER_TOKEN = getattr(config, 'SHUTTER_BEARER_TOKEN', None)
+PINATA_JWT = os.environ.get('PINATA_JWT')
+PINATA_API_KEY = os.environ.get('PINATA_API_KEY')
+PINATA_SECRET_API_KEY = os.environ.get('PINATA_SECRET_API_KEY')
+PINATA_GATEWAY = os.environ.get('PINATA_GATEWAY', 'https://gateway.pinata.cloud')
 
-    # Import image upload configuration from config.py
-    MAX_IMAGE_SIZE_MB = getattr(config, 'MAX_IMAGE_SIZE_MB', None)
+# Shutter configuration from environment variables only
+SHUTTER_API_BASE = os.environ.get("SHUTTER_API_BASE")
+SHUTTER_REGISTRY = os.environ.get("SHUTTER_REGISTRY_ADDRESS")
+SHUTTER_BEARER_TOKEN = os.environ.get("SHUTTER_BEARER_TOKEN")
 
-    # Check for V3 API (JWT) first, then fall back to V2 API
-    if PINATA_JWT and PINATA_JWT != "your_pinata_jwt_token_here":
-        PINATA_ENABLED = True
-        PINATA_VERSION = "v3"
-    elif PINATA_API_KEY and PINATA_SECRET_API_KEY and PINATA_API_KEY != "your_pinata_api_key_here":
-        PINATA_ENABLED = True
-        PINATA_VERSION = "v2"
-    else:
-        PINATA_ENABLED = False
-        PINATA_VERSION = None
-except ImportError:
-    print("Warning: config.py not found, trying environment variables...")
-    # Fallback to environment variables for Heroku deployment
-    PINATA_JWT = os.environ.get('PINATA_JWT')
-    PINATA_API_KEY = os.environ.get('PINATA_API_KEY')
-    PINATA_SECRET_API_KEY = os.environ.get('PINATA_SECRET_API_KEY')
-    PINATA_GATEWAY = os.environ.get('PINATA_GATEWAY', 'https://gateway.pinata.cloud')
+# Image upload configuration from environment variables only
+MAX_IMAGE_SIZE_MB = os.environ.get('MAX_IMAGE_SIZE_MB')
 
-    # Shutter configuration from environment variables only
-    SHUTTER_API_BASE = os.environ.get("SHUTTER_API_BASE")
-    SHUTTER_REGISTRY = os.environ.get("SHUTTER_REGISTRY_ADDRESS")
-    SHUTTER_BEARER_TOKEN = os.environ.get("SHUTTER_BEARER_TOKEN")
+# Check for V3 API (JWT) first, then fall back to V2 API
+if PINATA_JWT and PINATA_JWT != "your_pinata_jwt_token_here":
+    PINATA_ENABLED = True
+    PINATA_VERSION = "v3"
+    print("✅ Pinata V3 (JWT) configured from environment")
+elif PINATA_API_KEY and PINATA_SECRET_API_KEY and PINATA_API_KEY != "your_pinata_api_key_here":
+    PINATA_ENABLED = True
+    PINATA_VERSION = "v2"
+    print("✅ Pinata V2 (API Keys) configured from environment")
+else:
+    PINATA_ENABLED = False
+    PINATA_VERSION = None
+    print("❌ Pinata not configured - no valid credentials found")
 
-    # Image upload configuration from environment variables only
-    MAX_IMAGE_SIZE_MB = os.environ.get('MAX_IMAGE_SIZE_MB')
-
-    # Check for V3 API (JWT) first, then fall back to V2 API
-    if PINATA_JWT and PINATA_JWT != "your_pinata_jwt_token_here":
-        PINATA_ENABLED = True
-        PINATA_VERSION = "v3"
-        print("✅ Pinata V3 (JWT) configured from environment")
-    elif PINATA_API_KEY and PINATA_SECRET_API_KEY and PINATA_API_KEY != "your_pinata_api_key_here":
-        PINATA_ENABLED = True
-        PINATA_VERSION = "v2"
-        print("✅ Pinata V2 (API Keys) configured from environment")
-    else:
-        PINATA_ENABLED = False
-        PINATA_VERSION = None
-        print("❌ Pinata not configured - no valid credentials found")
-
-    # Detect production environment (Heroku provides PORT env var)
-    IS_PRODUCTION = os.environ.get('PORT') is not None or os.environ.get('DYNO') is not None
+# Detect production environment (Heroku provides PORT env var)
+IS_PRODUCTION = os.environ.get('PORT') is not None or os.environ.get('DYNO') is not None
 
 # Apply defaults for Shutter configuration if not set
 SHUTTER_API_BASE = SHUTTER_API_BASE or "https://shutter-api.chiado.staging.shutter.network/api"
