@@ -5,23 +5,23 @@
 const WalletConnectProvider = window.WalletConnectProvider.default;
 
 // =============  CONFIGURATION  =============
-// Reveal time configuration - change this for testing vs production
-const REVEAL_TIME_CONFIG = {
-  // For testing: 2 minutes from now (relative)
-  testing: {
-    type: 'relative',
-    value: 2 * 60 // 2 minutes in seconds
-  },
+// Helper: get reveal time configuration from public config
+async function getRevealTimeConfig() {
+  const config = await loadPublicConfig();
   
-  // For production: fixed timestamp (absolute)
-  production: {
-    type: 'absolute',
-    value: 1785369600 // July 30, 2026 12:00:00 AM
-  },
+  if (!config.reveal_time_config) {
+    throw new Error('reveal_time_config not found in public configuration');
+  }
   
-  // Current mode - change this to switch between testing and production
-  current: 'testing' // Change to 'production' for live deployment
-};
+  const revealConfig = config.reveal_time_config;
+  const currentMode = revealConfig.current;
+  
+  if (!revealConfig[currentMode]) {
+    throw new Error(`Reveal time configuration mode '${currentMode}' not found in config`);
+  }
+  
+  return revealConfig[currentMode];
+}
 
 // Chain configuration - change this to switch networks
 // const CHAIN_CONFIG = {
@@ -789,26 +789,34 @@ function populatePreview() {
   } else {
     document.getElementById('preview-issuer').textContent = 'anonymous';
   }
-  // Update unlock date (configurable reveal time)
-  const config = REVEAL_TIME_CONFIG[REVEAL_TIME_CONFIG.current];
-  let unlockDate;
-  let formatOptions;
   
-  if (config.type === 'relative') {
-    // For testing: current time + offset
-    unlockDate = new Date();
-    unlockDate.setSeconds(unlockDate.getSeconds() + config.value);
-    formatOptions = config.value < 86400 ? // Less than 1 day
-      { hour: '2-digit', minute: '2-digit', second: '2-digit' } :
-      { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' };
-  } else {
-    // For production: fixed timestamp
-    unlockDate = new Date(config.value * 1000);
-    formatOptions = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' };
-  }
-  
-  document.getElementById('preview-unlock-date').textContent = 
-    unlockDate.toLocaleString('en-US', formatOptions);
+  // Update unlock date (configurable reveal time) - async operation
+  (async () => {
+    try {
+      const config = await getRevealTimeConfig();
+      let unlockDate;
+      let formatOptions;
+      
+      if (config.type === 'relative') {
+        // For testing: current time + offset
+        unlockDate = new Date();
+        unlockDate.setSeconds(unlockDate.getSeconds() + config.value);
+        formatOptions = config.value < 86400 ? // Less than 1 day
+          { hour: '2-digit', minute: '2-digit', second: '2-digit' } :
+          { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' };
+      } else {
+        // For production: fixed timestamp
+        unlockDate = new Date(config.value * 1000);
+        formatOptions = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' };
+      }
+      
+      document.getElementById('preview-unlock-date').textContent = 
+        unlockDate.toLocaleString('en-US', formatOptions);
+    } catch (error) {
+      console.error('Failed to update unlock date:', error);
+      document.getElementById('preview-unlock-date').textContent = 'Error loading unlock date';
+    }
+  })();
   
   // Update tags
   const tagsContainer = document.querySelector('.preview-tags');
@@ -916,7 +924,7 @@ async function startEncryptionInBackground() {
     document.getElementById('preview-encryption-status').textContent = 'Getting encryption parameters...';
     
     // Calculate reveal timestamp based on configuration
-    const config = REVEAL_TIME_CONFIG[REVEAL_TIME_CONFIG.current];
+    const config = await getRevealTimeConfig();
     let revealTimestamp;
     if (config.type === 'relative') {
       // For testing: current time + offset
@@ -1264,29 +1272,37 @@ function populateCompletion() {
   } else {
     document.getElementById('final-preview-issuer').textContent = 'anonymous';
   }
-  // Update unlock date
-  const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
-  const config = REVEAL_TIME_CONFIG[REVEAL_TIME_CONFIG.current];
+  // Update unlock date - async operation
+  (async () => {
+    try {
+      const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
+      const config = await getRevealTimeConfig();
+      
+      // For display formatting, check if it's a short-term reveal (testing mode)
+      const formatOptions = (config.type === 'relative' && config.value < 86400) ? // Less than 1 day for testing
+        { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        } : 
+        { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric',
+          timeZone: 'UTC'
+        };
+      
+      document.getElementById('final-unlock-date').textContent = 
+        unlockDate.toLocaleString('en-US', formatOptions);
+    } catch (error) {
+      console.error('Failed to update final unlock date:', error);
+      document.getElementById('final-unlock-date').textContent = 'Error loading unlock date';
+    }
+  })();
   
-  // For display formatting, check if it's a short-term reveal (testing mode)
-  const formatOptions = (config.type === 'relative' && config.value < 86400) ? // Less than 1 day for testing
-    { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    } : 
-    { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      timeZone: 'UTC'
-    };
-  
-  document.getElementById('final-unlock-date').textContent = 
-    unlockDate.toLocaleString('en-US', formatOptions);
-    // Update tags
+  // Update tags
   const finalTagsContainer = document.getElementById('final-preview-tags');
   finalTagsContainer.innerHTML = '';
   const tags = capsuleData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);

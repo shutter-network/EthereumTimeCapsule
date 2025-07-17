@@ -69,6 +69,17 @@
       ]
     }
   ],
+  "reveal_time_config": {
+    "testing": {
+      "type": "relative",
+      "value": 120
+    },
+    "production": {
+      "type": "absolute", 
+      "value": 1785369600
+    },
+    "current": "testing"
+  },
   "image_processing": {
     "target_vertical_resolution": 100,
     "smoothing_factor": 19,
