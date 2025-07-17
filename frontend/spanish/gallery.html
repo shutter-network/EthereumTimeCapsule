@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time Capsule - Galería</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #000;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    .gallery-container {
+      max-width: 380px;
+      margin: 0 auto;
+      background-color: #000;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 16px;
+      background-color: #000;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .logo-icon {
+      width: 60px;
+      height: auto;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      justify-content: space-between;
+      padding: 4px 0;
+    }
+
+    .menu-line {
+      width: 100%;
+      height: 2px;
+      background-color: #fff;
+      transition: all 0.3s ease;
+    }
+
+    .menu-dropdown {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background-color: #000;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .menu-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .menu-dropdown a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 32px;
+      font-weight: 300;
+      letter-spacing: 2px;
+      transition: color 0.3s ease;
+      text-align: center;
+    }
+
+    .menu-dropdown a:hover {
+      color: #ccc;
+    }
+
+    .menu-back {
+      position: absolute;
+      top: 40px;
+      left: 40px;
+      font-size: 48px;
+      font-weight: 300;
+      color: #fff;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .menu-back:hover {
+      color: #ccc;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 20px 16px;
+    }
+
+    .gallery-header {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .gallery-title {
+      font-size: 32px;
+      line-height: 38px;
+      font-weight: 300;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .gallery-subtitle {
+      font-size: 18px;
+      line-height: 24px;
+      color: #999;
+      font-weight: 300;
+    }
+
+    .gallery-controls {
+      margin-bottom: 30px;
+      background-color: #111;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .search-box {
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      background-color: #222;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .search-input::placeholder {
+      color: #666;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #555;
+    }
+
+    .filter-controls {
+      margin-bottom: 20px;
+    }
+
+    .btn-filter {
+      padding: 8px 16px;
+      border: 1px solid #333;
+      border-radius: 20px;
+      background-color: #222;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-filter:hover {
+      background-color: #333;
+    }
+
+    .btn-filter.active {
+      background-color: #fff;
+      color: #000;
+    }
+
+    .tag-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn-search {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #333;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-search:hover {
+      background-color: #444;
+    }
+
+    .loading-indicator {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      border: 3px solid #333;
+      border-top: 3px solid #fff;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .capsules-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .capsule-card {
+      background-color: #111;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    .capsule-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .capsule-media {
+      width: 100%;
+      height: 200px;
+      background-color: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .capsule-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .capsule-info {
+      padding: 16px;
+    }
+
+    .capsule-title {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .capsule-meta {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+
+    .capsule-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .capsule-tag {
+      padding: 4px 8px;
+      background-color: #333;
+      border-radius: 12px;
+      font-size: 12px;
+      color: #ccc;
+    }
+
+    .load-more-container {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .btn-load-more {
+      padding: 12px 24px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      background-color: #222;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-load-more:hover {
+      background-color: #333;
+    }
+
+    .load-status {
+      font-size: 14px;
+      color: #666;
+      margin-top: 12px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      border-top: 1px solid #333;
+      background-color: #111;
+    }
+
+    .footer a {
+      color: #999;
+      text-decoration: none;
+      margin: 0 8px;
+      font-size: 14px;
+      transition: color 0.3s ease;
+    }
+
+    .footer a:hover {
+      color: #fff;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 480px) {
+      .gallery-container {
+        max-width: 100%;
+      }
+
+      .header {
+        padding: 16px;
+      }
+
+      .main-content {
+        padding: 16px;
+      }
+
+      .gallery-title {
+        font-size: 28px;
+        line-height: 34px;
+      }
+
+      .gallery-subtitle {
+        font-size: 16px;
+      }
+
+      .gallery-controls {
+        padding: 12px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .gallery-container {
+        max-width: 500px;
+        margin: 20px auto;
+        min-height: calc(100vh - 40px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="gallery-container">
+    <!-- Header -->
+    <div class="header">
+      <a href="/spanish/index.html" class="logo">
+        <img src="../logo.svg" alt="Time Capsule" class="logo-icon" style="width: 60px; height: auto;">
+        <img src="../headertext.png" alt="Time Capsule" style="height: 45px; width: auto;">
+      </a>
+      <div class="menu" id="menuButton">
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Gallery Header -->
+      <div class="gallery-header">
+        <div class="gallery-title">Galería</div>
+        <div class="gallery-subtitle">Explora mensajes preservados de la comunidad</div>
+      </div>
+
+      <!-- Wallet Status - Hidden for read-only gallery -->
+
+      <!-- Gallery Controls -->
+      <div class="gallery-controls">
+        <div class="search-box">
+          <input type="text" id="search-input" class="search-input" placeholder="Buscar por título, etiquetas o creador...">
+        </div>
+        <div class="filter-controls">
+          <button id="filter-all" class="btn-filter active">Todas las Etiquetas</button>
+          <div id="tag-filters" class="tag-filters">
+            <!-- Popular tags will be loaded here -->
+          </div>
+        </div>
+        <button id="search-btn" class="btn-search">Buscar</button>
+      </div>
+
+      <!-- Loading indicator -->
+      <div id="loading-indicator" class="loading-indicator" style="display: none;">
+        <div class="spinner"></div>
+        <p>Cargando cápsulas...</p>
+      </div>
+
+      <!-- Capsules Grid -->
+      <div id="capsules-grid" class="capsules-grid">
+        <!-- Capsules will be loaded here -->
+      </div>
+
+      <!-- Load More -->
+      <div class="load-more-container">
+        <button id="load-more-btn" class="btn-load-more">Cargar Más</button>
+        <p id="load-status" class="load-status"></p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <a href="/spanish/create.html">Crear Entrada</a> | <a href="/spanish/index.html">Inicio</a>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../public_config_loader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+  <!-- BLST WASM runtime (required for custom shutter crypto) -->
+  <script src="https://cdn.jsdelivr.net/npm/@shutter-network/blst@0.1.7/dist/blst.min.js"></script>
+
+  <!-- Custom Shutter WASM loader and app logic with cache busting -->
+  <script src="../blst.js?v=2025062004"></script>
+  <script type="module" src="../main.js?v=2025062004"></script>
+  <script type="module" src="gallery.js?v=2025062004"></script>
+
+  <script>
+    // Menu toggle functionality - consistent with other pages
+    function toggleMenu() {
+      // Remove existing menu if present
+      const existingMenu = document.querySelector('.menu-dropdown');
+      if (existingMenu) {
+        existingMenu.classList.remove('show');
+        setTimeout(() => {
+          existingMenu.remove();
+        }, 300);
+        return;
+      }
+
+      // Create new full-screen menu
+      const menu = document.createElement('div');
+      menu.className = 'menu-dropdown';
+
+      const links = [
+        { text: 'inicio', href: '/spanish/' },
+        { text: 'crear entrada', href: '/spanish/create.html' },
+        { text: 'galería', href: '/spanish/gallery.html' },
+        { text: 'documentación', href: 'https://github.com/shutter-network/EthereumTimeCapsule' },
+        { text: 'preguntas frecuentes', href: '/spanish/faq.html' },
+        { text: 'imprenta', href: '/spanish/imprint.html' }
+      ];
+
+      links.forEach((link, index) => {
+        const a = document.createElement('a');
+        a.href = link.href;
+        a.textContent = link.text;
+        menu.appendChild(a);
+      });
+
+      // Add back button
+      const backButton = document.createElement('div');
+      backButton.className = 'menu-back';
+      backButton.innerHTML = '&lt;';
+      backButton.addEventListener('click', toggleMenu);
+      menu.appendChild(backButton);
+
+      // Append to body for full-screen overlay
+      document.body.appendChild(menu);
+
+      // Trigger animation
+      setTimeout(() => {
+        menu.classList.add('show');
+      }, 10);
+
+      // Remove menu when clicking outside or on links
+      menu.addEventListener('click', (e) => {
+        if (e.target === menu || e.target.tagName === 'A') {
+          if (e.target.tagName === 'A') {
+            const href = e.target.href;
+            // Handle different types of links
+            if (href.startsWith('#')) {
+              // Prevent navigation for placeholder links
+              e.preventDefault();
+              toggleMenu();
+            } else {
+              // Internal links - prevent default and navigate in same tab
+              e.preventDefault();
+              toggleMenu();
+              setTimeout(() => {
+                window.location.href = href;
+              }, 300); // Wait for menu to close
+            }
+          } else {
+            toggleMenu();
+          }
+        }
+      });
+    }
+
+    // Add event listener for menu button
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuButton = document.getElementById('menuButton');
+      if (menuButton) {
+        menuButton.addEventListener('click', toggleMenu);
+      }
+      // Gallery is read-only, no wallet connection needed
+      console.log("Gallery page loaded in read-only mode");
+    });
+  </script>
+</body>
+</html>

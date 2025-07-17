@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ethereum Time Capsule | Sé Parte de la Historia Viviente de Ethereum</title>
+  <meta name="description" content="Para celebrar el décimo aniversario de Ethereum, creamos la Ethereum Time Capsule — sellada de forma privada ahora, revelada un año después, y registrada onchain para siempre.">
+
+  <!-- OpenGraph meta tags -->
+  <meta property="og:title" content="Ethereum Time Capsule | Sé Parte de la Historia Viviente de Ethereum">
+  <meta property="og:description" content="Para celebrar el décimo aniversario de Ethereum, creamos la Ethereum Time Capsule — sellada de forma privada ahora, revelada un año después, y registrada onchain para siempre.">
+  <meta property="og:image" content="https://ethtimecapsule.com/media_preview.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="">
+
+  <!-- Twitter meta tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ethereum Time Capsule | Sé Parte de la Historia Viviente de Ethereum">
+  <meta name="twitter:description" content="Para celebrar el décimo aniversario de Ethereum, creamos la Ethereum Time Capsule — sellada de forma privada ahora, revelada un año después, y registrada onchain para siempre.">
+  <meta name="twitter:image" content="https://ethtimecapsule.com/media_preview.png">
+
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="../matomo.js"></script>
+  <style>
+    /* Figma-inspired design variables */
+    :root {
+      /* Colors */
+      --eth1: #ffffff;
+      --eth2: #ececec;
+      --eth3: #232323;
+      --eth4: #c0c0c0;
+      --eth5: #242ae0;
+      --d9d9d9: #d9d9d9;
+
+      /* Fonts */
+      --eth1-font-family: 'Inter', sans-serif;
+      --eth1-font-size: 12px;
+      --eth1-font-weight: 500;
+      --button-font-family: 'Inter', sans-serif;
+      --button-font-size: 20px;
+      --button-font-weight: 600;
+      --intro-copy-font-family: 'Inter', sans-serif;
+      --intro-copy-font-size: 20px;
+      --intro-copy-font-weight: 400;
+      --slogan-mobile-font-family: 'Space Grotesk', sans-serif;
+      --slogan-mobile-font-size: 40px;
+      --slogan-mobile-line-height: 48px;
+      --slogan-mobile-font-weight: 700;
+      --tinx-font-family: 'Inter', sans-serif;
+      --tinx-font-size: 10px;
+      --tinx-font-weight: 400;
+      --tinx-light-font-family: 'Inter', sans-serif;
+      --tinx-light-font-size: 11px;
+      --tinx-light-font-weight: 300;
+      --small-button-font-family: 'Inter', sans-serif;
+      --small-button-font-size: 16px;
+      --small-button-font-weight: 600;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Global overflow control */
+    html, body {
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: var(--eth1-font-family);
+      background: var(--eth1);
+      color: var(--eth3);
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Main container */
+    .home-container {
+      background: var(--eth1);
+      border-radius: 24px;
+      border: 1px solid #000000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      max-width: 400px;
+      margin: 0 auto;
+      overflow: hidden;
+      position: relative;
+    }    /* Header */
+    .header {
+      background: var(--eth2);
+      padding: 12px 20px 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 68px;
+      min-width: 272px;
+      position: relative;
+    }
+
+    .logo {
+      font-family: var(--small-button-font-family);
+      font-size: 18px;
+      font-weight: var(--small-button-font-weight);
+      color: var(--eth3);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      font-size: 24px;
+    }
+
+    .menu {
+      width: 52px;
+      height: 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--d9d9d9);
+      border-radius: 12px;
+      cursor: pointer;
+      gap: 4px;
+      padding: 14px 12px;
+      transition: all 0.3s ease;
+    }
+
+    .menu:hover {
+      background: #c5c5c5;
+    }
+
+    .menu-line {
+      width: 28px;
+      height: 2px;
+      background-color: var(--eth3);
+      border-radius: 1px;
+      transition: all 0.3s ease;
+    }
+
+    /* Menu dropdown */
+    .menu-dropdown {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--eth2);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--eth1-font-family);
+      font-size: 24px;
+      font-weight: 400;
+      transform: translateY(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .menu-dropdown.show {
+      transform: translateY(0);
+    }
+
+    .menu-dropdown a {
+      display: block;
+      padding: 20px 0;
+      text-decoration: none;
+      color: var(--eth3);
+      text-align: center;
+      width: 100%;
+      transition: opacity 0.2s ease;
+    }
+
+    .menu-dropdown a:hover {
+      opacity: 0.7;
+    }
+
+    .menu-back {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 24px;
+      color: var(--eth3);
+    }
+
+    /* Body */
+    .body {
+      background: var(--eth1);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      width: 100%;
+      gap: 40px;
+    }
+
+    /* Thumbnail carousel */
+    .thumb-carousel {
+      width: 100%;
+      height: 120px;
+      display: flex;
+      gap: 16px;
+      padding: 10px 0;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      cursor: grab;
+      mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    }
+
+    .thumb-carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .thumb-carousel:active {
+      cursor: grabbing;
+    }
+
+    .intro-thumbnail {
+      min-width: 200px;
+      height: 120px;
+      background: var(--eth1);
+      border-radius: 12px;
+      border: 1px solid var(--eth4);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    .intro-thumbnail:hover {
+      transform: translateY(-2px);
+    }
+
+    .rectangle-143 {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%);
+      z-index: 1;
+    }
+
+    .content {
+      position: absolute;
+      bottom: 8px;
+      left: 12px;
+      right: 12px;
+      z-index: 10;
+      color: var(--eth3);
+    }
+
+    .issued-by-xyz {
+      font-family: var(--tinx-light-font-family);
+      font-size: var(--tinx-light-font-size);
+      font-weight: var(--tinx-light-font-weight);
+      line-height: 1.2;
+      margin-bottom: 2px;
+    }
+
+    .title-on-two-lines {
+      font-family: var(--eth1-font-family);
+      font-size: var(--eth1-font-size);
+      font-weight: var(--eth1-font-weight);
+      line-height: 1.2;
+      margin-bottom: 4px;
+      max-height: 30px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .onchain-values-container {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .onchain-values {
+      font-family: var(--tinx-font-family);
+      font-size: var(--tinx-font-size);
+      font-weight: var(--tinx-font-weight);
+      background: rgba(255, 255, 255, 0.8);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--eth3);
+    }
+
+    .image-cropped {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .image-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--eth4);
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    /* Copy section */
+    .copy {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .main-heading {
+      color: var(--eth3);
+      text-align: center;
+      font-family: var(--slogan-mobile-font-family);
+      font-size: var(--slogan-mobile-font-size);
+      line-height: var(--slogan-mobile-line-height);
+      font-weight: var(--slogan-mobile-font-weight);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .intro-copy {
+      color: var(--eth3);
+      text-align: center;
+      font-family: var(--intro-copy-font-family);
+      font-size: var(--intro-copy-font-size);
+      font-weight: var(--intro-copy-font-weight);
+      line-height: 1.4;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    /* Buttons */
+    .button-add-your-entry {
+      background: var(--eth5);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 24px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .button-add-your-entry:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(36, 42, 224, 0.3);
+    }
+
+    .add-your-entry {
+      color: var(--eth1);
+      font-family: var(--button-font-family);
+      font-size: var(--button-font-size);
+      font-weight: var(--button-font-weight);
+      line-height: 1;
+    }
+
+    .button-secondary {
+      background: var(--eth2);
+      border: 1px solid var(--eth4);
+      border-radius: 12px;
+      padding: 12px 24px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .button-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .button-primary-large {
+      background: var(--eth5);
+      border: none;
+      border-radius: 12px;
+      padding: 16px 32px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .button-primary-large:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(36, 42, 224, 0.3);
+    }
+
+    .button-text {
+      color: var(--eth3);
+      font-family: var(--small-button-font-family);
+      font-size: var(--small-button-font-size);
+      font-weight: var(--small-button-font-weight);
+      line-height: 1;
+    }
+
+    .button-primary-large .button-text {
+      color: var(--eth1);
+    }
+
+    /* Images */
+    .section-image {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      object-fit: cover;
+    }
+
+    /* Section containers */
+    .section-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+      max-width: 400px;
+      margin-top: 40px;
+    }
+
+    /* Circle styles for "Small fee" section */
+    .visual-placeholder.small-circles {
+      height: 80px;
+      position: relative;
+    }
+
+    .circle-top {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(45deg, #e0e0e0, #d0d0d0);
+      border-radius: 50%;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .circle-bottom-left {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+      border-radius: 50%;
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+    }
+
+    .circle-bottom-right {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(45deg, #e8e8e8, #d8d8d8);
+      border-radius: 50%;
+      position: absolute;
+      bottom: 0;
+      right: 20%;
+    }
+
+    /* Section list styles */
+    .section-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .section-list li {
+      color: #000000;
+      text-align: left;
+      font-family: var(--intro-copy-font-family);
+      font-size: var(--intro-copy-font-size);
+      font-weight: var(--intro-copy-font-weight);
+      line-height: 1.4;
+      position: relative;
+      padding-left: 20px;
+    }
+
+    .section-list li::before {
+      content: "•";
+      color: var(--eth3);
+      font-size: 20px;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    /* Centered content for final CTA */
+    .section-content.centered {
+      text-align: center;
+    }
+
+    .section-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .section-heading {
+      color: #000000;
+      text-align: center;
+      font-family: var(--slogan-mobile-font-family);
+      font-size: var(--slogan-mobile-font-size);
+      line-height: var(--slogan-mobile-line-height);
+      font-weight: var(--slogan-mobile-font-weight);
+      width: 100%;
+    }
+
+    .section-text {
+      color: #000000;
+      text-align: left;
+      font-family: var(--intro-copy-font-family);
+      font-size: var(--intro-copy-font-size);
+      font-weight: var(--intro-copy-font-weight);
+      width: 100%;
+      max-width: 400px;
+      line-height: 1.4;
+    }
+
+    .fee-text {
+      text-align: center;
+      font-weight: 600;
+      color: var(--eth5);
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--eth2);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin-top: 40px;
+    }
+
+    .footer-logos {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .footer-logo {
+      height: 40px;
+      width: auto;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+
+    .footer-logo:hover {
+      opacity: 1;
+    }
+
+    /* Responsive design */
+    @media (max-width: 420px) {
+      .home-container {
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
+        min-height: 100vh;
+      }
+
+      .body {
+        padding: 16px;
+      }
+
+      .main-heading {
+        font-size: 36px;
+        line-height: 44px;
+      }
+
+      .intro-copy {
+        font-size: 18px;
+      }
+
+      .section-heading {
+        font-size: 32px;
+        line-height: 38px;
+      }
+
+      .section-text {
+        font-size: 16px;
+      }
+
+      .thumb-carousel {
+        mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+      }
+
+      .intro-thumbnail {
+        min-width: 180px;
+        height: 100px;
+      }
+
+      .section-image {
+        border-radius: 8px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .home-container {
+        max-width: 500px;
+        margin: 20px auto;
+        min-height: calc(100vh - 40px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="home-container">
+    <!-- Header -->
+    <div class="header">      <a href="index.html" class="logo">
+        <img src="../logo.svg" alt="Time Capsule" class="logo-icon" style="width: 60px; height: auto;">
+        <img src="../headertext.png" alt="Time Capsule" style="height: 45px; width: auto;">
+      </a><div class="menu" id="menuButton">
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="body">      <!-- Thumbnail carousel -->
+      <div class="thumb-carousel" id="thumbCarousel">
+        <!-- Real capsules will be loaded here -->
+        <div class="loading-indicator" id="carouselLoading" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 120px; color: #999;">
+          <div>Cargando cápsulas...</div>
+        </div>
+      </div>
+
+      <!-- Copy section -->
+      <div class="copy">
+        <div class="main-heading">
+          Sé parte<br />
+          de la historia<br />
+          viviente de Ethereum
+        </div>
+
+        <div class="intro-copy">
+          Para celebrar el décimo aniversario de Ethereum, creamos la Ethereum Time Capsule<br />
+          — sellada de forma privada ahora, revelada un año después, y registrada onchain para siempre.
+        </div>
+      </div>
+
+      <a href="/spanish/create.html" class="button-add-your-entry">
+        <div class="add-your-entry">AÑADIR TU ENTRADA</div>
+      </a>
+
+      <img class="section-image" src="../opened_capsule_with_flares.svg"></img>
+
+      <!-- Open to all section -->
+      <div class="section-container">
+        <div class="section-heading">Abierto a todos</div>
+        <div class="section-text">
+          Todos los constructores, usuarios, artistas y soñadores están invitados a dejar su huella: historias de construcción de dApps, recuerdos divertidos, drops de alfa, memes atemporales, promociones de proyectos, visiones para el futuro de Ethereum — incluso acertijos que resolver o tesoros ocultos que desbloquear en el futuro.
+        </div>
+        <a href="/spanish/gallery.html" class="button-secondary">
+          <div class="button-text">VER TODAS LAS ENTRADAS</div>
+        </a>
+      </div>
+
+      <!-- Full-width image after "Open to all" -->
+      <img class="section-image" src="../meme_card.svg" style="padding: 20px 80px 20px 80px; margin-top: 80px;"></img>
+
+      <!-- How it works section -->
+      <div class="section-container">
+        <div class="section-heading">Cómo funciona</div>
+        <ul class="section-list">
+          <li>Enviar entrada: 30 de junio – 30 de julio</li>
+          <li>Sellado hasta: 30 de julio de 2026 a las 00:00</li>
+          <li>Las entradas se sellan con threshold encryption de Shutter API</li>
+        </ul>
+        <a href="https://www.shutter.network/shutter-api" class="button-secondary">
+          <div class="button-text">ACERCA DE SHUTTER API</div>
+        </a>
+      </div>
+
+      <!-- Full-width image after "How it works" -->
+      <img class="section-image" src="../protocol_guild.jpeg" style="padding: 20px 80px 20px 80px; margin-top: 80px;"></img>
+
+      <!-- Small fee section -->
+      <div class="section-container">
+        <div class="section-heading">Una pequeña cuota, un gran impacto</div>
+        <div class="section-text fee-text">
+          Cada entrada cuesta 0.001 ETH (~$2.50).
+        </div>
+        <div class="section-text">
+          Todo el dinero recibido irá a Protocol Guild, para apoyar a los desarrolladores principales que siguen avanzando y asegurando Ethereum.
+        </div>
+      </div>
+
+      <!-- Final CTA section -->
+      <div class="section-container" style="margin-top: 80px; margin-bottom: 60px;">
+        <div class="section-content centered">
+          <div class="section-heading" style="color: var(--eth5);">
+            ¿Estás listo para ser parte de la historia viviente de Ethereum?
+          </div>
+          <a href="/spanish/create.html" class="button-primary-large">
+            <div class="button-text">ENVIAR ENTRADA</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Full-width image after final CTA -->
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-logos">
+        <a href="https://www.shutter.network/shutter-api" target="_blank" rel="noopener noreferrer">
+          <img src="../shutter_api.svg" alt="Shutter API" class="footer-logo">
+        </a>
+        <a href="https://www.protocolguild.org/" target="_blank" rel="noopener noreferrer">
+          <img src="../protocol_guild_color.svg" alt="Protocol Guild" class="footer-logo">
+        </a>
+        <a href="https://ethcc.io/" target="_blank" rel="noopener noreferrer">
+          <img src="../ethcc.svg" alt="EthCC" class="footer-logo">
+        </a>
+      </div>
+    </div>
+  </div>
+  <!-- Scripts -->
+  <script src="../public_config_loader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script type="module">    // =============  HELPER FUNCTIONS  =============
+    // Helper: get API base URL (production vs development)
+    function getApiBaseUrl() {
+      return window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+    }
+
+    // Helper: load public config
+    async function loadPublicConfig() {
+      try {
+        const response = await axios.get('../public_config.json');
+        return response.data;
+      } catch (error) {
+        console.error('Failed to load public config:', error);
+        return null;
+      }
+    }// =============  CAROUSEL TOUCH FUNCTIONALITY  =============
+    let isScrolling = false;
+    let scrollTimeout;
+
+    function setupCarouselTouch() {
+      const carousel = document.getElementById('thumbCarousel');
+      if (!carousel) return;
+
+      let startX = 0;
+      let scrollLeft = 0;
+      let isDown = false;
+
+      // Mouse events for desktop
+      carousel.addEventListener('mousedown', (e) => {
+        isDown = true;
+        carousel.style.cursor = 'grabbing';
+        startX = e.pageX - carousel.offsetLeft;
+        scrollLeft = carousel.scrollLeft;
+        e.preventDefault();
+      });
+
+      carousel.addEventListener('mouseleave', () => {
+        isDown = false;
+        carousel.style.cursor = 'grab';
+      });
+
+      carousel.addEventListener('mouseup', () => {
+        isDown = false;
+        carousel.style.cursor = 'grab';
+      });
+
+      carousel.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - carousel.offsetLeft;
+        const walk = (x - startX) * 2;
+        carousel.scrollLeft = scrollLeft - walk;
+      });
+
+      // Touch events for mobile
+      carousel.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].pageX - carousel.offsetLeft;
+        scrollLeft = carousel.scrollLeft;
+      }, { passive: true });
+
+      carousel.addEventListener('touchmove', (e) => {
+        if (!startX) return;
+        const x = e.touches[0].pageX - carousel.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        carousel.scrollLeft = scrollLeft - walk;
+      }, { passive: true });
+
+      carousel.addEventListener('touchend', () => {
+        startX = 0;
+      }, { passive: true });
+
+      // Add scroll indicators
+      updateScrollIndicators();
+      carousel.addEventListener('scroll', () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(updateScrollIndicators, 100);
+      });
+    }
+
+    function updateScrollIndicators() {
+      const carousel = document.getElementById('thumbCarousel');
+      if (!carousel) return;
+
+      const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+      const scrollPercentage = carousel.scrollLeft / maxScroll;
+
+      // Add subtle visual feedback for scroll position
+      if (scrollPercentage <= 0.1) {
+        carousel.style.maskImage = 'linear-gradient(to right, black 80%, transparent 100%)';
+      } else if (scrollPercentage >= 0.9) {
+        carousel.style.maskImage = 'linear-gradient(to right, transparent 0%, black 20%)';
+      } else {
+        carousel.style.maskImage = 'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)';
+      }    }
+
+    // Handle image loading errors with fallback logic
+    function handleImageError(imgElement, imageCID, capsuleId) {
+      console.error(`Failed to load image for capsule #${capsuleId}:`, imgElement.src);
+
+      // If we're currently trying the IPFS endpoint, fallback to pixelated endpoint
+      if (imgElement.src.includes('/ipfs/')) {
+        console.log(`Falling back to pixelated endpoint for capsule #${capsuleId}`);
+        const timestamp = Date.now();
+        imgElement.src = `${getApiBaseUrl()}/pixelated/${imageCID}?t=${timestamp}`;
+        imgElement.onerror = function() {
+          // Both endpoints failed, show placeholder
+          console.error(`All image sources failed for capsule #${capsuleId}`);
+          this.style.display = 'none';
+          this.nextElementSibling.style.display = 'flex';
+        };
+      } else {
+        // Both endpoints failed, show placeholder
+        console.error(`All image sources failed for capsule #${capsuleId}`);
+        imgElement.style.display = 'none';
+        imgElement.nextElementSibling.style.display = 'flex';
+      }
+    }    // Load real capsules for the carousel
+    async function loadSampleCapsules() {
+      try {
+        const loadingIndicator = document.getElementById('carouselLoading');
+        loadingIndicator.style.display = 'flex';
+
+        console.log('🔄 Loading capsules for homepage carousel...');
+
+        // Load public config to check for custom capsule IDs
+        const config = await loadPublicConfig();
+        const customCapsuleIds = config?.homepage_carousel_capsules || [];
+
+        let capsules = [];
+
+        if (customCapsuleIds.length > 0) {
+          console.log('📋 Using configured capsule IDs:', customCapsuleIds);
+
+          // Load specific capsules by ID using the individual capsule endpoint
+          for (const capsuleId of customCapsuleIds) {
+            try {
+              const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
+
+              if (response.data.success && response.data.capsule) {
+                capsules.push(response.data.capsule);
+                console.log(`✅ Loaded capsule ${capsuleId}:`, response.data.capsule.title);
+              } else {
+                console.warn(`⚠️ Capsule ${capsuleId} not found`);
+              }
+            } catch (error) {
+              console.warn(`⚠️ Failed to load capsule ${capsuleId}:`, error.message);
+            }
+          }
+        } else {
+          console.log('📋 No custom capsule IDs configured, loading latest capsules');
+
+          // Load up to 9 capsules from the API (fallback behavior)
+          const response = await axios.get(`${getApiBaseUrl()}/api/capsules`, {
+            params: {
+              limit: 9,
+              offset: 0,
+              revealed_only: false
+            }
+          });
+
+          if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to load capsules');
+          }
+
+          capsules = response.data.capsules;
+        }
+
+        console.log(`✅ Loaded ${capsules.length} capsules for carousel`);
+
+        if (capsules.length > 0) {
+          const carousel = document.getElementById('thumbCarousel');
+          carousel.innerHTML = ''; // Clear loading indicator
+
+          // Create all thumbnails in parallel but maintain order
+          const thumbnailPromises = capsules.map(capsule => createThumbnail(capsule));
+          const thumbnails = await Promise.all(thumbnailPromises);
+
+          // Append thumbnails in the correct order
+          thumbnails.forEach(thumbnail => {
+            carousel.appendChild(thumbnail);
+          });
+
+          // Setup touch/swipe functionality after capsules are loaded
+          setupCarouselTouch();
+        } else {
+          // No capsules found, show placeholder
+          const carousel = document.getElementById('thumbCarousel');
+          carousel.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 120px; color: #999;">No hay cápsulas disponibles aún</div>';
+        }
+      } catch (error) {
+        console.error('Failed to load sample capsules:', error);
+        // Show error message
+        const carousel = document.getElementById('thumbCarousel');
+        carousel.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 120px; color: #999;">Error al cargar cápsulas</div>';
+      }
+    }
+
+    async function createThumbnail(capsule) {
+      const thumbnail = document.createElement('div');
+      thumbnail.className = 'intro-thumbnail';
+
+      let creator;
+      const ensProvider = new ethers.providers.JsonRpcProvider('https://eth-mainnet.g.alchemy.com/v2/kDge5GGs1WZE7tiYVnE3E');
+      try {
+        const ensName = await ensProvider.lookupAddress(capsule.creator);
+        if (ensName !== null) {
+          creator = ensName;
+        }
+      } catch (e) {
+        console.error("failed to lookup ENS name", e);
+      }
+      if (!creator) {
+        creator = `${capsule.creator.slice(0, 6)}...${capsule.creator.slice(-4)}`;
+      }
+      const isRevealed = capsule.isRevealed;
+        // For the homepage carousel, always show pixelated images (even for revealed capsules)
+      // This keeps the carousel consistent and avoids needing decryption logic here
+      let imageSrc;
+      let pixelatedCID;
+
+      // Add timestamp to prevent caching issues
+      const timestamp = Date.now();
+
+      // Use pixelated image CID if available, otherwise fall back to encrypted image CID
+      pixelatedCID = capsule.pixelatedImageCID || capsule.imageCID;
+
+      // Try IPFS endpoint first (for new pixelated images uploaded to IPFS)
+      imageSrc = `${getApiBaseUrl()}/ipfs/${pixelatedCID}?t=${timestamp}`;
+      console.log(`Setting pixelated image src for carousel capsule #${capsule.id}: ${imageSrc} (IPFS, CID: ${pixelatedCID})`);
+
+      // Truncate title if too long for thumbnail
+      let title = capsule.title;
+      if (title.length > 30) {
+        const words = title.split(' ');
+        if (words.length > 3) {
+          title = words.slice(0, 3).join(' ') + '...';
+        } else {
+          title = title.substring(0, 27) + '...';
+        }
+      }
+
+      // Get first tag for display
+      const firstTag = capsule.tags.split(',')[0].trim() || 'sin categoría';
+        thumbnail.innerHTML = `
+        <div class="rectangle-143"></div>
+        ${isRevealed ? '<div style="position: absolute; top: 8px; right: 8px; background: #4CAF50; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px; font-weight: 600; z-index: 20;">REVELADO</div>' : ''}
+        <div class="content">
+          <div class="issued-by-xyz">publicado por ${creator}</div>
+          <div class="title-on-two-lines">${title}</div>
+          <div class="onchain-values-container">
+            <div class="onchain-values">#${firstTag}</div>
+          </div>
+        </div>
+        <img class="image-cropped" src="${imageSrc}" alt="Capsule image" loading="lazy"
+             onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})" />
+        <div class="image-placeholder" style="display: none;">🔒</div>
+      `;
+
+      // Add click handler to view capsule in gallery
+      thumbnail.addEventListener('click', () => {
+        window.location.href = `/spanish/gallery.html?capsule=${capsule.id}`;
+      });
+
+      return thumbnail;
+    }function toggleMenu() {
+      // Remove existing menu if present
+      const existingMenu = document.querySelector('.menu-dropdown');
+      if (existingMenu) {
+        existingMenu.classList.remove('show');
+        setTimeout(() => {
+          existingMenu.remove();
+        }, 300);
+        return;
+      }
+
+      // Create new full-screen menu
+      const menu = document.createElement('div');
+      menu.className = 'menu-dropdown';      const links = [
+        { text: 'crear entrada', href: '/spanish/create.html' },
+        { text: 'galería', href: '/spanish/gallery.html' },
+        { text: 'documentación', href: 'https://github.com/shutter-network/EthereumTimeCapsule' },
+        { text: 'faq', href: '/spanish/faq.html' },
+        { text: 'imprenta', href: '/spanish/imprint.html' }
+      ];
+
+      links.forEach((link, index) => {
+        const a = document.createElement('a');
+        a.href = link.href;
+        a.textContent = link.text;
+        menu.appendChild(a);
+      });
+
+      // Add back button
+      const backButton = document.createElement('div');
+      backButton.className = 'menu-back';
+      backButton.innerHTML = '&lt;';
+      backButton.addEventListener('click', toggleMenu);
+      menu.appendChild(backButton);
+
+      // Append to body for full-screen overlay
+      document.body.appendChild(menu);
+
+      // Trigger animation
+      setTimeout(() => {
+        menu.classList.add('show');
+      }, 10);      // Remove menu when clicking outside or on links
+      menu.addEventListener('click', (e) => {
+        if (e.target === menu || e.target.tagName === 'A') {
+          if (e.target.tagName === 'A') {
+            const href = e.target.href;
+            // Handle different types of links
+            if (href.startsWith('#')) {
+              // Prevent navigation for placeholder links
+              e.preventDefault();
+              toggleMenu();
+
+            } else {
+              // Internal links - prevent default and navigate in same tab
+              e.preventDefault();
+              toggleMenu();
+              setTimeout(() => {
+                window.location.href = href;
+              }, 300); // Wait for menu to close
+            }
+          } else {
+            toggleMenu();
+          }
+        }
+      });
+    }
+
+    // Expose functions globally for HTML onclick handlers
+    window.handleImageError = handleImageError;
+
+    // Add event listener for menu button
+    document.getElementById('menuButton').addEventListener('click', toggleMenu);
+
+    // Load sample capsules when page loads
+    document.addEventListener('DOMContentLoaded', loadSampleCapsules);
+  </script>
+</body>
+</html>
