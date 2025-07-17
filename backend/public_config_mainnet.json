@@ -40,7 +40,8 @@
         { "name": "ETHTaipei", "emoji": null },
         { "name": "Optimism", "emoji": null },
         { "name": "Polygon", "emoji": null },
-        { "name": "zkSync", "emoji": null }
+        { "name": "zkSync", "emoji": null },
+        { "name": "bookofethereum", "emoji": "📚" }
       ]
     },
     {
@@ -70,6 +71,7 @@
         { "name": "thoughts", "emoji": "💭" },
         { "name": "travel", "emoji": "✈️" },
         { "name": "wishes", "emoji": "🌟" }
+        
       ]
     }
   ],
