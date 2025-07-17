@@ -1,4 +1,4 @@
-/*  gallery.js — Gallery Page Logic (Spanish) */
+/*  gallery.js — Gallery Page Logic  */
 /*  Handles loading and displaying capsules from the database API  */
 
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
@@ -57,11 +57,11 @@ function getIPFSUrls(cid) {
 
 // Helper: handle image loading errors with fallback
 async function handleImageError(imgElement, imageCID, capsuleId) {
-  console.error(`Error al cargar imagen para cápsula #${capsuleId}:`, imgElement.src);
+  console.error(`Failed to load image for capsule #${capsuleId}:`, imgElement.src);
   
   // If we're currently trying the IPFS endpoint, try multiple fallback strategies
   if (imgElement.src.includes('/ipfs/')) {
-    console.log(`Probando estrategias de respaldo para cápsula #${capsuleId}`);
+    console.log(`Trying fallback strategies for capsule #${capsuleId}`);
     
     // Strategy 1: Try pixelated endpoint with same CID
     const timestamp = Date.now();
@@ -71,20 +71,20 @@ async function handleImageError(imgElement, imageCID, capsuleId) {
       // Test if the pixelated endpoint exists before setting it
       const testResponse = await fetch(pixelatedUrl, { method: 'HEAD' });
       if (testResponse.ok) {
-        console.log(`Usando endpoint pixelado para cápsula #${capsuleId}`);
+        console.log(`Using pixelated endpoint for capsule #${capsuleId}`);
         imgElement.src = pixelatedUrl;
         imgElement.onerror = () => tryAlternateCID(imgElement, capsuleId);
         return;
       }
     } catch (e) {
-      console.log(`Prueba de endpoint pixelado falló para cápsula #${capsuleId}:`, e.message);
+      console.log(`Pixelated endpoint test failed for capsule #${capsuleId}:`, e.message);
     }
     
     // Strategy 2: Try to get fresh capsule data and use correct CID
     tryAlternateCID(imgElement, capsuleId);
   } else {
     // All strategies failed, hide the image
-    console.error(`Todas las fuentes de imagen fallaron para cápsula #${capsuleId}`);
+    console.error(`All image sources failed for capsule #${capsuleId}`);
     imgElement.style.display = 'none';
   }
 }
@@ -92,7 +92,7 @@ async function handleImageError(imgElement, imageCID, capsuleId) {
 // Helper: Try to get correct CID from direct capsule API
 async function tryAlternateCID(imgElement, capsuleId) {
   try {
-    console.log(`Obteniendo datos frescos de cápsula para #${capsuleId} para obtener CID correcto`);
+    console.log(`Fetching fresh capsule data for #${capsuleId} to get correct CID`);
     const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
     
     if (response.data.success && response.data.capsule) {
@@ -100,7 +100,7 @@ async function tryAlternateCID(imgElement, capsuleId) {
       const correctPixelatedCID = (capsule.pixelatedImageCID && capsule.pixelatedImageCID.trim()) || capsule.imageCID;
       
       if (correctPixelatedCID && correctPixelatedCID !== imgElement.getAttribute('data-current-cid')) {
-        console.log(`Probando CID correcto para cápsula #${capsuleId}: ${correctPixelatedCID}`);
+        console.log(`Trying correct CID for capsule #${capsuleId}: ${correctPixelatedCID}`);
         imgElement.setAttribute('data-current-cid', correctPixelatedCID);
         
         const timestamp = Date.now();
@@ -108,10 +108,10 @@ async function tryAlternateCID(imgElement, capsuleId) {
         imgElement.src = newUrl;
         
         imgElement.onerror = function() {
-          console.log(`Probando endpoint pixelado con CID correcto para cápsula #${capsuleId}`);
+          console.log(`Trying pixelated endpoint with correct CID for capsule #${capsuleId}`);
           this.src = `${getApiBaseUrl()}/pixelated/${correctPixelatedCID}?t=${timestamp}`;
           this.onerror = function() {
-            console.error(`Todos los respaldos fallaron para cápsula #${capsuleId}`);
+            console.error(`All fallbacks failed for capsule #${capsuleId}`);
             this.style.display = 'none';
           };
         };
@@ -119,38 +119,38 @@ async function tryAlternateCID(imgElement, capsuleId) {
       }
     }
   } catch (e) {
-    console.error(`Error al obtener datos frescos de cápsula para #${capsuleId}:`, e);
+    console.error(`Failed to fetch fresh capsule data for #${capsuleId}:`, e);
   }
   
   // Final fallback: hide the image
-  console.error(`Todas las estrategias de carga de imagen fallaron para cápsula #${capsuleId}`);
+  console.error(`All image loading strategies failed for capsule #${capsuleId}`);
   imgElement.style.display = 'none';
 }
 
 // Helper: fetch from redundant URLs with fallbacks
 async function fetchWithFallback(urls, options = {}) {
   if (!urls || urls.length === 0) {
-    throw new Error("No se proporcionaron URLs para fetch de respaldo");
+    throw new Error("No URLs provided for fallback fetch");
   }
   
   const errors = [];
   
   for (let i = 0; i < urls.length; i++) {
     try {
-      console.log(`Intentando obtener desde URL ${i + 1}/${urls.length}: ${urls[i]}`);
+      console.log(`Attempting to fetch from URL ${i + 1}/${urls.length}: ${urls[i]}`);
       const response = await axios.get(urls[i], {
         timeout: i === 0 ? 5000 : 10000, // First URL gets shorter timeout
         ...options
       });
-      console.log(`Obtenido exitosamente desde: ${urls[i]}`);
+      console.log(`Successfully fetched from: ${urls[i]}`);
       return response;
     } catch (error) {
       const errorMsg = error.response ? `${error.response.status} ${error.response.statusText}` : error.message;
-      console.warn(`Error al obtener desde ${urls[i]}: ${errorMsg}`);
+      console.warn(`Failed to fetch from ${urls[i]}: ${errorMsg}`);
       errors.push(`URL ${i + 1}: ${errorMsg}`);
       
       if (i === urls.length - 1) {
-        throw new Error(`Todas las ${urls.length} URLs fallaron:\n${errors.join('\n')}`);
+        throw new Error(`All ${urls.length} URLs failed:\n${errors.join('\n')}`);
       }
       // Continue to next URL
     }
@@ -165,9 +165,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     try {
       const systemInfo = await axios.get(`${getApiBaseUrl()}/system_info`);
       window.systemInfo = systemInfo.data;
-      console.log("Información del sistema cargada:", window.systemInfo);
+      console.log("System info loaded:", window.systemInfo);
     } catch (e) {
-      console.warn("No se pudo cargar información del sistema:", e);
+      console.warn("Could not load system info:", e);
       window.systemInfo = { pinata_enabled: false };
     }
     
@@ -176,13 +176,13 @@ window.addEventListener("DOMContentLoaded", async () => {
     
     // Store the full config globally
     appConfig = cfgAll;
-    console.log('📋 Configuración de la aplicación cargada:', appConfig);
+    console.log('📋 Loaded app configuration:', appConfig);
     
     const fixedCfg = cfgAll["network"];
     
     contractAddr = fixedCfg.contract_address;
     const cacheBuster = `?v=${Date.now()}`;
-    contractAbi = await (await fetch(`../contract_abi.json${cacheBuster}`)).json();
+    contractAbi = await (await fetch(`contract_abi.json${cacheBuster}`)).json();
     shutterApi = fixedCfg.shutter_api_base;
     registryAddr = fixedCfg.registry_address;
     // read-only provider
@@ -192,17 +192,17 @@ window.addEventListener("DOMContentLoaded", async () => {
       new ethers.providers.JsonRpcProvider(fixedCfg.rpc_url)
     );
       // Gallery is read-only by default, wallet connects on-demand for reveal actions
-    console.log("Galería inicializada en modo solo lectura (wallet se conecta bajo demanda)");
+    console.log("Gallery initialized in read-only mode (wallet connects on-demand)");
     
     // Setup event listeners
     setupEventListeners();
       // Initialize Shutter WASM
-    console.log("Inicializando Shutter WASM...");
+    console.log("Initializing Shutter WASM...");
     try {
       await ensureShutterReady();
-      console.log("✅ Shutter WASM listo");
+      console.log("✅ Shutter WASM ready");
     } catch (e) {
-      console.warn("⚠️ Shutter WASM no está listo aún, reintentará cuando sea necesario:", e.message);
+      console.warn("⚠️ Shutter WASM not ready yet, will retry when needed:", e.message);
     }
     
     // Check if we have a direct capsule link
@@ -210,9 +210,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     const capsuleId = urlParams.get('capsule');
     
     if (capsuleId) {
-      console.log(`🎯 Enlace directo a cápsula detectado: ${capsuleId}`);
+      console.log(`🎯 Direct capsule link detected: ${capsuleId}`);
       await loadDirectCapsule(capsuleId);    } else {
-      console.log('📚 Cargando todas las cápsulas');
+      console.log('📚 Loading all capsules');
       // Load initial capsules
       loadCapsules();
     }
@@ -221,8 +221,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     await loadTagsFromConfig();
     
   } catch (e) {
-    console.error("Error en la inicialización:", e);
-    document.getElementById('load-status').textContent = 'Error al inicializar la galería';
+    console.error("Initialization failed:", e);
+    document.getElementById('load-status').textContent = 'Error al inicializar galería';
   }
 });
 
@@ -230,7 +230,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 async function connectWallet(manual = false) {
   const config = await loadPublicConfig();
   try {
-    console.log('🔄 Conectando wallet para interacción blockchain...');
+    console.log('🔄 Connecting wallet for blockchain interaction...');
     
     let eth = window.ethereum;
     if (!eth) {
@@ -245,7 +245,7 @@ async function connectWallet(manual = false) {
       // Request account access (this will prompt the user)
       const accounts = await eth.request({ method: "eth_requestAccounts" });
       if (!accounts || accounts.length === 0) {
-        throw new Error('No se devolvieron cuentas desde el wallet');
+        throw new Error('No accounts returned from wallet');
       }
     }
       provider = new ethers.providers.Web3Provider(eth);
@@ -267,23 +267,23 @@ async function connectWallet(manual = false) {
         // Verify the switch worked
         const newNet = await provider.getNetwork();
         if (newNet.chainId !== config.network.chainId) {
-          throw new Error(`Cambio de red falló. Se esperaba chain ID ${config.network.chainId}, se obtuvo ${newNet.chainId}`);
+          throw new Error(`Network switch failed. Expected chain ID ${config.network.chainId}, got ${newNet.chainId}`);
         }
         
       } catch (switchError) {
-        throw new Error(`Por favor cambie a ${config.network.chainName} (network ID ${config.network.chainId}) en su wallet. Si no tiene esta red, agreguela manualmente.`);
+        throw new Error(`Please switch to ${config.network.chainName} (network ID ${config.network.chainId}) in your wallet. If you don't have this network, please add it manually.`);
       }
     }
     
     contract = new ethers.Contract(contractAddr, contractAbi, signer);
-    console.log("💰 Contrato de wallet inicializado con dirección:", contractAddr);
+    console.log("💰 Wallet contract initialized with address:", contractAddr);
     
     walletConnected = true;
-    console.log('✅ Wallet conectado exitosamente');
+    console.log('✅ Wallet connected successfully');
     
     return true;
   } catch (e) {
-    console.error("❌ Error en la conexión del wallet:", e);
+    console.error("❌ Wallet connection failed:", e);
     walletConnected = false;
     return false;
   }
@@ -309,10 +309,10 @@ function setupEventListeners() {
 // =============  FILTER AND SEARCH  =============
 async function loadTagsFromConfig() {
   try {
-    console.log('🏷️ Cargando etiquetas desde configuración...');
+    console.log('🏷️ Loading tags from config...');
     
     if (!appConfig || !appConfig.tag_sections) {
-      console.warn('No hay tag_sections en la configuración');
+      console.warn('No tag_sections in config');
       return;
     }
     
@@ -330,13 +330,13 @@ async function loadTagsFromConfig() {
       count: 0 // We'll show count as 0 or remove it since we're not extracting
     }));
     
-    console.log('✅ Etiquetas cargadas desde configuración:', availableTags);
+    console.log('✅ Tags loaded from config:', availableTags);
     
     // Render tag filter buttons
     renderTagFilters();
     
   } catch (error) {
-    console.error('Error al cargar etiquetas desde configuración:', error);
+    console.error('Failed to load tags from config:', error);
   }
 }
 
@@ -422,7 +422,7 @@ async function loadCapsules() {
   
   try {
     loadingIndicator.style.display = 'block';
-    loadStatus.textContent = 'Cargando cápsulas desde base de datos...';
+    loadStatus.textContent = 'Cargando cápsulas desde la base de datos...';
     
     let url, params;
       if (currentSearch) {
@@ -445,16 +445,16 @@ async function loadCapsules() {
       }
     }
     
-    console.log(`📦 Cargando cápsulas: ${JSON.stringify(params)}`);
+    console.log(`📦 Loading capsules: ${JSON.stringify(params)}`);
     const response = await axios.get(url, { params });
     
     if (!response.data.success) {
-      throw new Error(response.data.error || "Error al cargar cápsulas");
+      throw new Error(response.data.error || "Failed to load capsules");
     }
     
     const capsules = response.data.capsules;
     const totalCount = response.data.total_count || capsules.length;
-      console.log(`✅ Cargadas ${capsules.length} cápsulas`);
+      console.log(`✅ Loaded ${capsules.length} capsules`);
     
     // Filter capsules based on current filter (for search results)
     let filteredCapsules = capsules;
@@ -487,15 +487,15 @@ async function loadCapsules() {
     // Update load more button
     const loadMoreBtn = document.getElementById('load-more-btn');
     if (hasMore) {
-      loadMoreBtn.textContent = 'Cargar Más Cápsulas';
+      loadMoreBtn.textContent = 'Cargar más cápsulas';
       loadMoreBtn.disabled = false;
     } else {
-      loadMoreBtn.textContent = 'No Hay Más Cápsulas';
+      loadMoreBtn.textContent = 'No hay más cápsulas';
       loadMoreBtn.disabled = true;
     }
     
   } catch (error) {
-    console.error('Error al cargar cápsulas:', error);
+    console.error('Failed to load capsules:', error);
     loadStatus.textContent = 'Error al cargar cápsulas: ' + error.message;
   } finally {
     isLoading = false;
@@ -527,10 +527,10 @@ async function createCapsuleCard(capsule) {
   card.setAttribute('data-capsule-id', capsule.id); // Add unique identifier
   
   // Debug logging for CID inconsistencies
-  console.log(`Creando tarjeta para cápsula #${capsule.id}:`);
+  console.log(`Creating card for capsule #${capsule.id}:`);
   console.log(`- imageCID: ${capsule.imageCID}`);
   console.log(`- pixelatedImageCID: ${capsule.pixelatedImageCID}`);
-  console.log(`- pixelatedImageCID (recortado): ${capsule.pixelatedImageCID && capsule.pixelatedImageCID.trim()}`);
+  console.log(`- pixelatedImageCID (trimmed): ${capsule.pixelatedImageCID && capsule.pixelatedImageCID.trim()}`);
 
   const config = await loadPublicConfig();
   const ensProvider = new ethers.providers.JsonRpcProvider(config.network.rpcUrl);
@@ -544,7 +544,7 @@ async function createCapsuleCard(capsule) {
       creator = ensName;
     }
   } catch (e) {
-    console.error("error al buscar nombre ENS", e);
+    console.error("failed to lookup ENS name", e);
   }
   if (!creator) {
     creator = `${capsule.creator.slice(0, 6)}...${capsule.creator.slice(-4)}`;
@@ -561,7 +561,7 @@ async function createCapsuleCard(capsule) {
   let pixelatedCID; // Declare this outside the if/else block
   
   if (isRevealed) {
-    imageSrc = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkRlc2NpZnJhbmRvLi4uPC90ZXh0Pjwvc3ZnPg=="; // Placeholder for decrypted image
+    imageSrc = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkRlY3J5cHRpbmcuLi48L3RleHQ+PC9zdmc+"; // Placeholder for decrypted image
     pixelatedCID = capsule.imageCID; // Use encrypted image CID for error fallback
   } else {
     // Add timestamp to prevent caching issues
@@ -573,7 +573,7 @@ async function createCapsuleCard(capsule) {
     // Try IPFS endpoint first (for new pixelated images uploaded to IPFS)
     // If that fails, fall back to legacy pixelated endpoint
     imageSrc = `${getApiBaseUrl()}/ipfs/${pixelatedCID}?t=${timestamp}`;
-    console.log(`Estableciendo src de imagen pixelada para cápsula #${capsule.id}: ${imageSrc} (IPFS, CID: ${pixelatedCID})`);
+    console.log(`Setting pixelated image src for capsule #${capsule.id}: ${imageSrc} (IPFS, CID: ${pixelatedCID})`);
   }
 
   // Format unlock date exactly like in preview
@@ -583,35 +583,34 @@ async function createCapsuleCard(capsule) {
     month: 'long', 
     day: 'numeric',
     timeZone: 'UTC',
-    locale: 'es-ES'
   };
-  const formattedDate = unlockDate.toLocaleString('es-ES', formatOptions);
+  const formattedDate = unlockDate.toLocaleString('en-US', formatOptions);
 
   // Use exact same structure as preview card
   card.innerHTML = `
     <div class="preview-image-container">
-      <img src="${imageSrc}" alt="Imagen de cápsula" class="preview-image${isRevealed ? '' : ' pixelated'}" loading="lazy" 
+      <img src="${imageSrc}" alt="Capsule image" class="preview-image${isRevealed ? '' : ' pixelated'}" loading="lazy" 
            data-current-cid="${pixelatedCID}" data-capsule-id="${capsule.id}"
            onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})">
-      <div class="issuer-tag">emitido por <span>${creator}</span></div>
+      <div class="issuer-tag">issued by <span>${creator}</span></div>
     </div>
     
     <div class="preview-content">
-      <h2 class="preview-title">${capsule.title || 'Cápsula Sin Título'}</h2>
+      <h2 class="preview-title">${capsule.title || 'Untitled Capsule'}</h2>
       
       <div class="preview-meta">
         <div class="meta-item">
           <div class="meta-icon">${isRevealed ? '🔓' : '🔒'}</div>
           <div class="meta-text">
-            <div class="meta-label">${isRevealed ? 'desbloqueado el' : 'cifrado hasta'}</div>
+            <div class="meta-label">${isRevealed ? 'unlocked on' : 'encrypted until'}</div>
             <div class="meta-value">${formattedDate}</div>
           </div>
         </div>
         <div class="meta-item">
           <div class="meta-icon">📄</div>
           <div class="meta-text">
-            <div class="meta-label">${isRevealed ? 'historia' : 'bloqueado'}</div>
-            <div class="meta-value" style="cursor: pointer; color: #4F46E5;" onclick="toggleStory(${capsule.id})">${isRevealed ? 'leer historia' : 'cifrado'}</div>
+            <div class="meta-label">${isRevealed ? 'story' : 'locked'}</div>
+            <div class="meta-value" style="cursor: pointer; color: #4F46E5;" onclick="toggleStory(${capsule.id})">${isRevealed ? 'read story' : 'encrypted'}</div>
           </div>
         </div>
       </div>
@@ -625,7 +624,7 @@ async function createCapsuleCard(capsule) {
           ${capsule.decryptedStory}
         </div>` : 
         `<div id="story-${capsule.id}" style="margin-top: 16px; font-size: 14px; line-height: 1.4; color: #999; font-style: italic; display: none;">
-          🔒 La historia se revelará el ${formattedDate}
+          � Story will be revealed on ${formattedDate}
         </div>`
       }
     </div>
@@ -646,7 +645,7 @@ async function createCapsuleCard(capsule) {
     }
     
     // Navigate to individual capsule view
-    window.location.href = `/spanish/gallery.html?capsule=${capsule.id}`;
+    window.location.href = `/gallery.html?capsule=${capsule.id}`;
   });
   
   // Add cursor pointer to indicate clickability
@@ -658,22 +657,21 @@ async function createCapsuleCard(capsule) {
 // =============  CAPSULE INTERACTIONS  =============
 async function decryptCapsule(id, shutterIdentity) {
   try {
-    console.log(`🔓 Descifrando cápsula #${id}...`);
+    console.log(`🔓 Decrypting capsule #${id}...`);
     
     // Get decryption key
     const resp = await axios.get(`${shutterApi}/get_decryption_key`, {
       params: { identity: shutterIdentity, registry: registryAddr }
     });
     const key = resp.data?.message?.decryption_key;
-    if (!key) {
-      alert("¡Clave de descifrado aún no disponible! Por favor espere e intente de nuevo.");
+    if (!key) {    alert("Decryption key not available yet! Please wait and try again.");
       return;
     }
 
     // Fetch capsule data from database API
     const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${id}`);
     if (!response.data.success) {
-      throw new Error(response.data.error || "Error al obtener cápsula");
+      throw new Error(response.data.error || "Failed to fetch capsule");
     }
     const cap = response.data.capsule;
 
@@ -684,8 +682,7 @@ async function decryptCapsule(id, shutterIdentity) {
     } else if (typeof cap.encryptedStory === "string") {
       encryptedHex = "0x" + cap.encryptedStory;
     } else {
-      throw new Error("Formato de encryptedStory desconocido desde base de datos");
-    }
+      throw new Error("Unknown encryptedStory format from database");    }
 
     // Ensure Shutter WASM is ready before decryption
     await ensureShutterReady();
@@ -701,11 +698,11 @@ async function decryptCapsule(id, shutterIdentity) {
       storyElement.classList.add('expanded');
     }
     
-    console.log(`✅ Cápsula #${id} descifrada exitosamente`);
+    console.log(`✅ Successfully decrypted capsule #${id}`);
     
   } catch (error) {
-    console.error(`Error al descifrar cápsula #${id}:`, error);
-    alert("Error en el descifrado: " + error.message);
+    console.error(`Failed to decrypt capsule #${id}:`, error);
+    alert("Decryption failed: " + error.message);
   }
 }
 
@@ -713,30 +710,29 @@ async function revealCapsule(id, shutterIdentity) {
   try {
     // Connect wallet on-demand when user wants to reveal
     if (!walletConnected) {
-      console.log('🔗 Conectando wallet para acción de revelación...');
+      console.log('🔗 Connecting wallet for reveal action...');
       const connected = await connectWallet(true);
       if (!connected) {
-        alert('Se requiere conexión de wallet para revelar cápsulas permanentemente en la blockchain.');
+        alert('Wallet connection is required to reveal capsules permanently on the blockchain.');
         return;
       }
     }
     
-    console.log(`🎉 Revelando cápsula #${id}...`);
+    console.log(`🎉 Revealing capsule #${id}...`);
     
     // Get decryption key
     const resp = await axios.get(`${shutterApi}/get_decryption_key`, {
       params: { identity: shutterIdentity, registry: registryAddr }
     });
     const key = resp.data?.message?.decryption_key;
-    if (!key) {
-      alert("¡Clave de descifrado aún no disponible!");
+    if (!key) {      alert("Decryption key not available yet!");
       return;
     }
 
     // Fetch capsule data from database API
     const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${id}`);
     if (!response.data.success) {
-      throw new Error(response.data.error || "Error al obtener cápsula");
+      throw new Error(response.data.error || "Failed to fetch capsule");
     }
     const cap = response.data.capsule;
 
@@ -745,9 +741,8 @@ async function revealCapsule(id, shutterIdentity) {
     if (typeof cap.encryptedStory === "string" && cap.encryptedStory.startsWith("0x")) {
       encryptedHex = cap.encryptedStory;
     } else if (typeof cap.encryptedStory === "string") {
-      encryptedHex = "0x" + cap.encryptedStory;
-    } else {
-      throw new Error("Formato de encryptedStory desconocido desde base de datos");
+      encryptedHex = "0x" + cap.encryptedStory;    } else {
+      throw new Error("Unknown encryptedStory format from database");
     }
 
     // Ensure Shutter WASM is ready before decryption
@@ -758,18 +753,18 @@ async function revealCapsule(id, shutterIdentity) {
 
     // Submit reveal transaction
     const tx = await contract.revealCapsule(id, plaintext);
-    alert(`¡Transacción de revelación enviada! Hash: ${tx.hash}`);
+    alert(`Reveal transaction submitted! Hash: ${tx.hash}`);
     
     // Wait for confirmation and refresh
     await tx.wait();
-    alert('¡Cápsula revelada exitosamente!');
+    alert('Capsule revealed successfully!');
     
     // Refresh the page to show updated state
     window.location.reload();
     
   } catch (error) {
-    console.error(`Error al revelar cápsula #${id}:`, error);
-    alert("Error en la revelación: " + error.message);
+    console.error(`Failed to reveal capsule #${id}:`, error);
+    alert("Reveal failed: " + error.message);
   }
 }
 
@@ -786,7 +781,7 @@ function toggleStory(id) {
 
 async function decryptAndDisplayImage(capsuleId, imageCID, shutterIdentity) {
   try {
-    console.log(`🖼️ Descifrando imagen para cápsula ${capsuleId}...`);
+    console.log(`🖼️ Decrypting image for capsule ${capsuleId}...`);
     
     // Get decryption key
     const resp = await axios.get(`${shutterApi}/get_decryption_key`, {
@@ -794,19 +789,15 @@ async function decryptAndDisplayImage(capsuleId, imageCID, shutterIdentity) {
     });
     const key = resp.data?.message?.decryption_key;
     if (!key) {
-      console.log("Clave de descifrado no disponible para imagen");
+      console.log("Decryption key not available for image");
       return;
-    }
-
-    // Fetch encrypted image from IPFS with redundancy
+    }    // Fetch encrypted image from IPFS with redundancy
     const ipfsUrls = getIPFSUrls(imageCID);
     
-    console.log(`Obteniendo imagen cifrada desde IPFS, probando ${ipfsUrls.length} URLs...`);
+    console.log(`Fetching encrypted image from IPFS, trying ${ipfsUrls.length} URLs...`);
     const encryptedImageResp = await fetchWithFallback(ipfsUrls, {
       responseType: 'arraybuffer'
-    });
-
-    const encryptedImageHex = "0x" + Array.from(new Uint8Array(encryptedImageResp.data))
+    });const encryptedImageHex = "0x" + Array.from(new Uint8Array(encryptedImageResp.data))
       .map(b => b.toString(16).padStart(2, "0")).join("");
 
     // Ensure Shutter WASM is ready before decryption
@@ -820,14 +811,12 @@ async function decryptAndDisplayImage(capsuleId, imageCID, shutterIdentity) {
       decryptedImageHex.slice(2).match(/.{2}/g).map(byte => parseInt(byte, 16))
     );
     const imageBlob = new Blob([decryptedImageBytes]);
-    const imageUrl = URL.createObjectURL(imageBlob);
-
-    // Find and update the image using data attribute for precise matching
-    console.log(`Buscando tarjeta de cápsula con ID #${capsuleId}...`);
+    const imageUrl = URL.createObjectURL(imageBlob);    // Find and update the image using data attribute for precise matching
+    console.log(`Looking for capsule card with ID #${capsuleId}...`);
     const targetCard = document.querySelector(`[data-capsule-id="${capsuleId}"]`);
     
     if (targetCard) {
-      console.log(`¡Encontrada tarjeta exacta para cápsula #${capsuleId}!`);
+      console.log(`Found exact matching card for capsule #${capsuleId}!`);
       const img = targetCard.querySelector('.preview-image');
       if (img) {
         // Clean up previous object URL to prevent memory leaks
@@ -835,15 +824,15 @@ async function decryptAndDisplayImage(capsuleId, imageCID, shutterIdentity) {
           URL.revokeObjectURL(img.src);
         }
         img.src = imageUrl;
-        img.alt = "Imagen descifrada";
+        img.alt = "Decrypted image";
         // Remove pixelated class from decrypted images
         img.classList.remove('pixelated');
-        console.log(`✅ Imagen descifrada y mostrada exitosamente para cápsula #${capsuleId}`);
+        console.log(`✅ Successfully decrypted and displayed image for capsule #${capsuleId}`);
       } else {
-        console.warn(`Elemento de imagen no encontrado en tarjeta para cápsula #${capsuleId}`);
+        console.warn(`Image element not found in card for capsule #${capsuleId}`);
       }
     } else {
-      console.warn(`No se encontró tarjeta para cápsula ID #${capsuleId}`);
+      console.warn(`No card found for capsule ID #${capsuleId}`);
       // Fallback to the old method if data attribute fails
       const capsuleCards = document.querySelectorAll('.capsule-card-gallery');
       for (const card of capsuleCards) {
@@ -855,17 +844,17 @@ async function decryptAndDisplayImage(capsuleId, imageCID, shutterIdentity) {
               URL.revokeObjectURL(img.src);
             }
             img.src = imageUrl;
-            img.alt = "Imagen descifrada";
+            img.alt = "Decrypted image";
             // Remove pixelated class from decrypted images
             img.classList.remove('pixelated');
-            console.log(`✅ Imagen descifrada y mostrada exitosamente para cápsula #${capsuleId} (método de respaldo)`);
+            console.log(`✅ Successfully decrypted and displayed image for capsule #${capsuleId} (fallback method)`);
           }
           break;
         }
       }
     }
   } catch (e) {
-    console.error(`Error al descifrar imagen para cápsula ${capsuleId}:`, e);
+    console.error(`Failed to decrypt image for capsule ${capsuleId}:`, e);
   }
 }
 
@@ -880,7 +869,7 @@ async function ensureShutterReady() {
     tries++;
   }
   if (!window.shutter || typeof window.shutter.encryptData !== "function") {
-    throw new Error("¡Shutter WASM no cargado!");
+    throw new Error("Shutter WASM not loaded!");
   }
 }
 
@@ -893,27 +882,27 @@ window.decryptAndDisplayImage = decryptAndDisplayImage;
 window.handleImageError = handleImageError;
 window.tryAlternateCID = tryAlternateCID;
 window.filterByTag = function(tagName) {
-  console.log(`🏷️ Filtrando por etiqueta: ${tagName}`);
+  console.log(`🏷️ Filtering by tag: ${tagName}`);
   setFilter(tagName);
 };
 
 // Function to load a specific capsule directly
 async function loadDirectCapsule(capsuleId) {
   try {
-    console.log(`🔍 Cargando cápsula ${capsuleId} directamente...`);
+    console.log(`🔍 Loading capsule ${capsuleId} directly...`);
     
     // Fetch the specific capsule from the backend
     const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
     
     if (!response.data.success || !response.data.capsule) {
-      console.error('❌ Cápsula no encontrada');
+      console.error('❌ Capsule not found');
       // Fall back to loading all capsules
       await loadCapsules();
       return;
     }
     
     const capsule = response.data.capsule;
-    console.log('✅ Cápsula directa cargada:', capsule);
+    console.log('✅ Direct capsule loaded:', capsule);
     
     // Clear the gallery and display only this capsule
     const gallery = document.getElementById('capsules-grid');
@@ -938,7 +927,7 @@ async function loadDirectCapsule(capsuleId) {
     }
     
   } catch (error) {
-    console.error('❌ Error al cargar cápsula directa:', error);
+    console.error('❌ Error loading direct capsule:', error);
     // Fall back to loading all capsules
     await loadCapsules();
   }
