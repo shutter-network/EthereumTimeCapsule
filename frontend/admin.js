@@ -9,21 +9,6 @@ import { Buffer } from "https://esm.sh/buffer";
 // UMD bundle already loaded, grab default export:
 const WalletConnectProvider = window.WalletConnectProvider.default;
 
-// =============  CONFIGURATION  =============
-// Chain configuration - change this to switch networks
-const CHAIN_CONFIG = {
-  chainId: 1,                    // Chain ID as number
-  chainIdHex: '0x1',              // Chain ID in hex format
-  chainName: 'Ethereum',             // Display name (for error messages)
-  rpcUrl: 'https://eth-mainnet.g.alchemy.com/v2/kDge5GGs1WZE7tiYVnE3E', // RPC endpoint
-};
-// const CHAIN_CONFIG = {
-//   chainId: 11155111,                    // Chain ID as number
-//   chainIdHex: '0xaa36a7',              // Chain ID in hex format
-//   chainName: 'Sepolia',             // Display name (for error messages)
-//   rpcUrl: 'https://eth-sepolia.g.alchemy.com/v2/YKFc7LN9GJ55rAR9FScn4', // RPC endpoint
-// };
-
 // =============  GLOBALS (EXACT COPY FROM GALLERY.JS)  =============
 let provider, signer, contract, contractRead;
 let contractAddr, contractAbi, shutterApi, registryAddr;
@@ -183,12 +168,16 @@ async function connectWallet(manual = false) {
   try {
     logOutput('🔄 Connecting wallet for blockchain interaction...');
     
+    // Load network config from public config
+    const config = await loadPublicConfig();
+    const networkConfig = config.network;
+    
     let eth = window.ethereum;
     if (!eth) {
       // fallback to WalletConnect
       const wc = new WalletConnectProvider({
-        rpc: { [CHAIN_CONFIG.chainId]: CHAIN_CONFIG.rpcUrl },
-        chainId: CHAIN_CONFIG.chainId
+        rpc: { [networkConfig.chainId]: networkConfig.rpcUrl },
+        chainId: networkConfig.chainId
       });
       await wc.enable();
       eth = wc;
@@ -204,12 +193,12 @@ async function connectWallet(manual = false) {
     signer = provider.getSigner();
     
     const net = await provider.getNetwork();
-    if (net.chainId !== CHAIN_CONFIG.chainId) {
+    if (net.chainId !== networkConfig.chainId) {
       // Try to switch to target chain
       try {
         await eth.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: CHAIN_CONFIG.chainIdHex }],
+          params: [{ chainId: networkConfig.chainIdHex }],
         });
         
         // IMPORTANT: Recreate provider after network switch
@@ -218,12 +207,12 @@ async function connectWallet(manual = false) {
         
         // Verify the switch worked
         const newNet = await provider.getNetwork();
-        if (newNet.chainId !== CHAIN_CONFIG.chainId) {
-          throw new Error(`Network switch failed. Expected chain ID ${CHAIN_CONFIG.chainId}, got ${newNet.chainId}`);
+        if (newNet.chainId !== networkConfig.chainId) {
+          throw new Error(`Network switch failed. Expected chain ID ${networkConfig.chainId}, got ${newNet.chainId}`);
         }
         
       } catch (switchError) {
-        throw new Error(`Please switch to ${CHAIN_CONFIG.chainName} (network ID ${CHAIN_CONFIG.chainId}) in your wallet. If you don't have this network, please add it manually.`);
+        throw new Error(`Please switch to ${networkConfig.chainName} (network ID ${networkConfig.chainId}) in your wallet. If you don't have this network, please add it manually.`);
       }
     }
     
