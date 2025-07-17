@@ -4,25 +4,6 @@
 // UMD bundle already loaded, grab default export:
 const WalletConnectProvider = window.WalletConnectProvider.default;
 
-// =============  CONFIGURATION  =============
-// Helper: get reveal time configuration from public config
-async function getRevealTimeConfig() {
-  const config = await loadPublicConfig();
-  
-  if (!config.reveal_time_config) {
-    throw new Error('reveal_time_config not found in public configuration');
-  }
-  
-  const revealConfig = config.reveal_time_config;
-  const currentMode = revealConfig.current;
-  
-  if (!revealConfig[currentMode]) {
-    throw new Error(`Reveal time configuration mode '${currentMode}' not found in config`);
-  }
-  
-  return revealConfig[currentMode];
-}
-
 // Chain configuration - change this to switch networks
 // const CHAIN_CONFIG = {
 //   chainId: 1,                    // Chain ID as number
@@ -793,7 +774,7 @@ function populatePreview() {
   // Update unlock date (configurable reveal time) - async operation
   (async () => {
     try {
-      const config = await getRevealTimeConfig();
+      const config = (await loadPublicConfig()).reveal_time;
       let unlockDate;
       let formatOptions;
       
@@ -924,7 +905,7 @@ async function startEncryptionInBackground() {
     document.getElementById('preview-encryption-status').textContent = 'Getting encryption parameters...';
     
     // Calculate reveal timestamp based on configuration
-    const config = await getRevealTimeConfig();
+    const config = (await loadPublicConfig()).reveal_time;
     let revealTimestamp;
     if (config.type === 'relative') {
       // For testing: current time + offset
@@ -1276,7 +1257,7 @@ function populateCompletion() {
   (async () => {
     try {
       const unlockDate = new Date(capsuleData.encryptionData.revealTimestamp * 1000);
-      const config = await getRevealTimeConfig();
+      const config = (await loadPublicConfig()).reveal_time;
       
       // For display formatting, check if it's a short-term reveal (testing mode)
       const formatOptions = (config.type === 'relative' && config.value < 86400) ? // Less than 1 day for testing
