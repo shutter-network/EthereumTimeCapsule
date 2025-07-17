@@ -2055,8 +2055,7 @@ function truncateAddress(address) {
 window.addEventListener("DOMContentLoaded", async () => {
   try {
     // Load configs & ABI
-    const cacheBuster = `?v=${Date.now()}`;
-    const cfgAll = await (await fetch(`public_config.json${cacheBuster}`)).json();
+    const cfgAll = await loadPublicConfig();
     
     // Store the full config globally for use by other functions
     appConfig = cfgAll;
