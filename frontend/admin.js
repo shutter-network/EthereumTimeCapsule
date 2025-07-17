@@ -147,6 +147,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     
     const fixedCfg = cfgAll["network"];
     contractAddr = fixedCfg.contract_address;
+    const cacheBuster = `?v=${Date.now()}`;
     contractAbi = await (await fetch(`contract_abi.json${cacheBuster}`)).json();
     shutterApi = fixedCfg.shutter_api_base;
     registryAddr = fixedCfg.registry_address;
