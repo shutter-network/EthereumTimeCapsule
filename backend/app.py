@@ -194,11 +194,9 @@ try:    # Handle different working directories (local vs Heroku)
     
     print(f"📊 Image processing config loaded: {IMAGE_PROCESSING_CONFIG}")
     
-    # Use default network configuration
-    default_network = config_data.get("default_network", "testnet")
-    network_config = config_data[default_network]
     
     # Get start block configuration (optional)
+    network_config = config_data["network"]
     start_block = network_config.get("start_block", 0)
     
     # Initialize event-based blockchain sync service  
@@ -1177,13 +1175,11 @@ def debug_contract():
     """Debug endpoint to show current contract configuration"""
     try:
         # Get current network config
-        default_network = config_data.get("default_network", "testnet")
-        network_config = config_data[default_network]
+        network_config = config_data["network"]
         
         return jsonify({
             "success": True,
             "config_source": public_config_path,
-            "default_network": default_network,
             "current_config": network_config,
             "backend_contract_address": sync_service.contract_address if sync_service else "Not initialized",
             "backend_rpc_url": sync_service.rpc_url if sync_service else "Not initialized",

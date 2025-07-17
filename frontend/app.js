@@ -2067,14 +2067,11 @@ window.addEventListener("DOMContentLoaded", async () => {
       populateTagsFromConfig();
     }
     
-    const fixedNetwork = cfgAll.default_network;
-    const fixedCfg = cfgAll[fixedNetwork];
-    const shutterCfg = cfgAll["testnet"]; // or "mainnet"
-    
+    const fixedCfg = cfgAll["network"];
     contractAddr = fixedCfg.contract_address;
     contractAbi = await (await fetch(`contract_abi.json${cacheBuster}`)).json();
-    shutterApi = shutterCfg.shutter_api_base;
-    registryAddr = shutterCfg.registry_address;
+    shutterApi = fixedCfg.shutter_api_base;
+    registryAddr = fixedCfg.registry_address;
       // read-only provider
     contractRead = new ethers.Contract(
       contractAddr,
