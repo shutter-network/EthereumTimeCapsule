@@ -1,4 +1,4 @@
-/*  admin.js — Admin Panel Logic (Spanish) */
+/*  admin.js — Admin Panel Logic (Chinese) */
 /*  Handles admin operations: preview, reveal, share, batch operations  */
 /*  EXACT PORT OF WORKING GALLERY.JS LOGIC  */
 
@@ -51,7 +51,7 @@ function getIPFSUrls(cid) {
 // Helper: fetch from redundant URLs with fallbacks
 async function fetchWithFallback(urls, options = {}) {
   if (!urls || urls.length === 0) {
-    throw new Error("No se proporcionaron URLs para fetch de respaldo");
+    throw new Error("未提供备用fetch的URL");
   }
   
   const errors = [];
@@ -67,11 +67,11 @@ async function fetchWithFallback(urls, options = {}) {
       return response;
     } catch (error) {
       const errorMsg = error.response ? `${error.response.status} ${error.response.statusText}` : error.message;
-      console.warn(`Error al obtener desde ${urls[i]}: ${errorMsg}`);
+      console.warn(`从 ${urls[i]} 获取时出错: ${errorMsg}`);
       errors.push(`URL ${i + 1}: ${errorMsg}`);
       
       if (i === urls.length - 1) {
-        throw new Error(`Todas las ${urls.length} URLs fallaron:\n${errors.join('\n')}`);
+        throw new Error(`所有 ${urls.length} 个URL都失败了:\n${errors.join('\n')}`);
       }
       // Continue to next URL
     }
@@ -89,7 +89,7 @@ async function ensureShutterReady() {
     tries++;
   }
   if (!window.shutter || typeof window.shutter.encryptData !== "function") {
-    throw new Error("¡Shutter WASM no cargado!");
+    throw new Error("Shutter WASM未加载!");
   }
 }
 
@@ -107,7 +107,7 @@ function logOutput(message) {
 // =============  INITIALIZATION (EXACT COPY FROM GALLERY.JS)  =============
 window.addEventListener("DOMContentLoaded", async () => {
   try {
-    logOutput("🚀 Inicializando panel de administración...");
+    logOutput("🚀 初始化管理面板...");
     
     // Initialize global storage
     window.ipfsUrls = {};
@@ -116,11 +116,11 @@ window.addEventListener("DOMContentLoaded", async () => {
     try {
       const systemInfo = await axios.get(`${getApiBaseUrl()}/system_info`);
       window.systemInfo = systemInfo.data;
-      logOutput("✅ Información del sistema cargada");
+      logOutput("✅ 系统信息已加载");
     } catch (e) {
-      console.warn("No se pudo cargar información del sistema:", e);
+      console.warn("无法加载系统信息:", e);
       window.systemInfo = { pinata_enabled: false };
-      logOutput("⚠️ Información del sistema no disponible (opcional)");
+      logOutput("⚠️ 系统信息不可用 (可选)");
     }
     
     // Load configs & ABI
@@ -128,7 +128,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     
     // Store the full config globally
     appConfig = cfgAll;
-    logOutput('📋 Configuración de la aplicación cargada');
+    logOutput('📋 应用配置已加载');
     
     const fixedCfg = cfgAll["network"];
     contractAddr = fixedCfg.contract_address;
@@ -144,22 +144,22 @@ window.addEventListener("DOMContentLoaded", async () => {
       new ethers.providers.JsonRpcProvider(fixedCfg.rpc_url)
     );
     
-    logOutput("📡 Contrato inicializado en modo solo lectura");
+    logOutput("📡 合约已在只读模式下初始化");
     
     // Initialize Shutter WASM
-    logOutput("🔧 Inicializando Shutter WASM...");
+    logOutput("🔧 初始化Shutter WASM...");
     try {
       await ensureShutterReady();
-      logOutput("✅ Shutter WASM listo");
+      logOutput("✅ Shutter WASM就绪");
     } catch (e) {
-      logOutput("⚠️ Shutter WASM no está listo aún, reintentará cuando sea necesario");
+      logOutput("⚠️ Shutter WASM尚未就绪，必要时将重试");
     }
     
-    logOutput("🎯 Panel de administración listo para operaciones");
+    logOutput("🎯 管理面板已准备好进行操作");
     
   } catch (e) {
-    console.error("Error en la inicialización:", e);
-    logOutput(`❌ Error en la inicialización: ${e.message}`);
+    console.error("初始化错误:", e);
+    logOutput(`❌ 初始化错误: ${e.message}`);
   }
 });
 
@@ -217,7 +217,7 @@ async function connectWallet(manual = false) {
     }
     
     contract = new ethers.Contract(contractAddr, contractAbi, signer);
-    logOutput("💰 Contrato de wallet inicializado");
+    logOutput("💰 钱包合约已初始化");
     
     walletConnected = true;
     logOutput('✅ Wallet conectado exitosamente');

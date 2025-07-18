@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ethereum Time Capsule - Panel de Administración</title>
+  <title>以太坊时间胶囊 - 管理面板</title>
   <meta name="description" content="在以太坊上创建加密的时间胶囊，锁定一年。存储记忆、消息和图片，将在正好365天后揭示。">
 
   <!-- OpenGraph meta tags -->
-  <meta property="og:title" content="Ethereum Time Capsule - Panel de Administración">
+  <meta property="og:title" content="以太坊时间胶囊 - 管理面板">
   <meta property="og:description" content="在以太坊上创建加密的时间胶囊，锁定一年。存储记忆、消息和图片，将在正好365天后揭示。">
   <meta property="og:image" content="https://ethtimecapsule.com/media_preview.png">
   <meta property="og:type" content="website">
@@ -15,7 +15,7 @@
 
   <!-- Twitter meta tags -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ethereum Time Capsule - Panel de Administración">
+  <meta name="twitter:title" content="以太坊时间胶囊 - 管理面板">
   <meta name="twitter:description" content="在以太坊上创建加密的时间胶囊，锁定一年。存储记忆、消息和图片，将在正好365天后揭示。">
   <meta name="twitter:image" content="https://ethtimecapsule.com/media_preview.png">
 
@@ -380,7 +380,7 @@
   <div class="admin-container">
     <!-- Header -->
     <div class="header">
-      <a href="/spanish/index.html" class="logo">
+      <a href="/chinese/index.html" class="logo">
         <img src="../logo.svg" alt="Time Capsule" class="logo-icon" style="width: 60px; height: auto;">
         <img src="../headertext.png" alt="Time Capsule" style="height: 45px; width: auto;">
       </a>
@@ -391,13 +391,13 @@
     <div class="main-content">
       <!-- Admin Header -->
       <div class="admin-header">
-        <div class="admin-title">Panel de Administración</div>
-        <div class="admin-subtitle">⚠️ Funciones administrativas para gestionar time capsules</div>
+        <div class="admin-title">管理面板</div>
+        <div class="admin-subtitle">⚠️ 管理时间胶囊的管理功能</div>
       </div>
 
       <!-- Warning -->
       <div class="warning-message">
-        🚨 Esta página contiene funciones administrativas. Usar con precaución. 🚨
+        🚨 此页面包含管理功能。请谨慎使用。🚨
       </div>
 
       <!-- Wallet Status -->
@@ -409,7 +409,7 @@
       <div class="admin-controls">
         <!-- Connect Wallet Section -->
         <div class="control-section">
-          <div class="section-title">🔗 Conexión de Wallet</div>
+          <div class="section-title">🔗 钱包连接</div>
           <div class="input-group">
             <button id="connect-wallet-btn" class="btn-admin">连接钱包</button>
           </div>
@@ -420,7 +420,7 @@
           <div class="section-title">🔓 预览胶囊历史 (链下)</div>
           <div class="input-group">
             <input type="number" id="preview-capsule-id" placeholder="输入胶囊ID" min="1">
-            <button class="btn-small btn-decrypt" onclick="previewCapsuleStory()">🔓 Previsualizar Historia</button>
+            <button class="btn-small btn-decrypt" onclick="previewCapsuleStory()">🔓 预览故事</button>
           </div>
         </div>
 
@@ -429,7 +429,7 @@
           <div class="section-title">🎉 永久揭示胶囊 (链上)</div>
           <div class="input-group">
             <input type="number" id="reveal-capsule-id" placeholder="输入胶囊ID" min="1">
-            <button class="btn-small btn-reveal" onclick="revealCapsuleForever()">🎉 Revelar Para Siempre</button>
+            <button class="btn-small btn-reveal" onclick="revealCapsuleForever()">🎉 永久揭晓</button>
           </div>
         </div>
 
@@ -438,7 +438,7 @@
           <div class="section-title">🐦 在X上分享胶囊</div>
           <div class="input-group">
                         <input type="number" id="share-capsule-id" placeholder="输入胶囊ID" min="1">
-            <button class="btn-small btn-share" onclick="shareCapsule()">🐦 Compartir en X</button>
+            <button class="btn-small btn-share" onclick="shareCapsule()">🐦 分享到X</button>
           </div>
         </div>
 
