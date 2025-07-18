@@ -580,7 +580,7 @@
             </div>
             <div class="faq-answer">
               <div class="faq-answer-text">
-                La Cápsula del Tiempo Ethereum solo está disponible en Ethereum Mainnet.
+                以太坊时间胶囊仅在以太坊主网上可用。
               </div>
             </div>
           </div>
@@ -592,7 +592,7 @@
             </div>
             <div class="faq-answer">
               <div class="faq-answer-text">
-                Las imágenes se almacenan en IPFS (Sistema de Archivos InterPlanetario), una red de almacenamiento descentralizada. Esto asegura que tus imágenes permanezcan accesibles y resistentes a la censura. Si no subes una imagen, usaremos un diseño por defecto hermoso.
+                图片存储在IPFS（星际文件系统）中，这是一个去中心化的存储网络。这确保您的图片保持可访问且抗审查。如果您不上传图片，我们将使用美观的默认设计。
               </div>
             </div>
           </div>
@@ -639,7 +639,7 @@
             </div>
             <div class="faq-answer">
               <div class="faq-answer-text">
-                Cuando el bloqueo temporal expira, el contenido de tu cápsula se vuelve públicamente visible en la galería. Cualquiera puede leer tu mensaje y ver tu imagen. La cápsula permanece accesible permanentemente en la blockchain como parte del patrimonio digital de la humanidad.
+                当时间锁到期时，您胶囊的内容将在画廊中公开可见。任何人都可以阅读您的消息并查看您的图片。胶囊将作为人类数字遗产的一部分永久存在于区块链上。
               </div>
             </div>
           </div>
@@ -670,12 +670,12 @@
 
           <div class="faq-item">
             <div class="faq-question" onclick="toggleFAQ(this)">
-              <div class="faq-question-text">¿Qué debería escribir en mi cápsula del tiempo?</div>
+              <div class="faq-question-text">我应该在时间胶囊中写什么？</div>
               <div class="faq-toggle">▼</div>
             </div>
             <div class="faq-answer">
               <div class="faq-answer-text">
-                ¡Cualquier cosa que sea significativa para ti! Ideas populares incluyen: pensamientos y sentimientos actuales, predicciones sobre el futuro, mensajes para tu yo futuro, recuerdos de eventos significativos, esperanzas y sueños, o mensajes para seres queridos. Manténlo bajo 280 caracteres para la mejor experiencia.
+                任何对您有意义的内容！热门想法包括：当前的想法和感受、对未来的预测、给未来自己的消息、重要事件的回忆、希望和梦想，或给亲人的消息。为了最佳体验，请保持在280个字符以内。
               </div>
             </div>
           </div>
@@ -695,19 +695,19 @@
             </div>
             <div class="faq-answer">
               <div class="faq-answer-text">
-                1. Asegúrate de estar conectado a Ethereum Mainnet en tu wallet<br>
-                2. Intenta refrescar la página y reconectarte<br>
-                3. Verifica que la extensión de tu wallet esté actualizada<br>
-                4. Asegúrate de tener algo de ETH para las tarifas de transacción<br><br>
+                1. 确保您的钱包已连接到以太坊主网<br>
+                2. 尝试刷新页面并重新连接<br>
+                3. 验证您的钱包扩展程序已更新<br>
+                4. 确保您有足够的ETH用于交易费用<br><br>
 
-                USUARIOS MÓVILES: Accede a la URL ethtimecapsule.com desde el navegador web de tu wallet
+                移动用户：请从您钱包的网络浏览器访问ethtimecapsule.com
               </div>
             </div>
           </div>
 
           <div class="faq-item">
             <div class="faq-question" onclick="toggleFAQ(this)">
-              <div class="faq-question-text">La transacción falló. ¿Qué salió mal?</div>
+              <div class="faq-question-text">交易失败了。出了什么问题？</div>
               <div class="faq-toggle">▼</div>
             </div>
             <div class="faq-answer">
@@ -719,12 +719,12 @@
 
           <div class="faq-item">
             <div class="faq-question" onclick="toggleFAQ(this)">
-              <div class="faq-question-text">No puedo ver mi cápsula en la galería. ¿Dónde está?</div>
+              <div class="faq-question-text">我在画廊中看不到我的胶囊。它在哪里？</div>
               <div class="faq-toggle">▼</div>
             </div>
             <div class="faq-answer">
               <div class="faq-answer-text">
-                Si tu transacción fue exitosa, tu cápsula debería aparecer en la galería en unos minutos. Intenta refrescar la página o revisar el enlace directo proporcionado después de la creación. Si aún no aparece, la blockchain podría estar experimentando retrasos.
+                如果您的交易成功，您的胶囊应该在几分钟内出现在画廊中。尝试刷新页面或查看创建后提供的直接链接。如果仍未出现，区块链可能正在经历延迟。
               </div>
             </div>
           </div>
@@ -765,13 +765,39 @@
         { text: '画廊', href: 'gallery.html' },
         { text: '常见问题', href: 'faq.html' },
         { text: '文档', href: 'https://github.com/shutter-network/EthereumTimeCapsule' },
-        { text: 'aviso legal', href: '/imprint.html' }
+        { text: '版权信息', href: '/imprint.html' }
       ];
 
       links.forEach((link, index) => {
         const a = document.createElement('a');
         a.href = link.href;
         a.textContent = link.text;
+        menu.appendChild(a);
+      });
+
+      // Add language selector section
+      const langSeparator = document.createElement('div');
+      langSeparator.style.cssText = 'width: 80%; height: 1px; background: #ccc; margin: 30px auto;';
+      menu.appendChild(langSeparator);
+
+      const langTitle = document.createElement('div');
+      langTitle.textContent = '语言 / Language';
+      langTitle.style.cssText = 'text-align: center; font-size: 18px; color: #666; margin-bottom: 20px;';
+      menu.appendChild(langTitle);
+
+      const languages = [
+        { text: 'English', href: '../faq.html' },
+        { text: '中文', href: 'faq.html', current: true },
+        { text: 'Español', href: '../spanish/faq.html' }
+      ];
+
+      languages.forEach(lang => {
+        const a = document.createElement('a');
+        a.href = lang.href;
+        a.textContent = lang.text;
+        if (lang.current) {
+          a.style.cssText = 'color: #242ae0; font-weight: 600;';
+        }
         menu.appendChild(a);
       });
 

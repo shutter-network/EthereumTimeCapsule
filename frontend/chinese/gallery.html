@@ -813,13 +813,39 @@
         { text: '画廊', href: 'gallery.html' },
         { text: '文档', href: 'https://github.com/shutter-network/EthereumTimeCapsule' },
         { text: '常见问题', href: 'faq.html' },
-        { text: 'imprenta', href: 'imprint.html' }
+        { text: '版权信息', href: 'imprint.html' }
       ];
 
       links.forEach((link, index) => {
         const a = document.createElement('a');
         a.href = link.href;
         a.textContent = link.text;
+        menu.appendChild(a);
+      });
+
+      // Add language selector section
+      const langSeparator = document.createElement('div');
+      langSeparator.style.cssText = 'width: 80%; height: 1px; background: #ccc; margin: 30px auto;';
+      menu.appendChild(langSeparator);
+
+      const langTitle = document.createElement('div');
+      langTitle.textContent = '语言 / Language';
+      langTitle.style.cssText = 'text-align: center; font-size: 18px; color: #666; margin-bottom: 20px;';
+      menu.appendChild(langTitle);
+
+      const languages = [
+        { text: 'English', href: '../gallery.html' },
+        { text: '中文', href: 'gallery.html', current: true },
+        { text: 'Español', href: '../spanish/gallery.html' }
+      ];
+
+      languages.forEach(lang => {
+        const a = document.createElement('a');
+        a.href = lang.href;
+        a.textContent = lang.text;
+        if (lang.current) {
+          a.style.cssText = 'color: #242ae0; font-weight: 600;';
+        }
         menu.appendChild(a);
       });
 

@@ -1314,7 +1314,7 @@
         </div>
 
         <div class="preview-content">
-          <h2 id="preview-title" class="preview-title">Mi increíble entrada a la cápsula del tiempo de Ethereum</h2>
+          <h2 id="preview-title" class="preview-title">我的以太坊时间胶囊精彩记录</h2>
 
           <div class="preview-meta">
             <div class="meta-item">
@@ -1335,7 +1335,7 @@
 
           <div class="preview-tags">
             <span class="tag">#lol</span>
-            <span class="tag">#ValoresOnChain</span>
+            <span class="tag">#链上价值</span>
           </div>
         </div>
       </div>
@@ -1365,7 +1365,7 @@
       <div class="process-section">
         <div class="step-title" style="margin-bottom: 20px;">
           <div class="step-number-text">Paso 3</div>
-          <div class="step-description">Enviando a Blockchain</div>
+          <div class="step-description">发送到区块链</div>
         </div>
 
         <!-- Wallet Connection Status -->
@@ -1377,13 +1377,13 @@
 
         <!-- Blockchain Submission Progress -->
         <div class="blockchain-submission-section" id="blockchain-submission-section" style="display: none;">
-          <h3>⛓️ Envío a Blockchain</h3>
+          <h3>⛓️ 发送到区块链</h3>
           <div class="progress-bar">
             <div id="submission-progress" class="progress-fill" style="width: 0%;"></div>
           </div>
-          <div id="submission-status" class="status-text">Preparando transacción...</div>
+          <div id="submission-status" class="status-text">准备交易...</div>
           <div class="submission-status">
-            <p id="submission-message">Por favor confirma la transacción en tu billetera...</p>
+            <p id="submission-message">请在您的钱包中确认交易...</p>
           </div>
         </div>
       </div>
@@ -1403,7 +1403,7 @@
         </div>
 
         <div class="preview-content">
-          <h2 id="final-preview-title" class="preview-title">Mi increíble entrada a la cápsula del tiempo de Ethereum</h2>
+          <h2 id="final-preview-title" class="preview-title">我的以太坊时间胶囊精彩记录</h2>
 
           <div class="preview-meta">
             <div class="meta-item">
@@ -1489,6 +1489,32 @@
         const a = document.createElement('a');
         a.href = link.href;
         a.textContent = link.text;
+        menu.appendChild(a);
+      });
+
+      // Add language selector section
+      const langSeparator = document.createElement('div');
+      langSeparator.style.cssText = 'width: 80%; height: 1px; background: #ccc; margin: 30px auto;';
+      menu.appendChild(langSeparator);
+
+      const langTitle = document.createElement('div');
+      langTitle.textContent = '语言 / Language';
+      langTitle.style.cssText = 'text-align: center; font-size: 18px; color: #666; margin-bottom: 20px;';
+      menu.appendChild(langTitle);
+
+      const languages = [
+        { text: 'English', href: '../create.html' },
+        { text: '中文', href: 'create.html', current: true },
+        { text: 'Español', href: '../spanish/create.html' }
+      ];
+
+      languages.forEach(lang => {
+        const a = document.createElement('a');
+        a.href = lang.href;
+        a.textContent = lang.text;
+        if (lang.current) {
+          a.style.cssText = 'color: #242ae0; font-weight: 600;';
+        }
         menu.appendChild(a);
       });
 

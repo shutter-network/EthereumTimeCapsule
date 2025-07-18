@@ -58,12 +58,12 @@ async function fetchWithFallback(urls, options = {}) {
   
   for (let i = 0; i < urls.length; i++) {
     try {
-      console.log(`Intentando obtener desde URL ${i + 1}/${urls.length}: ${urls[i]}`);
+      console.log(`尝试从URL ${i + 1}/${urls.length}获取: ${urls[i]}`);
       const response = await axios.get(urls[i], {
         timeout: i === 0 ? 5000 : 10000, // First URL gets shorter timeout
         ...options
       });
-      console.log(`Obtenido exitosamente desde: ${urls[i]}`);
+      console.log(`成功从以下地址获取: ${urls[i]}`);
       return response;
     } catch (error) {
       const errorMsg = error.response ? `${error.response.status} ${error.response.statusText}` : error.message;
@@ -166,7 +166,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 // =============  WALLET CONNECTION (EXACT COPY FROM GALLERY.JS)  =============
 async function connectWallet(manual = false) {
   try {
-    logOutput('🔄 Conectando wallet para interacción blockchain...');
+    logOutput('🔄 连接钱包进行区块链交互...');
     
     // Load network config from public config
     const config = await loadPublicConfig();
@@ -185,7 +185,7 @@ async function connectWallet(manual = false) {
       // Request account access (this will prompt the user)
       const accounts = await eth.request({ method: "eth_requestAccounts" });
       if (!accounts || accounts.length === 0) {
-        throw new Error('No se devolvieron cuentas desde el wallet');
+        throw new Error('钱包未返回账户');
       }
     }
     
@@ -208,11 +208,11 @@ async function connectWallet(manual = false) {
         // Verify the switch worked
         const newNet = await provider.getNetwork();
         if (newNet.chainId !== networkConfig.chainId) {
-          throw new Error(`Cambio de red falló. Se esperaba chain ID ${networkConfig.chainId}, se obtuvo ${newNet.chainId}`);
+          throw new Error(`网络切换失败。期望链ID ${networkConfig.chainId}，实际获得 ${newNet.chainId}`);    
         }
         
       } catch (switchError) {
-        throw new Error(`Por favor cambie a ${networkConfig.chainName} (network ID ${networkConfig.chainId}) en su wallet. Si no tiene esta red, agreguela manualmente.`);
+        throw new Error(`请在您的钱包中切换到${networkConfig.chainName}（网络ID ${networkConfig.chainId}）。如果您没有此网络，请手动添加。`);
       }
     }
     
@@ -220,12 +220,12 @@ async function connectWallet(manual = false) {
     logOutput("💰 钱包合约已初始化");
     
     walletConnected = true;
-    logOutput('✅ Wallet conectado exitosamente');
+    logOutput('✅ 钱包连接成功');
     
     return true;
   } catch (e) {
-    console.error("❌ Error en la conexión del wallet:", e);
-    logOutput(`❌ Error en la conexión del wallet: ${e.message}`);
+    console.error("❌ 钱包连接错误:", e);
+    logOutput(`❌ 钱包连接错误: ${e.message}`);
     walletConnected = false;
     return false;
   }
@@ -239,12 +239,12 @@ async function previewCapsuleStory() {
   const capsuleId = parseInt(capsuleIdInput.value);
   
   if (isNaN(capsuleId) || capsuleId < 0) {
-    logOutput('❌ Por favor ingrese un ID de cápsula válido');
+    logOutput('❌ 请输入有效的胶囊ID');
     return;
   }
   
   try {
-    logOutput(`🔓 Previsualizando historia para cápsula #${capsuleId}...`);
+    logOutput(`🔓 预览胶囊 #${capsuleId} 的故事...`);
     
     // Fetch capsule data from database API
     const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
@@ -262,10 +262,10 @@ async function previewCapsuleStory() {
     });
     const key = resp.data?.message?.decryption_key;
     if (!key) {
-      throw new Error("¡Clave de descifrado aún no disponible! Por favor espere e intente de nuevo.");
+      throw new Error("解密密钥尚未可用！请等待后重试。");
     }
     
-    logOutput(`🔑 Clave de descifrado obtenida`);
+    logOutput(`🔑 已获得解密密钥`);
 
     // Handle encrypted story from database API
     let encryptedHex;
@@ -274,7 +274,7 @@ async function previewCapsuleStory() {
     } else if (typeof cap.encryptedStory === "string") {
       encryptedHex = "0x" + cap.encryptedStory;
     } else {
-      throw new Error("Formato de encryptedStory desconocido desde base de datos");
+      throw new Error("数据库中的encryptedStory格式未知");
     }
 
     // Ensure Shutter WASM is ready before decryption
@@ -284,12 +284,12 @@ async function previewCapsuleStory() {
     const plaintextHex = await window.shutter.decrypt(encryptedHex, key);
     const plaintext = Buffer.from(plaintextHex.slice(2), "hex").toString("utf8");
 
-    logOutput(`✅ ¡Historia descifrada exitosamente!`);
-    logOutput(`📖 Contenido de la historia: "${plaintext}"`);
+    logOutput(`✅ 故事解密成功！`);
+    logOutput(`📖 故事内容: "${plaintext}"`);
     
   } catch (error) {
     console.error(`Error al previsualizar cápsula #${capsuleId}:`, error);
-    logOutput(`❌ Error en la previsualización: ${error.message}`);
+    logOutput(`❌ 预览错误: ${error.message}`);
   }
 }
 
@@ -299,22 +299,22 @@ async function revealCapsuleForever() {
   const capsuleId = parseInt(capsuleIdInput.value);
   
   if (isNaN(capsuleId) || capsuleId < 0) {
-    logOutput('❌ Por favor ingrese un ID de cápsula válido');
+    logOutput('❌ 请输入有效的胶囊ID');
     return;
   }
   
   try {
     // Connect wallet on-demand when user wants to reveal
     if (!walletConnected) {
-      logOutput('🔗 Conectando wallet para transacción de revelación...');
+      logOutput('🔗 连接钱包以进行揭示交易...');
       const connected = await connectWallet(true);
       if (!connected) {
-        logOutput('❌ Se requiere conexión de wallet para revelar cápsulas permanentemente en la blockchain.');
+        logOutput('❌ 需要连接钱包才能在区块链上永久揭示胶囊。');
         return;
       }
     }
     
-    logOutput(`🎉 Revelando cápsula #${capsuleId} para siempre en blockchain...`);
+    logOutput(`🎉 在区块链上永久揭示胶囊 #${capsuleId}...`);
     
     // Fetch capsule data from database API
     const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
@@ -331,10 +331,10 @@ async function revealCapsuleForever() {
     });
     const key = resp.data?.message?.decryption_key;
     if (!key) {
-      throw new Error("¡Clave de descifrado aún no disponible!");
+      throw new Error("解密密钥尚未可用！");
     }
     
-    logOutput(`🔑 Clave de descifrado obtenida`);
+    logOutput(`🔑 已获得解密密钥`);
 
     // Handle encrypted story from database API
     let encryptedHex;
@@ -343,7 +343,7 @@ async function revealCapsuleForever() {
     } else if (typeof cap.encryptedStory === "string") {
       encryptedHex = "0x" + cap.encryptedStory;
     } else {
-      throw new Error("Formato de encryptedStory desconocido desde base de datos");
+      throw new Error("数据库中的encryptedStory格式未知");
     }
 
     // Ensure Shutter WASM is ready before decryption
@@ -353,21 +353,21 @@ async function revealCapsuleForever() {
     const plaintextHex = await window.shutter.decrypt(encryptedHex, key);
     const plaintext = Buffer.from(plaintextHex.slice(2), "hex").toString("utf8");
     
-    logOutput(`🔓 Historia descifrada: "${plaintext}"`);
+    logOutput(`🔓 故事已解密: "${plaintext}"`);
 
     // Submit reveal transaction
-    logOutput(`📝 Enviando transacción de revelación a blockchain...`);
+    logOutput(`📝 发送揭示交易到区块链...`);
     const tx = await contract.revealCapsule(capsuleId, plaintext);
-    logOutput(`🚀 ¡Transacción de revelación enviada! Hash: ${tx.hash}`);
+    logOutput(`🚀 揭示交易已发送！哈希: ${tx.hash}`);
     
     // Wait for confirmation
-    logOutput(`⏳ Esperando confirmación de transacción...`);
+    logOutput(`⏳ 等待交易确认...`);
     await tx.wait();
-    logOutput(`✅ ¡Cápsula #${capsuleId} revelada exitosamente en blockchain!`);
+    logOutput(`✅ 胶囊 #${capsuleId} 在区块链上成功揭示！`);
     
   } catch (error) {
     console.error(`Error al revelar cápsula #${capsuleId}:`, error);
-    logOutput(`❌ Error en la revelación: ${error.message}`);
+    logOutput(`❌ 揭示错误: ${error.message}`);
   }
 }
 
@@ -377,12 +377,12 @@ async function shareCapsule() {
   const capsuleId = parseInt(capsuleIdInput.value);
   
   if (isNaN(capsuleId) || capsuleId < 0) {
-    logOutput('❌ Por favor ingrese un ID de cápsula válido');
+    logOutput('❌ 请输入有效的胶囊ID');
     return;
   }
   
   try {
-    logOutput(`🐦 Compartiendo cápsula #${capsuleId} en X...`);
+    logOutput(`🐦 在X上分享胶囊 #${capsuleId}...`);
     
     // Fetch capsule data to get title and details
     const response = await axios.get(`${getApiBaseUrl()}/api/capsules/${capsuleId}`);
@@ -401,7 +401,7 @@ async function shareCapsule() {
     // Construct tweet text
     const tweetText = encodeURIComponent(
       `🎁 Mira mi Time Capsule: "${title}" 🎁\n\n` +
-      `🗓️ Se desbloquea: ${revealTime.toLocaleDateString('es-ES', { timeZone: 'UTC' })}\n` +
+      `🗓️ 解锁时间: ${revealTime.toLocaleDateString('zh-CN', { timeZone: 'UTC' })}\n` +
       `🔗 Ver: ${capsuleUrl}\n\n` +
       `#TimeCapsule #Ethereum #Future #Memories`
     );
@@ -410,12 +410,12 @@ async function shareCapsule() {
     const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
     window.open(twitterUrl, '_blank');
     
-    logOutput(`✅ Diálogo de compartir abierto para cápsula #${capsuleId}: "${title}"`);
+    logOutput(`✅ 为胶囊 #${capsuleId} 打开分享对话框: "${title}"`);
     logOutput(`🔗 Enlace directo: ${capsuleUrl}`);
     
   } catch (error) {
-    console.error(`Error al compartir cápsula #${capsuleId}:`, error);
-    logOutput(`❌ Error al compartir: ${error.message}`);
+    console.error(`分享胶囊 #${capsuleId} 时出错:`, error);
+    logOutput(`❌ 分享错误: ${error.message}`);
   }
 }
 
@@ -425,7 +425,7 @@ async function batchPreviewCapsules() {
   const capsuleIdsText = batchInput.value.trim();
   
   if (!capsuleIdsText) {
-    logOutput('❌ Por favor ingrese IDs de cápsula (separados por coma)');
+    logOutput('❌ 请输入胶囊ID（用逗号分隔）');
     return;
   }
   
@@ -464,7 +464,7 @@ async function batchPreviewCapsules() {
         });
         const key = resp.data?.message?.decryption_key;
         if (!key) {
-          throw new Error("Clave de descifrado aún no disponible");
+          throw new Error("解密密钥尚未可用");
         }
 
         // Handle encrypted story
@@ -499,11 +499,11 @@ async function batchPreviewCapsules() {
     logOutput(`\n📊 ¡Previsualización en lote completada!`);
     logOutput(`✅ Exitosas: ${successCount}`);
     logOutput(`❌ Fallidas: ${failCount}`);
-    logOutput(`📝 Total procesadas: ${capsuleIds.length}`);
+    logOutput(`📝 已处理总数: ${capsuleIds.length}`);
     
   } catch (error) {
-    console.error('Error en previsualización en lote:', error);
-    logOutput(`❌ Error en previsualización en lote: ${error.message}`);
+    console.error('批量预览错误:', error);
+    logOutput(`❌ 批量预览错误: ${error.message}`);
   }
 }
 
@@ -515,7 +515,7 @@ async function initializeShutter() {
     logOutput('✅ ¡Shutter WASM inicializado exitosamente!');
     logOutput(`🛠️ Funciones disponibles: ${Object.keys(window.shutter || {}).join(', ')}`);
   } catch (error) {
-    logOutput(`❌ Error en inicialización de Shutter: ${error.message}`);
+    logOutput(`❌ Shutter初始化错误: ${error.message}`);
   }
 }
 

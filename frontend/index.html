@@ -1161,6 +1161,32 @@
         menu.appendChild(a);
       });
 
+      // Add language selector section
+      const langSeparator = document.createElement('div');
+      langSeparator.style.cssText = 'width: 80%; height: 1px; background: #ccc; margin: 30px auto;';
+      menu.appendChild(langSeparator);
+
+      const langTitle = document.createElement('div');
+      langTitle.textContent = 'Language / 语言';
+      langTitle.style.cssText = 'text-align: center; font-size: 18px; color: #666; margin-bottom: 20px;';
+      menu.appendChild(langTitle);
+
+      const languages = [
+        { text: 'English', href: 'index.html', current: true },
+        { text: '中文', href: 'chinese/index.html' },
+        { text: 'Español', href: 'spanish/index.html' }
+      ];
+
+      languages.forEach(lang => {
+        const a = document.createElement('a');
+        a.href = lang.href;
+        a.textContent = lang.text;
+        if (lang.current) {
+          a.style.cssText = 'color: #242ae0; font-weight: 600;';
+        }
+        menu.appendChild(a);
+      });
+
       // Add back button
       const backButton = document.createElement('div');
       backButton.className = 'menu-back';
