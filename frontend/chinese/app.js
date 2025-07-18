@@ -787,7 +787,7 @@ function populatePreview() {
         unlockDate.toLocaleString('en-US', formatOptions);
     } catch (error) {
       console.error('Failed to update unlock date:', error);
-      document.getElementById('preview-unlock-date').textContent = 'Error cargando fecha de desbloqueo';
+      document.getElementById('preview-unlock-date').textContent = '加载解锁日期时出错';
     }
   })();
   
@@ -911,7 +911,7 @@ async function startEncryptionInBackground() {
     
     if (!imageToEncrypt) {
       // Fetch default image and convert to File object
-      document.getElementById('preview-encryption-status').textContent = 'Cargando imagen por defecto...';
+      document.getElementById('preview-encryption-status').textContent = '正在加载默认图片...';
       try {
         const defaultImageResponse = await fetch('default.jpg');
         const defaultImageBlob = await defaultImageResponse.blob();
@@ -1192,7 +1192,7 @@ async function submitToChain() {
 
     if (submissionStatus) submissionStatus.textContent = '¡Éxito! Preparando pantalla de finalización...';
     if (submissionProgress) submissionProgress.style.width = '100%';
-    if (submissionMessage) submissionMessage.textContent = '¡Éxito! ¡Tu cápsula del tiempo ha sido creada!';
+    if (submissionMessage) submissionMessage.textContent = '成功！您的时间胶囊已创建！';
     
     // Move to final step with a short delay
     setTimeout(() => {
@@ -1211,12 +1211,12 @@ async function submitToChain() {
       submissionStatus.style.color = 'red';
     }
     if (submissionMessage) {
-      submissionMessage.textContent = 'Transacción fallida. Por favor intenta de nuevo.';
+      submissionMessage.textContent = '交易失败。请重试。';
       submissionMessage.style.color = 'red';
     }
       // Show retry option
     setTimeout(async () => {
-      if (confirm('Transacción fallida. ¿Te gustaría intentar de nuevo?')) {
+      if (confirm('交易失败。您想重试吗？')) {
         // Reset submission UI and retry
         document.getElementById('submission-status').style.color = '';
         document.getElementById('submission-message').style.color = '';
@@ -1271,7 +1271,7 @@ function populateCompletion() {
         unlockDate.toLocaleString('en-US', formatOptions);
     } catch (error) {
       console.error('Failed to update final unlock date:', error);
-      document.getElementById('final-unlock-date').textContent = 'Error cargando fecha de desbloqueo';
+      document.getElementById('final-unlock-date').textContent = '加载解锁日期时出错';
     }
   })();
   

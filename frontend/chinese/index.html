@@ -1113,9 +1113,9 @@
       const firstTag = capsule.tags.split(',')[0].trim() || 'sin categoría';
         thumbnail.innerHTML = `
         <div class="rectangle-143"></div>
-        ${isRevealed ? '<div style="position: absolute; top: 8px; right: 8px; background: #4CAF50; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px; font-weight: 600; z-index: 20;">REVELADO</div>' : ''}
+        ${isRevealed ? '<div style="position: absolute; top: 8px; right: 8px; background: #4CAF50; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px; font-weight: 600; z-index: 20;">已揭示</div>' : ''}
         <div class="content">
-          <div class="issued-by-xyz">publicado por ${creator}</div>
+          <div class="issued-by-xyz">发布者 ${creator}</div>
           <div class="title-on-two-lines">${title}</div>
           <div class="onchain-values-container">
             <div class="onchain-values">#${firstTag}</div>

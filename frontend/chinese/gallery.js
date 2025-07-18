@@ -482,7 +482,7 @@ async function loadCapsules() {
     const previousCount = grid.children.length - filteredCapsules.length;
     const totalDisplayed = previousCount + filteredCapsules.length;
 
-    loadStatus.textContent = `Mostrando ${totalDisplayed} de ${totalCount} cápsulas`;
+    loadStatus.textContent = `显示 ${totalDisplayed} 个胶囊，共 ${totalCount} 个`;
 
     // Update load more button
     const loadMoreBtn = document.getElementById('load-more-btn');
@@ -592,7 +592,7 @@ async function createCapsuleCard(capsule) {
       <img src="${imageSrc}" alt="Capsule image" class="preview-image${isRevealed ? '' : ' pixelated'}" loading="lazy" 
            data-current-cid="${pixelatedCID}" data-capsule-id="${capsule.id}"
            onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})">
-      <div class="issuer-tag">issued by <span>${creator}</span></div>
+      <div class="issuer-tag">发布者 <span>${creator}</span></div>
     </div>
     
     <div class="preview-content">
@@ -916,7 +916,7 @@ async function loadDirectCapsule(capsuleId) {
       // Update load status
       const loadStatus = document.getElementById('load-status');
       if (loadStatus) {
-        loadStatus.textContent = `Mostrando cápsula específica #${capsule.id}`;
+        loadStatus.textContent = `显示特定胶囊 #${capsule.id}`;
       }
       
       // Hide load more button since we're only showing one capsule
