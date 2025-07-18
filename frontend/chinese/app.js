@@ -1364,7 +1364,7 @@ function populateCompletion() {
         }, 2000);
       }).catch(err => {
         console.error('Failed to copy ciphertext:', err);
-        alert('Failed to copy ciphertext to clipboard');
+        alert('复制密文到剪贴板失败');
       });
     };
   }
@@ -1400,7 +1400,7 @@ function generateShareableLink() {
         }, 2000);
       }).catch(err => {
         console.error('Failed to copy link:', err);
-        alert('Failed to copy link to clipboard');
+        alert('复制链接到剪贴板失败');
       });
     };
   }
@@ -1777,21 +1777,21 @@ View my encrypted entry and create your own:`;
         window.open(twitterUrl, '_blank');
         
         if (clipboardSuccess) {
-          alert('🎨 Perfect! Your capsule image is now copied to your clipboard.\n\n📋 Just paste it (Ctrl+V / Cmd+V) into your tweet before clicking "Post"! 🚀\n\nTip: The image will appear as an attachment when you paste it.');
+          alert('🎨 完美！您的胶囊图片已复制到剪贴板。\n\n📋 在点击"发布"之前，只需将其粘贴（Ctrl+V / Cmd+V）到您的推文中！🚀\n\n提示：粘贴时图片将作为附件出现。');
         } else {
-          alert('📷 Your capsule image has been downloaded.\n\nAttach the downloaded file to your tweet to show off your time capsule! 🚀');
+          alert('📷 您的胶囊图片已下载。\n\n将下载的文件附加到您的推文中，展示您的时间胶囊！🚀');
         }
       }, 500);
     } else {
       // If generation fails, open Twitter without image
       window.open(twitterUrl, '_blank');
-      alert('� Tweet opened! Consider downloading the image separately to attach to your tweet.');
+      alert('🐦 推文已打开！考虑单独下载图片以附加到您的推文中。');
     }
   }).catch(error => {
     console.error('Share failed:', error);
     // Fallback: open Twitter without image
     window.open(twitterUrl, '_blank');
-    alert('🐦 Tweet abierto! Considera descargar la imagen por separado para adjuntarla a tu tweet.');
+    alert('🐦 推文已打开！考虑单独下载图片以附加到您的推文中。');
   });
 }
 

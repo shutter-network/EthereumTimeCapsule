@@ -222,7 +222,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     
   } catch (e) {
     console.error("Initialization failed:", e);
-    document.getElementById('load-status').textContent = 'Error al inicializar galería';
+    document.getElementById('load-status').textContent = '初始化画廊时出错';
   }
 });
 
@@ -422,7 +422,7 @@ async function loadCapsules() {
   
   try {
     loadingIndicator.style.display = 'block';
-    loadStatus.textContent = 'Cargando cápsulas desde la base de datos...';
+    loadStatus.textContent = '从数据库加载胶囊中...';
     
     let url, params;
       if (currentSearch) {
@@ -487,16 +487,16 @@ async function loadCapsules() {
     // Update load more button
     const loadMoreBtn = document.getElementById('load-more-btn');
     if (hasMore) {
-      loadMoreBtn.textContent = 'Cargar más cápsulas';
+      loadMoreBtn.textContent = '加载更多胶囊';
       loadMoreBtn.disabled = false;
     } else {
-      loadMoreBtn.textContent = 'No hay más cápsulas';
+      loadMoreBtn.textContent = '没有更多胶囊';
       loadMoreBtn.disabled = true;
     }
     
   } catch (error) {
     console.error('Failed to load capsules:', error);
-    loadStatus.textContent = 'Error al cargar cápsulas: ' + error.message;
+    loadStatus.textContent = '加载胶囊时出错：' + error.message;
   } finally {
     isLoading = false;
     loadingIndicator.style.display = 'none';

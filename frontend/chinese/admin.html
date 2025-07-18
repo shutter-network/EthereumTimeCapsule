@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ethereum Time Capsule - Panel de Administración</title>
-  <meta name="description" content="Crea cápsulas de tiempo cifradas en Ethereum que están bloqueadas por un año. Almacena memorias, mensajes e imágenes que se revelarán después de exactamente 365 días.">
+  <meta name="description" content="在以太坊上创建加密的时间胶囊，锁定一年。存储记忆、消息和图片，将在正好365天后揭示。">
 
   <!-- OpenGraph meta tags -->
   <meta property="og:title" content="Ethereum Time Capsule - Panel de Administración">
-  <meta property="og:description" content="Crea cápsulas de tiempo cifradas en Ethereum que están bloqueadas por un año. Almacena memorias, mensajes e imágenes que se revelarán después de exactamente 365 días.">
+  <meta property="og:description" content="在以太坊上创建加密的时间胶囊，锁定一年。存储记忆、消息和图片，将在正好365天后揭示。">
   <meta property="og:image" content="https://ethtimecapsule.com/media_preview.png">
   <meta property="og:type" content="website">
   <meta property="og:url" content="">
@@ -16,7 +16,7 @@
   <!-- Twitter meta tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ethereum Time Capsule - Panel de Administración">
-  <meta name="twitter:description" content="Crea cápsulas de tiempo cifradas en Ethereum que están bloqueadas por un año. Almacena memorias, mensajes e imágenes que se revelarán después de exactamente 365 días.">
+  <meta name="twitter:description" content="在以太坊上创建加密的时间胶囊，锁定一年。存储记忆、消息和图片，将在正好365天后揭示。">
   <meta name="twitter:image" content="https://ethtimecapsule.com/media_preview.png">
 
   <link rel="icon" type="image/png" href="../favicon.png">
@@ -411,33 +411,33 @@
         <div class="control-section">
           <div class="section-title">🔗 Conexión de Wallet</div>
           <div class="input-group">
-            <button id="connect-wallet-btn" class="btn-admin">Conectar Wallet</button>
+            <button id="connect-wallet-btn" class="btn-admin">连接钱包</button>
           </div>
         </div>
 
         <!-- Preview Story Section -->
         <div class="control-section">
-          <div class="section-title">🔓 Previsualizar Historia de Cápsula (Off-chain)</div>
+          <div class="section-title">🔓 预览胶囊历史 (链下)</div>
           <div class="input-group">
-            <input type="number" id="preview-capsule-id" placeholder="Ingrese ID de Cápsula" min="1">
+            <input type="number" id="preview-capsule-id" placeholder="输入胶囊ID" min="1">
             <button class="btn-small btn-decrypt" onclick="previewCapsuleStory()">🔓 Previsualizar Historia</button>
           </div>
         </div>
 
         <!-- Reveal Forever Section -->
         <div class="control-section">
-          <div class="section-title">🎉 Revelar Cápsula Para Siempre (On-chain)</div>
+          <div class="section-title">🎉 永久揭示胶囊 (链上)</div>
           <div class="input-group">
-            <input type="number" id="reveal-capsule-id" placeholder="Ingrese ID de Cápsula" min="1">
+            <input type="number" id="reveal-capsule-id" placeholder="输入胶囊ID" min="1">
             <button class="btn-small btn-reveal" onclick="revealCapsuleForever()">🎉 Revelar Para Siempre</button>
           </div>
         </div>
 
         <!-- Share Capsule Section -->
         <div class="control-section">
-          <div class="section-title">🐦 Compartir Cápsula en X</div>
+          <div class="section-title">🐦 在X上分享胶囊</div>
           <div class="input-group">
-            <input type="number" id="share-capsule-id" placeholder="Ingrese ID de Cápsula" min="1">
+            <input type="number" id="share-capsule-id" placeholder="输入胶囊ID" min="1">
             <button class="btn-small btn-share" onclick="shareCapsule()">🐦 Compartir en X</button>
           </div>
         </div>
@@ -446,7 +446,7 @@
         <div class="control-section">
           <div class="section-title">📦 Operaciones en Lote</div>
           <div class="input-group">
-            <input type="text" id="batch-capsule-ids" placeholder="Ingrese IDs de Cápsula (separados por coma): 1,2,3,4">
+            <input type="text" id="batch-capsule-ids" placeholder="输入胶囊ID (用逗号分隔): 1,2,3,4">
             <button class="btn-admin" onclick="batchPreviewCapsules()">Previsualización en Lote</button>
           </div>
         </div>
