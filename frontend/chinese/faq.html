@@ -1,0 +1,841 @@
+<!DOC   <meta name="description" content="Para celebrar el 10º aniversario de Ethereum, creamos la Cápsula del Tiempo Ethereum — sellada privadamente ahora, revelada un año después, y grabada inmutablemente en blockchain para siempre."><title>Cápsula del Tiempo Ethereum | Sé Parte de la Historia Viviente de Ethereum</title>YPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ethereum Time Capsule | Be Part of Ethereum’s Living History</title>
+  <meta name="description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.">
+
+  <!-- OpenGraph meta tags -->
+  <meta property="og:title" content="Ethereum Time Capsule | Be Part of Ethereum’s Living History">
+  <meta property="og:description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.
+">
+  <meta property="og:image" content="https://ethtimecapsule.com/media_preview.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="">
+
+  <!-- Twitter meta tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ethereum Time Capsule | Be Part of Ethereum’s Living History">
+  <meta name="twitter:description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.
+">
+  <meta name="twitter:image" content="https://ethtimecapsule.com/media_preview.png">
+
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="matomo.js"></script>
+  <style>
+    /* Figma-inspired design variables - consistent with other pages */
+    :root {
+      /* Colors */
+      --eth1: #ffffff;
+      --eth2: #ececec;
+      --eth3: #232323;
+      --eth4: #c0c0c0;
+      --eth5: #242ae0;
+      --d9d9d9: #d9d9d9;
+
+      /* Fonts */
+      --eth1-font-family: 'Inter', sans-serif;
+      --eth1-font-size: 12px;
+      --eth1-font-weight: 500;
+      --button-font-family: 'Inter', sans-serif;
+      --button-font-size: 20px;
+      --button-font-weight: 600;
+      --intro-copy-font-family: 'Inter', sans-serif;
+      --intro-copy-font-size: 20px;
+      --intro-copy-font-weight: 400;
+      --slogan-mobile-font-family: 'Space Grotesk', sans-serif;
+      --slogan-mobile-font-size: 40px;
+      --slogan-mobile-line-height: 48px;
+      --slogan-mobile-font-weight: 700;
+      --tinx-font-family: 'Inter', sans-serif;
+      --tinx-font-size: 10px;
+      --tinx-font-weight: 400;
+      --tinx-light-font-family: 'Inter', sans-serif;
+      --tinx-light-font-size: 11px;
+      --tinx-light-font-weight: 300;
+      --small-button-font-family: 'Inter', sans-serif;
+      --small-button-font-size: 16px;
+      --small-button-font-weight: 600;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--eth1-font-family);
+      background: var(--eth1);
+      color: var(--eth3);
+      line-height: 1.4;
+    }
+
+    /* Main Container - consistent with other pages */
+    .faq-container {
+      background: var(--eth1);
+      border-radius: 24px;
+      border: 1px solid #000000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      max-width: 400px;
+      margin: 0 auto;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Header - consistent with other pages */
+    .header {
+      background: var(--eth2);
+      padding: 12px 20px 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 68px;
+      min-width: 272px;
+      position: relative;
+    }
+
+    .logo {
+      font-family: var(--small-button-font-family);
+      font-size: 18px;
+      font-weight: var(--small-button-font-weight);
+      color: var(--eth3);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      font-size: 24px;
+    }
+
+    .menu {
+      width: 52px;
+      height: 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--d9d9d9);
+      border-radius: 12px;
+      cursor: pointer;
+      gap: 4px;
+      padding: 14px 12px;
+      transition: all 0.3s ease;
+    }
+
+    .menu:hover {
+      background: #c5c5c5;
+    }
+
+    .menu-line {
+      width: 28px;
+      height: 2px;
+      background-color: var(--eth3);
+      border-radius: 1px;
+      transition: all 0.3s ease;
+    }
+
+    /* Menu dropdown - consistent with other pages */
+    .menu-dropdown {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--eth2);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--eth1-font-family);
+      font-size: 24px;
+      font-weight: 400;
+      transform: translateY(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .menu-dropdown.show {
+      transform: translateY(0);
+    }
+
+    .menu-dropdown a {
+      display: block;
+      padding: 20px 0;
+      text-decoration: none;
+      color: var(--eth3);
+      text-align: center;
+      width: 100%;
+      transition: opacity 0.2s ease;
+    }
+
+    .menu-dropdown a:hover {
+      opacity: 0.7;
+    }
+
+    .menu-back {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 24px;
+      color: var(--eth3);
+    }
+
+    /* Main content area */
+    .main-content {
+      flex: 1;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+    }
+
+    /* FAQ header */
+    .faq-header {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .faq-title {
+      color: var(--eth3);
+      text-align: center;
+      font-family: var(--slogan-mobile-font-family);
+      font-size: 32px;
+      line-height: 38px;
+      font-weight: var(--slogan-mobile-font-weight);
+      margin-bottom: 8px;
+    }
+
+    .faq-subtitle {
+      color: var(--eth3);
+      text-align: center;
+      font-family: var(--intro-copy-font-family);
+      font-size: 16px;
+      font-weight: var(--intro-copy-font-weight);
+      line-height: 1.4;
+      opacity: 0.8;
+    }
+
+    /* FAQ content */
+    .faq-content {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* FAQ categories */
+    .faq-category {
+      background: var(--eth2);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .category-title {
+      color: var(--eth3);
+      font-family: var(--small-button-font-family);
+      font-size: 18px;
+      font-weight: var(--small-button-font-weight);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .category-icon {
+      font-size: 20px;
+    }
+
+    /* FAQ items */
+    .faq-item {
+      background: var(--eth1);
+      border-radius: 12px;
+      border: 1px solid var(--eth4);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .faq-item:hover {
+      border-color: var(--eth5);
+      transform: translateY(-1px);
+    }
+
+    .faq-question {
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--eth1);
+      transition: background-color 0.3s ease;
+    }
+
+    .faq-question:hover {
+      background: #f8f9fa;
+    }
+
+    .faq-question-text {
+      font-family: var(--small-button-font-family);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--eth3);
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .faq-toggle {
+      font-size: 18px;
+      color: var(--eth5);
+      transition: transform 0.3s ease;
+      margin-left: 12px;
+    }
+
+    .faq-item.active .faq-toggle {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      padding: 0 16px;
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      background: var(--eth1);
+    }
+
+    .faq-item.active .faq-answer {
+      max-height: 500px;
+      padding: 0 16px 16px 16px;
+    }
+
+    .faq-answer-text {
+      font-family: var(--eth1-font-family);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--eth3);
+      line-height: 1.5;
+    }
+
+    .faq-answer-text a {
+      color: var(--eth5);
+      text-decoration: none;
+    }
+
+    .faq-answer-text a:hover {
+      text-decoration: underline;
+    }
+
+    .faq-answer-text code {
+      background: var(--eth2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    /* Action buttons */
+    .faq-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 360px;
+      margin-top: 8px;
+    }
+
+    .btn-primary {
+      background: var(--eth5);
+      color: var(--eth1);
+      border: none;
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-family: var(--small-button-font-family);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(36, 42, 224, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--eth2);
+      color: var(--eth3);
+      border: 1px solid var(--eth4);
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-family: var(--small-button-font-family);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-secondary:hover {
+      background: var(--d9d9d9);
+      transform: translateY(-1px);
+    }
+
+    /* Footer - consistent with other pages */
+    .footer {
+      background: var(--eth2);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 58px;
+    }
+
+    .learn-more {
+      color: #000000;
+      text-align: center;
+      font-family: var(--eth1-font-family);
+      font-size: var(--eth1-font-size);
+      font-weight: var(--eth1-font-weight);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .learn-more:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive adjustments - consistent with other pages */
+    @media (max-width: 420px) {
+      .faq-container {
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
+        min-height: 100vh;
+      }
+
+      .main-content {
+        padding: 16px;
+      }
+
+      .faq-title {
+        font-size: 28px;
+        line-height: 34px;
+      }
+
+      .faq-subtitle {
+        font-size: 14px;
+      }
+
+      .faq-category {
+        padding: 16px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .faq-container {
+        max-width: 500px;
+        margin: 20px auto;
+        min-height: calc(100vh - 40px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="faq-container">
+    <!-- Header -->
+    <div class="header">
+      <a href="/" class="logo">
+        <img src="../logo.svg" alt="Time Capsule" class="logo-icon" style="width: 60px; height: auto;">
+        <img src="../headertext.png" alt="Time Capsule" style="height: 45px; width: auto;">
+      </a>
+      <div class="menu" id="menuButton">
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- FAQ Header -->
+      <div class="faq-header">
+        <div class="faq-title">Preguntas Frecuentes</div>
+        <div class="faq-subtitle">Preguntas frecuentes sobre la Cápsula del Tiempo Ethereum</div>
+      </div>
+
+      <!-- FAQ Content -->
+      <div class="faq-content">
+        <!-- Getting Started -->
+        <div class="faq-category">
+          <div class="category-title">
+            <span class="category-icon">🚀</span>
+            Primeros Pasos
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">¿Qué es la Cápsula del Tiempo Ethereum?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                La Cápsula del Tiempo Ethereum es una aplicación descentralizada que te permite crear cápsulas del tiempo digitales encriptadas en la blockchain de Ethereum. Puedes preservar mensajes, recuerdos y medios que se revelarán automáticamente en una fecha futura usando tecnología de encriptación con bloqueo temporal.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">¿Cómo creo mi primera cápsula del tiempo?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                1. Conecta tu wallet de Ethereum (MetaMask, WalletConnect, etc.)<br>
+                2. Completa tu entrada con un título, mensaje, etiquetas e imagen opcional<br>
+                3. Previsualiza tu cápsula encriptada<br>
+                4. Paga la pequeña tarifa (0.001 ETH) y envía a la blockchain<br>
+                5. ¡Comparte el enlace único de tu cápsula con otros!
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">¿Necesito criptomonedas para usar esto?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                Sí, necesitas una pequeña cantidad de ETH (0.001 ETH) para crear una cápsula del tiempo. Esta tarifa se dona al Protocol Guild para apoyar el desarrollo de Ethereum. Puedes ver las cápsulas existentes gratis, pero crear nuevas requiere esta tarifa mínima.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Technical Details -->
+        <div class="faq-category">
+          <div class="category-title">
+            <span class="category-icon">⚙️</span>
+            Detalles Técnicos
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">¿Cómo funciona la encriptación con bloqueo temporal?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                Usamos la tecnología de encriptación con bloqueo temporal de Shutter Network. Tu mensaje se encripta y solo puede ser desencriptado después de que haya pasado un período de tiempo específico. Las cápsulas están configuradas para desbloquearse el 30 de julio de 2026 a las 00:00, asegurando que tus recuerdos digitales se preserven hasta la fecha de revelación.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">¿Qué redes de blockchain son compatibles?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                La Cápsula del Tiempo Ethereum solo está disponible en Ethereum Mainnet.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">¿Dónde se almacenan las imágenes?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                Las imágenes se almacenan en IPFS (Sistema de Archivos InterPlanetario), una red de almacenamiento descentralizada. Esto asegura que tus imágenes permanezcan accesibles y resistentes a la censura. Si no subes una imagen, usaremos un diseño por defecto hermoso.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">¿Mis datos están seguros y privados?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                ¡Sí! El contenido de tu mensaje se encripta usando criptografía avanzada y solo puede ser desencriptado después de que expire el bloqueo temporal. Solo el título, etiquetas y metadatos son públicamente visibles hasta la fecha de revelación. La encriptación se maneja completamente en tu navegador para máxima seguridad.
+              </div>
+            </div>
+          </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Usage & Features -->
+        <div class="faq-category">
+          <div class="category-title">
+            <span class="category-icon">💡</span>
+            Uso y Características
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">¿Puedo editar o eliminar una cápsula después de crearla?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                No, una vez que una cápsula del tiempo se crea y se envía a la blockchain, se vuelve inmutable. Esto es por diseño para asegurar la integridad y permanencia de tus recuerdos digitales. Asegúrate de revisar tu contenido cuidadosamente antes de enviar.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">¿Qué pasa cuando mi cápsula se desbloquea?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                Cuando el bloqueo temporal expira, el contenido de tu cápsula se vuelve públicamente visible en la galería. Cualquiera puede leer tu mensaje y ver tu imagen. La cápsula permanece accesible permanentemente en la blockchain como parte del patrimonio digital de la humanidad.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">¿Puedo compartir mi cápsula antes de que se desbloquee?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                ¡Sí! Cada cápsula obtiene un enlace único para compartir que puedes enviar a amigos y familiares. Podrán ver la vista previa de la cápsula (título, etiquetas, fecha de desbloqueo) pero no el contenido del mensaje encriptado hasta que llegue la fecha de revelación.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">¿Hay un límite de cuántas cápsulas puedo crear?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                ¡No, puedes crear tantas cápsulas del tiempo como quieras! Cada una solo requiere la pequeña tarifa de 0.001 ETH. Construye una colección completa de recuerdos, pensamientos y mensajes para el futuro.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">¿Qué debería escribir en mi cápsula del tiempo?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                ¡Cualquier cosa que sea significativa para ti! Ideas populares incluyen: pensamientos y sentimientos actuales, predicciones sobre el futuro, mensajes para tu yo futuro, recuerdos de eventos significativos, esperanzas y sueños, o mensajes para seres queridos. Manténlo bajo 280 caracteres para la mejor experiencia.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Troubleshooting -->
+        <div class="faq-category">
+          <div class="category-title">
+            <span class="category-icon">🔧</span>
+            Solución de Problemas
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">Mi wallet no se conecta. ¿Qué debería hacer?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                1. Asegúrate de estar conectado a Ethereum Mainnet en tu wallet<br>
+                2. Intenta refrescar la página y reconectarte<br>
+                3. Verifica que la extensión de tu wallet esté actualizada<br>
+                4. Asegúrate de tener algo de ETH para las tarifas de transacción<br><br>
+
+                USUARIOS MÓVILES: Accede a la URL ethtimecapsule.com desde el navegador web de tu wallet
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">La transacción falló. ¿Qué salió mal?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                Los problemas comunes incluyen: ETH insuficiente para tarifas de gas, congestión de la red, o problemas de conexión del wallet. Intenta revisar el historial de transacciones de tu wallet para detalles del error, asegúrate de tener suficiente ETH, e intenta de nuevo. Si los problemas persisten, intenta refrescar y reconectar tu wallet.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-text">No puedo ver mi cápsula en la galería. ¿Dónde está?</div>
+              <div class="faq-toggle">▼</div>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-text">
+                Si tu transacción fue exitosa, tu cápsula debería aparecer en la galería en unos minutos. Intenta refrescar la página o revisar el enlace directo proporcionado después de la creación. Si aún no aparece, la blockchain podría estar experimentando retrasos.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="faq-actions">
+        <a href="create.html" class="btn-primary">Crea Tu Primera Cápsula del Tiempo</a>
+        <a href="gallery.html" class="btn-secondary">Explorar Cápsulas Existentes</a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <a href="index.html" class="learn-more">Volver al Inicio</a>
+    </div>
+  </div>
+
+  <script>
+    // Menu toggle functionality - consistent with other pages
+    function toggleMenu() {
+      // Remove existing menu if present
+      const existingMenu = document.querySelector('.menu-dropdown');
+      if (existingMenu) {
+        existingMenu.classList.remove('show');
+        setTimeout(() => {
+          existingMenu.remove();
+        }, 300);
+        return;
+      }
+
+      // Create new full-screen menu
+      const menu = document.createElement('div');
+      menu.className = 'menu-dropdown';      const links = [
+        { text: 'inicio', href: 'index.html' },
+        { text: 'crear entrada', href: 'create.html' },
+        { text: 'galería', href: 'gallery.html' },
+        { text: 'preguntas frecuentes', href: 'faq.html' },
+        { text: 'documentación', href: 'https://github.com/shutter-network/EthereumTimeCapsule' },
+        { text: 'aviso legal', href: '/imprint.html' }
+      ];
+
+      links.forEach((link, index) => {
+        const a = document.createElement('a');
+        a.href = link.href;
+        a.textContent = link.text;
+        menu.appendChild(a);
+      });
+
+      // Add back button
+      const backButton = document.createElement('div');
+      backButton.className = 'menu-back';
+      backButton.innerHTML = '&lt;';
+      backButton.addEventListener('click', toggleMenu);
+      menu.appendChild(backButton);
+
+      // Append to body for full-screen overlay
+      document.body.appendChild(menu);
+
+      // Trigger animation
+      setTimeout(() => {
+        menu.classList.add('show');
+      }, 10);
+        // Remove menu when clicking outside or on links
+      menu.addEventListener('click', (e) => {
+        if (e.target === menu || e.target.tagName === 'A') {
+          if (e.target.tagName === 'A') {
+            const href = e.target.href;
+            // Handle different types of links
+            if (href.startsWith('#')) {
+              // Prevent navigation for placeholder links
+              e.preventDefault();
+              toggleMenu();
+            } else {
+              // Internal links - prevent default and navigate in same tab
+              e.preventDefault();
+              toggleMenu();
+              setTimeout(() => {
+                window.location.href = href;
+              }, 300); // Wait for menu to close
+            }
+          } else {
+            toggleMenu();
+          }
+        }
+      });
+    }
+
+    // FAQ toggle functionality
+    function toggleFAQ(element) {
+      const faqItem = element.parentNode;
+      const isActive = faqItem.classList.contains('active');
+
+      // Close all other FAQ items
+      document.querySelectorAll('.faq-item.active').forEach(item => {
+        if (item !== faqItem) {
+          item.classList.remove('active');
+        }
+      });
+
+      // Toggle current item
+      if (isActive) {
+        faqItem.classList.remove('active');
+      } else {
+        faqItem.classList.add('active');
+      }
+    }
+
+    // Add event listener for menu button
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuButton = document.getElementById('menuButton');
+      if (menuButton) {
+        menuButton.addEventListener('click', toggleMenu);
+      }
+
+      console.log("FAQ page loaded successfully");
+    });
+  </script>
+</body>
+</html>
