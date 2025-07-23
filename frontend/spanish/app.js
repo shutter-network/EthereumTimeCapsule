@@ -1739,7 +1739,7 @@ function downloadCapsuleImage() {
 }
 
 function followOnX() {
-  window.open('https://twitter.com/ethereum', '_blank');
+  window.open('https://x.com/ethtimecapsule', '_blank');
 }
 
 function shareOnX() {
