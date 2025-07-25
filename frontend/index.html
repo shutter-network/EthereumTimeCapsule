@@ -743,6 +743,15 @@
       margin-bottom: 30px;
     }
 
+    .barometer-title {
+      font-family: var(--slogan-mobile-font-family);
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--eth3);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
     /* Barometer styles */
     .barometer-container {
       padding: 0 40px;
@@ -783,7 +792,7 @@
 
     .barometer-scale {
       position: absolute;
-      left: -80px;
+      left: -50px;
       top: 0;
       height: 100%;
       display: flex;
@@ -899,7 +908,7 @@
 
     .barometer-progress-indicator {
       position: absolute;
-      right: -80px;
+      right: -50px;
       top: 50%;
       transform: translateY(-50%);
       background: rgba(255, 255, 255, 0.95);
@@ -980,18 +989,21 @@
     }
 
     @media (max-width: 600px) {
-      .barometer-goals {
-        right: -30px;
-        width: 80px;
+      .barometer-scale {
+        left: -35px;
       }
       
-      .barometer-goal.stretch {
-        padding: 6px 8px;
-        font-size: 10px;
+      .barometer-progress-indicator {
+        right: -35px;
+        padding: 8px 12px;
       }
       
-      .barometer-goal {
-        font-size: 10px;
+      .barometer-tick {
+        font-size: 11px;
+      }
+      
+      .progress-percentage {
+        font-size: 20px;
       }
     }
 
@@ -1001,20 +1013,26 @@
         max-width: 100%;
       }
       
-      .barometer-goals {
-        position: static;
-        margin-top: 20px;
-        width: 100%;
-        align-items: center;
+      .barometer-scale {
+        left: -25px;
       }
       
-      .barometer-goal {
+      .barometer-progress-indicator {
+        right: -25px;
+        padding: 6px 10px;
+      }
+      
+      .barometer-tick {
         font-size: 10px;
-        text-align: center;
       }
       
-      .barometer-goal::before {
-        display: none;
+      .barometer-tick::after {
+        width: 8px;
+        height: 1px;
+      }
+      
+      .progress-percentage {
+        font-size: 18px;
       }
       
       .barometer-stats {
