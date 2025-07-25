@@ -770,6 +770,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 30px;
       position: relative;
       width: 100%;
       min-height: 400px;
@@ -787,18 +788,14 @@
         0 8px 32px rgba(0, 0, 0, 0.15),
         inset 0 2px 8px rgba(255, 255, 255, 0.3),
         inset 0 -2px 8px rgba(0, 0, 0, 0.1);
-      margin: 0 auto;
     }
 
     .barometer-scale {
-      position: absolute;
-      left: -50px;
-      top: 0;
-      height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: flex-end;
+      height: 320px;
       padding: 20px 0;
     }
 
@@ -819,17 +816,6 @@
       width: 12px;
       height: 2px;
       background: var(--eth3);
-    }
-
-    .barometer-tick.goal-2000 {
-      color: var(--eth5);
-      font-weight: 700;
-    }
-
-    .barometer-tick.goal-2000::after {
-      background: var(--eth5);
-      width: 16px;
-      height: 3px;
     }
 
     .barometer-tick.goal-500 {
@@ -907,16 +893,13 @@
     }
 
     .barometer-progress-indicator {
-      position: absolute;
-      right: -50px;
-      top: 50%;
-      transform: translateY(-50%);
       background: rgba(255, 255, 255, 0.95);
       border: 2px solid var(--eth5);
       border-radius: 16px;
       padding: 12px 16px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       backdrop-filter: blur(10px);
+      align-self: center;
     }
 
     .progress-percentage {
@@ -970,32 +953,9 @@
       letter-spacing: 0.5px;
     }
 
-    .protocol-guild-notice {
-      text-align: center;
-      margin-top: 16px;
-      padding: 12px 20px;
-      background: linear-gradient(135deg, rgba(36, 42, 224, 0.1) 0%, rgba(91, 56, 237, 0.1) 100%);
-      border: 1px solid rgba(36, 42, 224, 0.2);
-      border-radius: 12px;
-      font-family: var(--eth1-font-family);
-      font-size: 13px;
-      color: var(--eth3);
-      backdrop-filter: blur(10px);
-    }
-
-    .protocol-guild-highlight {
-      color: var(--eth5);
-      font-weight: 600;
-    }
-
     @media (max-width: 600px) {
-      .barometer-scale {
-        left: -35px;
-      }
-      
-      .barometer-progress-indicator {
-        right: -35px;
-        padding: 8px 12px;
+      .barometer-wrapper {
+        gap: 20px;
       }
       
       .barometer-tick {
@@ -1013,13 +973,26 @@
         max-width: 100%;
       }
       
+      .barometer-wrapper {
+        gap: 15px;
+        flex-direction: column;
+      }
+      
       .barometer-scale {
-        left: -25px;
+        flex-direction: row;
+        height: auto;
+        width: 280px;
+        justify-content: space-between;
+        align-items: center;
+        order: 2;
+      }
+      
+      .barometer {
+        order: 1;
       }
       
       .barometer-progress-indicator {
-        right: -25px;
-        padding: 6px 10px;
+        order: 3;
       }
       
       .barometer-tick {
@@ -1027,8 +1000,7 @@
       }
       
       .barometer-tick::after {
-        width: 8px;
-        height: 1px;
+        display: none;
       }
       
       .progress-percentage {
@@ -1098,10 +1070,10 @@
         <div class="barometer-title">Community Progress</div>
         <div class="barometer-wrapper">
           <div class="barometer-scale">
-            <div class="barometer-tick goal-2000">2,000</div>
-            <div class="barometer-tick">1,500</div>
             <div class="barometer-tick">1,000</div>
+            <div class="barometer-tick">750</div>
             <div class="barometer-tick goal-500">500</div>
+            <div class="barometer-tick">250</div>
             <div class="barometer-tick current" id="currentTick" style="display: none;">
               <span id="currentTickValue">0</span>
             </div>
@@ -1134,12 +1106,6 @@
             <div class="barometer-stat-number">500</div>
             <div class="barometer-stat-label">Main Goal</div>
           </div>
-        </div>
-        
-        <div class="protocol-guild-notice">
-          🎯 <span class="protocol-guild-highlight">Stretch Goal:</span> Reach 2,000 entries to unlock an additional 
-          <span class="protocol-guild-highlight">$50,000 donation to Protocol Guild</span> — 
-          supporting the core developers who make Ethereum possible.
         </div>
       </div>
 
@@ -1588,32 +1554,32 @@
         if (response.data.success) {
           const currentCount = response.data.count;
           const goal = 500;
-          const stretchGoal = 2000;
           
           console.log(`📊 Current capsules: ${currentCount}, Goal: ${goal}`);
           
-          updateBarometer(currentCount, goal, stretchGoal);
+          updateBarometer(currentCount, goal);
         } else {
           console.warn('Failed to fetch capsule count:', response.data.message);
           // Show placeholder data if API fails
-          updateBarometer(0, 500, 2000);
+          updateBarometer(0, 500);
         }
       } catch (error) {
         console.error('Failed to load barometer data:', error);
         // Show placeholder data if API fails
-        updateBarometer(0, 500, 2000);
+        updateBarometer(0, 500);
       }
     }
 
-    function updateBarometer(currentCount, goal, stretchGoal) {
+    function updateBarometer(currentCount, goal) {
       // Update barometer elements
       document.getElementById('barometerCount').textContent = currentCount;
       document.getElementById('progressPercentage').textContent = `${Math.min((currentCount / goal) * 100, 100).toFixed(1)}%`;
       document.getElementById('currentCount').textContent = currentCount;
       document.getElementById('remainingCount').textContent = Math.max(0, goal - currentCount);
       
-      // Fill height based on stretch goal for better visual scaling
-      const fillHeight = Math.min((currentCount / stretchGoal) * 100, 100);
+      // Fill height based on goal (scale from 0-1000 for better visual scaling)
+      const maxScale = 1000;
+      const fillHeight = Math.min((currentCount / maxScale) * 100, 100);
       document.getElementById('barometerFill').style.height = `${fillHeight}%`;
       
       // Position and show current count tick on scale
@@ -1623,22 +1589,10 @@
         currentTick.style.display = 'flex';
         currentTickValue.textContent = currentCount;
         
-        // Position the current tick based on the count (scale from 0-2000)
-        const tickPosition = Math.min((currentCount / stretchGoal) * 100, 100);
+        // Position the current tick based on the count (scale from 0-1000)
+        const tickPosition = Math.min((currentCount / maxScale) * 100, 100);
         currentTick.style.bottom = `${tickPosition}%`;
         currentTick.style.transform = 'translateY(50%)';
-      }
-      
-      // Update Protocol Guild notice based on progress
-      const notice = document.querySelector('.protocol-guild-notice');
-      if (currentCount >= stretchGoal) {
-        notice.innerHTML = `🎉 <span class="protocol-guild-highlight">Amazing!</span> You've reached the stretch goal! 
-          <span class="protocol-guild-highlight">$50,000 will be donated to Protocol Guild</span> thanks to this incredible community effort!`;
-      } else if (currentCount >= goal) {
-        const stretchProgress = ((currentCount / stretchGoal) * 100).toFixed(1);
-        notice.innerHTML = `🎉 <span class="protocol-guild-highlight">Goal Achieved!</span> 
-          Now ${stretchProgress}% toward the <span class="protocol-guild-highlight">$50,000 Protocol Guild stretch goal</span> 
-          — help us support Ethereum's core developers!`;
       }
     }
 
