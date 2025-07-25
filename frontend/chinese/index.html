@@ -424,34 +424,98 @@
       padding: 0 40px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
       align-items: center;
       justify-content: center;
       width: 100%;
       margin: 40px auto;
       position: relative;
-      max-width: 500px;
-    }
-
-    .barometer {
-      position: relative;
-      width: 60px;
-      height: 300px;
-      background: linear-gradient(180deg, #f0f0f0 0%, #e0e0e0 100%);
-      border-radius: 30px;
-      border: 3px solid #333;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      margin: 0 auto;
+      max-width: 600px;
     }
 
     .barometer-wrapper {
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 30px;
       position: relative;
       width: 100%;
-      min-height: 320px;
+      min-height: 400px;
+    }
+
+    .barometer {
+      position: relative;
+      width: 80px;
+      height: 320px;
+      background: linear-gradient(180deg, rgba(240, 240, 240, 0.8) 0%, rgba(220, 220, 220, 0.9) 100%);
+      border-radius: 40px;
+      border: 4px solid #2a2a2a;
+      overflow: hidden;
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.15),
+        inset 0 2px 8px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 8px rgba(0, 0, 0, 0.1);
+      margin: 0 auto;
+    }
+
+    .barometer-scale {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+      height: 320px;
+      padding: 20px 0;
+    }
+
+    .barometer-tick {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--eth1-font-family);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--eth3);
+      white-space: nowrap;
+    }
+
+    .barometer-tick::after {
+      content: '';
+      width: 12px;
+      height: 2px;
+      background: var(--eth3);
+    }
+
+    .barometer-tick.goal-500 {
+      color: var(--eth5);
+      font-weight: 700;
+      font-size: 18px;
+      background: rgba(36, 42, 224, 0.1);
+      padding: 6px 12px;
+      border-radius: 12px;
+      border: 2px solid var(--eth5);
+    }
+
+    .barometer-tick.goal-500::after {
+      background: var(--eth5);
+      width: 24px;
+      height: 4px;
+    }
+
+    .barometer-tick.current {
+      color: #fff;
+      background: var(--eth5);
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 13px;
+      box-shadow: 0 2px 8px rgba(36, 42, 224, 0.3);
+    }
+
+    .barometer-tick.current::after {
+      background: #fff;
+      width: 20px;
+      height: 3px;
     }
 
     .barometer-fill {
@@ -459,116 +523,120 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      background: linear-gradient(180deg, #242ae0 0%, #1a1fb0 100%);
-      border-radius: 0 0 27px 27px;
-      transition: height 0.8s ease-out;
+      background: linear-gradient(180deg, 
+        rgba(36, 42, 224, 0.9) 0%, 
+        rgba(26, 31, 176, 1) 50%,
+        rgba(20, 25, 140, 1) 100%
+      );
+      border-radius: 0 0 36px 36px;
+      transition: height 1.2s cubic-bezier(0.4, 0, 0.2, 1);
       height: 0%;
+      box-shadow: 
+        0 -4px 16px rgba(36, 42, 224, 0.4),
+        inset 0 2px 8px rgba(255, 255, 255, 0.2);
     }
 
     .barometer-bulb {
       position: absolute;
-      bottom: -20px;
+      bottom: -25px;
       left: 50%;
       transform: translateX(-50%);
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, #242ae0 0%, #1a1fb0 100%);
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, 
+        rgba(36, 42, 224, 1) 0%, 
+        rgba(26, 31, 176, 1) 50%,
+        rgba(20, 25, 140, 1) 100%
+      );
       border-radius: 50%;
-      border: 3px solid #333;
+      border: 4px solid #2a2a2a;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-family: var(--small-button-font-family);
-      font-size: 14px;
-      font-weight: 600;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 4px 12px rgba(255, 255, 255, 0.2),
+        inset 0 -2px 8px rgba(0, 0, 0, 0.2);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 
-    .barometer-goals {
-      position: absolute;
-      right: -40px;
-      top: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 100px;
+    .barometer-progress-indicator {
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid var(--eth5);
+      border-radius: 16px;
+      padding: 12px 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      align-self: center;
     }
 
-    .barometer-goal {
-      position: relative;
+    .progress-percentage {
+      font-family: var(--small-button-font-family);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--eth5);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .progress-label {
       font-family: var(--eth1-font-family);
       font-size: 12px;
-      font-weight: 500;
       color: var(--eth3);
-      white-space: nowrap;
-    }
-
-    .barometer-goal.stretch {
-      background: var(--eth5);
-      color: white;
-      padding: 6px 8px;
-      border-radius: 16px;
-      font-weight: 600;
-      margin-bottom: 20px;
       text-align: center;
-      box-shadow: 0 2px 10px rgba(36, 42, 224, 0.3);
-      font-size: 10px;
-      width: 80px;
-    }
-
-    .barometer-goal.stretch .goal-subtitle {
-      font-size: 10px;
-      opacity: 0.9;
-      margin-top: 2px;
-    }
-
-    .barometer-goal::before {
-      content: '';
-      position: absolute;
-      left: -15px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 10px;
-      height: 2px;
-      background: var(--eth3);
-    }
-
-    .barometer-goal.stretch::before {
-      background: white;
-    }
-
-    .barometer-title {
-      text-align: center;
-      font-family: var(--small-button-font-family);
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--eth3);
-      margin-bottom: 16px;
     }
 
     .barometer-stats {
       display: flex;
-      gap: 20px;
-      margin-top: 16px;
+      gap: 40px;
+      margin-top: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     .barometer-stat {
       text-align: center;
       font-family: var(--eth1-font-family);
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(36, 42, 224, 0.2);
+      border-radius: 12px;
+      padding: 12px 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
     }
 
     .barometer-stat-number {
-      font-size: 24px;
-      font-weight: 600;
+      font-size: 28px;
+      font-weight: 700;
       color: var(--eth5);
       line-height: 1;
+      margin-bottom: 4px;
     }
 
     .barometer-stat-label {
       font-size: 12px;
       color: var(--eth3);
-      margin-top: 4px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    @media (max-width: 600px) {
+      .barometer-wrapper {
+        gap: 20px;
+      }
+      
+      .barometer-tick {
+        font-size: 11px;
+      }
+      
+      .progress-percentage {
+        font-size: 20px;
+      }
     }
 
     @media (max-width: 420px) {
@@ -577,24 +645,46 @@
         max-width: 100%;
       }
       
-      .barometer-goals {
-        position: static;
-        margin-top: 20px;
-        width: 100%;
+      .barometer-wrapper {
+        gap: 15px;
+        flex-direction: column;
+      }
+      
+      .barometer-scale {
+        flex-direction: row;
+        height: auto;
+        width: 280px;
+        justify-content: space-between;
         align-items: center;
+        order: 2;
       }
       
-      .barometer-goal {
+      .barometer {
+        order: 1;
+      }
+      
+      .barometer-progress-indicator {
+        order: 3;
+      }
+      
+      .barometer-tick {
         font-size: 10px;
-        text-align: center;
       }
       
-      .barometer-goal::before {
+      .barometer-tick::after {
         display: none;
+      }
+      
+      .progress-percentage {
+        font-size: 18px;
       }
       
       .barometer-stats {
         gap: 15px;
+      }
+      
+      .barometer-stat-number {
+        font-size: 20px;
       }
     }
 
@@ -971,32 +1061,43 @@
       <!-- Progress Barometer -->
       <div class="barometer-container">
         <div class="barometer-title">社区进度</div>
-        <div class="barometer-wrapper" style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%;">
+        <div class="barometer-wrapper">
+          <div class="barometer-scale">
+            <div class="barometer-tick">1,000</div>
+            <div class="barometer-tick">750</div>
+            <div class="barometer-tick goal-500">500</div>
+            <div class="barometer-tick">250</div>
+            <div class="barometer-tick current" id="currentTick" style="display: none;">
+              <span id="currentTickValue">0</span>
+            </div>
+            <div class="barometer-tick">0</div>
+          </div>
+          
           <div class="barometer">
             <div class="barometer-fill" id="barometerFill"></div>
             <div class="barometer-bulb">
               <span id="barometerCount">--</span>
             </div>
           </div>
-          <div class="barometer-goals">
-            <div class="barometer-goal stretch">
-              扩展目标:<br>
-              2,000 条记录<br>
-              <div class="goal-subtitle">(向协议公会额外捐$50,000)</div>
-            </div>
-            <div class="barometer-goal" style="top: 180px;">
-              目标: 500 条记录
-            </div>
+          
+          <div class="barometer-progress-indicator">
+            <div class="progress-percentage" id="progressPercentage">--%</div>
+            <div class="progress-label">达到目标</div>
           </div>
         </div>
+        
         <div class="barometer-stats">
           <div class="barometer-stat">
-            <div class="barometer-stat-number" id="progressPercentage">--%</div>
-            <div class="barometer-stat-label">完成</div>
+            <div class="barometer-stat-number" id="currentCount">--</div>
+            <div class="barometer-stat-label">当前记录</div>
           </div>
           <div class="barometer-stat">
             <div class="barometer-stat-number" id="remainingCount">--</div>
-            <div class="barometer-stat-label">还需</div>
+            <div class="barometer-stat-label">距离目标</div>
+          </div>
+          <div class="barometer-stat">
+            <div class="barometer-stat-number">500</div>
+            <div class="barometer-stat-label">主要目标</div>
           </div>
         </div>
       </div>
@@ -1442,45 +1543,69 @@
     // Expose functions globally for HTML onclick handlers
     window.handleImageError = handleImageError;
 
-    // Add event listener for menu button
-    document.getElementById('menuButton').addEventListener('click', toggleMenu);
-
-    // Barometer functionality
-    async function updateBarometer() {
+    // =============  BAROMETER FUNCTIONALITY  =============
+    async function loadBarometerData() {
       try {
-        const apiBaseUrl = getApiBaseUrl();
-        const response = await axios.get(`${apiBaseUrl}/api/capsules/count`);
-        const currentCount = response.data.count;
+        console.log('🎯 Loading barometer data...');
         
-        const goal = 500;
-        const stretchGoal = 2000;
-        const percentage = Math.min((currentCount / goal) * 100, 100);
-        const fillHeight = Math.min((currentCount / goal) * 100, 100);
+        // Fetch total capsule count from API
+        const response = await axios.get(`${getApiBaseUrl()}/api/capsules/count`);
         
-        // Update the barometer elements
-        document.getElementById('barometerCount').textContent = currentCount;
-        document.getElementById('barometerFill').style.height = `${fillHeight}%`;
-        document.getElementById('progressPercentage').textContent = `${percentage.toFixed(1)}%`;
-        document.getElementById('remainingCount').textContent = Math.max(0, goal - currentCount);
-        
-        // Update stretch goal message if we've reached the main goal
-        const stretchGoalElement = document.querySelector('.barometer-goal.stretch');
-        if (currentCount >= goal && stretchGoalElement) {
-          const stretchPercentage = Math.min((currentCount / stretchGoal) * 100, 100);
-          stretchGoalElement.innerHTML = `🎉 目标已达成!<br>扩展进度: ${stretchPercentage.toFixed(1)}%<div class="goal-subtitle">(向协议公会额外捐$50,000)</div>`;
+        if (response.data.success) {
+          const currentCount = response.data.count;
+          const goal = 500;
+          
+          console.log(`📊 Current capsules: ${currentCount}, Goal: ${goal}`);
+          
+          updateBarometer(currentCount, goal);
+        } else {
+          console.warn('Failed to fetch capsule count:', response.data.message);
+          // Show placeholder data if API fails
+          updateBarometer(0, 500);
         }
       } catch (error) {
-        console.error('Error loading barometer data:', error);
-        document.getElementById('barometerCount').textContent = '--';
-        document.getElementById('progressPercentage').textContent = '错误';
-        document.getElementById('remainingCount').textContent = '--';
+        console.error('Failed to load barometer data:', error);
+        // Show placeholder data if API fails
+        updateBarometer(0, 500);
       }
     }
 
-    // Load sample capsules and barometer when page loads
+    function updateBarometer(currentCount, goal) {
+      // Update barometer elements
+      document.getElementById('barometerCount').textContent = currentCount;
+      document.getElementById('progressPercentage').textContent = `${Math.min((currentCount / goal) * 100, 100).toFixed(1)}%`;
+      document.getElementById('currentCount').textContent = currentCount;
+      document.getElementById('remainingCount').textContent = Math.max(0, goal - currentCount);
+      
+      // Fill height based on goal (scale from 0-1000 for better visual scaling)
+      const maxScale = 1000;
+      const fillHeight = Math.min((currentCount / maxScale) * 100, 100);
+      document.getElementById('barometerFill').style.height = `${fillHeight}%`;
+      
+      // Position and show current count tick on scale
+      const currentTick = document.getElementById('currentTick');
+      const currentTickValue = document.getElementById('currentTickValue');
+      if (currentCount > 0) {
+        currentTick.style.display = 'flex';
+        currentTickValue.textContent = currentCount;
+        
+        // Position the current tick based on the count (scale from 0-1000)
+        const tickPosition = Math.min((currentCount / maxScale) * 100, 100);
+        currentTick.style.bottom = `${tickPosition}%`;
+        currentTick.style.transform = 'translateY(50%)';
+      }
+    }
+
+    // Expose functions globally for HTML onclick handlers
+    window.handleImageError = handleImageError;
+
+    // Add event listener for menu button
+    document.getElementById('menuButton').addEventListener('click', toggleMenu);
+
+    // Load sample capsules and barometer data when page loads
     document.addEventListener('DOMContentLoaded', function() {
       loadSampleCapsules();
-      updateBarometer();
+      loadBarometerData();
     });
   </script>
 </body>
