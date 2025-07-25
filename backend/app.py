@@ -1056,6 +1056,21 @@ def get_capsules_by_creator(creator_address):
         print(f"Error in /api/capsules/creator/{creator_address}:", e)
         return {"error": str(e)}, 500
 
+@app.route("/api/capsules/count", methods=["GET"])
+def get_capsule_count():
+    """Get total number of capsules in the database"""
+    try:
+        total_count = db.get_capsule_count()
+        
+        return jsonify({
+            "success": True,
+            "count": total_count
+        })
+        
+    except Exception as e:
+        print("Error in /api/capsules/count:", e)
+        return {"error": str(e)}, 500
+
 @app.route("/api/sync/status", methods=["GET"])
 def get_sync_status():
     """Get blockchain synchronization status"""

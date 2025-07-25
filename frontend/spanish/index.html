@@ -417,7 +417,78 @@
       display: flex;
       align-items: center;
       justify-content: center;
-    }    /* New section styles */
+    }
+
+    /* Barometer styles */
+    .barometer-container {
+      background: linear-gradient(135deg, rgba(36, 42, 224, 0.1) 0%, rgba(91, 56, 237, 0.1) 100%);
+      border: 1px solid rgba(36, 42, 224, 0.2);
+      border-radius: 16px;
+      padding: 24px;
+      margin: 32px 0;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .barometer-header {
+      color: var(--eth5);
+      font-family: var(--small-button-font-family);
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .barometer-progress {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      height: 24px;
+      overflow: hidden;
+      position: relative;
+      margin: 16px 0;
+    }
+
+    .barometer-fill {
+      background: linear-gradient(90deg, var(--eth5) 0%, #5b38ed 100%);
+      height: 100%;
+      border-radius: 12px;
+      transition: width 0.8s ease-in-out;
+      position: relative;
+    }
+
+    .barometer-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      font-family: var(--body-font-family);
+      font-size: 14px;
+    }
+
+    .barometer-current {
+      color: var(--eth5);
+      font-weight: 700;
+    }
+
+    .barometer-goal {
+      color: var(--eth2);
+      font-weight: 500;
+    }
+
+    .barometer-percentage {
+      color: var(--eth5);
+      font-weight: 700;
+      margin-top: 8px;
+      font-size: 16px;
+    }
+
+    .barometer-stretch {
+      margin-top: 12px;
+      color: var(--eth2);
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    /* New section styles */
     .section-container {
       padding: 0 40px;
       display: flex;
@@ -784,6 +855,24 @@
         <div class="intro-copy">
           Para celebrar los 10 años de Ethereum, creamos la Cápsula del Tiempo de Ethereum<br />
           — sellada de forma privada hoy, revelada en un año y guardada onchain para siempre.
+        </div>
+      </div>
+
+      <!-- Progress Barometer -->
+      <div class="barometer-container">
+        <div class="barometer-header">📈 Progreso de la Cápsula del Tiempo</div>
+        <div class="barometer-progress">
+          <div class="barometer-fill" id="barometer-fill"></div>
+        </div>
+        <div class="barometer-stats">
+          <span class="barometer-current">
+            <span id="current-count">Cargando...</span> entradas
+          </span>
+          <span class="barometer-goal">Meta: 500 entradas</span>
+        </div>
+        <div class="barometer-percentage" id="barometer-percentage">0%</div>
+        <div class="barometer-stretch">
+          🎯 Meta extendida: 2000 entradas para donación adicional a Protocol Guild
         </div>
       </div>
 
@@ -1231,8 +1320,39 @@
     // Add event listener for menu button
     document.getElementById('menuButton').addEventListener('click', toggleMenu);
 
-    // Load sample capsules when page loads
-    document.addEventListener('DOMContentLoaded', loadSampleCapsules);
+    // Barometer functionality
+    async function updateBarometer() {
+      try {
+        const apiBaseUrl = getApiBaseUrl();
+        const response = await axios.get(`${apiBaseUrl}/api/capsules/count`);
+        const currentCount = response.data.count;
+        
+        const goal = 500;
+        const stretchGoal = 2000;
+        const percentage = Math.min((currentCount / goal) * 100, 100);
+        
+        // Update the barometer elements
+        document.getElementById('current-count').textContent = currentCount;
+        document.getElementById('barometer-fill').style.width = `${percentage}%`;
+        document.getElementById('barometer-percentage').textContent = `${percentage.toFixed(1)}%`;
+        
+        // Update stretch goal message if we've reached the main goal
+        const stretchDiv = document.querySelector('.barometer-stretch');
+        if (currentCount >= goal) {
+          const stretchPercentage = Math.min((currentCount / stretchGoal) * 100, 100);
+          stretchDiv.innerHTML = `🎉 ¡Meta alcanzada! Progreso hacia meta extendida: ${stretchPercentage.toFixed(1)}%`;
+        }
+      } catch (error) {
+        console.error('Error loading barometer data:', error);
+        document.getElementById('current-count').textContent = 'Error';
+      }
+    }
+
+    // Load sample capsules and barometer when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      loadSampleCapsules();
+      updateBarometer();
+    });
   </script>
 </body>
 </html>
