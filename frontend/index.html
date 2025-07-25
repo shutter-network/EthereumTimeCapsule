@@ -788,6 +788,7 @@
         0 8px 32px rgba(0, 0, 0, 0.15),
         inset 0 2px 8px rgba(255, 255, 255, 0.3),
         inset 0 -2px 8px rgba(0, 0, 0, 0.1);
+      margin: 0 auto;
     }
 
     .barometer-scale {
@@ -821,12 +822,16 @@
     .barometer-tick.goal-500 {
       color: var(--eth5);
       font-weight: 700;
-      font-size: 14px;
+      font-size: 18px;
+      background: rgba(36, 42, 224, 0.1);
+      padding: 6px 12px;
+      border-radius: 12px;
+      border: 2px solid var(--eth5);
     }
 
     .barometer-tick.goal-500::after {
       background: var(--eth5);
-      width: 20px;
+      width: 24px;
       height: 4px;
     }
 
