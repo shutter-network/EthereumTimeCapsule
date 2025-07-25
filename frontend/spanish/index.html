@@ -421,38 +421,179 @@
 
     /* Barometer styles */
     .barometer-container {
-      background: linear-gradient(135deg, rgba(36, 42, 224, 0.1) 0%, rgba(91, 56, 237, 0.1) 100%);
-      border: 1px solid rgba(36, 42, 224, 0.2);
-      border-radius: 16px;
-      padding: 24px;
-      margin: 32px 0;
-      text-align: center;
-      backdrop-filter: blur(10px);
-    }
-
-    .barometer-header {
-      color: var(--eth5);
-      font-family: var(--small-button-font-family);
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 16px;
-    }
-
-    .barometer-progress {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      height: 24px;
-      overflow: hidden;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin: 40px auto;
       position: relative;
-      margin: 16px 0;
+      max-width: 400px;
+    }
+
+    .barometer {
+      position: relative;
+      width: 60px;
+      height: 300px;
+      background: linear-gradient(180deg, #f0f0f0 0%, #e0e0e0 100%);
+      border-radius: 30px;
+      border: 3px solid #333;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      margin: 0 auto;
+    }
+
+    .barometer-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      width: 100%;
+      min-height: 320px;
     }
 
     .barometer-fill {
-      background: linear-gradient(90deg, var(--eth5) 0%, #5b38ed 100%);
-      height: 100%;
-      border-radius: 12px;
-      transition: width 0.8s ease-in-out;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(180deg, #242ae0 0%, #1a1fb0 100%);
+      border-radius: 0 0 27px 27px;
+      transition: height 0.8s ease-out;
+      height: 0%;
+    }
+
+    .barometer-bulb {
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #242ae0 0%, #1a1fb0 100%);
+      border-radius: 50%;
+      border: 3px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-family: var(--small-button-font-family);
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .barometer-goals {
+      position: absolute;
+      right: -120px;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100px;
+    }
+
+    .barometer-goal {
       position: relative;
+      font-family: var(--eth1-font-family);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--eth3);
+      white-space: nowrap;
+    }
+
+    .barometer-goal.stretch {
+      background: var(--eth5);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(36, 42, 224, 0.3);
+    }
+
+    .barometer-goal.stretch .goal-subtitle {
+      font-size: 10px;
+      opacity: 0.9;
+      margin-top: 2px;
+    }
+
+    .barometer-goal::before {
+      content: '';
+      position: absolute;
+      left: -15px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 2px;
+      background: var(--eth3);
+    }
+
+    .barometer-goal.stretch::before {
+      background: white;
+    }
+
+    .barometer-title {
+      text-align: center;
+      font-family: var(--small-button-font-family);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--eth3);
+      margin-bottom: 16px;
+    }
+
+    .barometer-stats {
+      display: flex;
+      gap: 20px;
+      margin-top: 16px;
+    }
+
+    .barometer-stat {
+      text-align: center;
+      font-family: var(--eth1-font-family);
+    }
+
+    .barometer-stat-number {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--eth5);
+      line-height: 1;
+    }
+
+    .barometer-stat-label {
+      font-size: 12px;
+      color: var(--eth3);
+      margin-top: 4px;
+    }
+
+    @media (max-width: 420px) {
+      .barometer-container {
+        padding: 0 10px;
+        max-width: 100%;
+      }
+      
+      .barometer-goals {
+        position: static;
+        margin-top: 20px;
+        width: 100%;
+        align-items: center;
+      }
+      
+      .barometer-goal {
+        font-size: 10px;
+        text-align: center;
+      }
+      
+      .barometer-goal::before {
+        display: none;
+      }
+      
+      .barometer-stats {
+        gap: 15px;
+      }
     }
 
     .barometer-stats {
@@ -860,19 +1001,34 @@
 
       <!-- Progress Barometer -->
       <div class="barometer-container">
-        <div class="barometer-header">📈 Progreso de la Cápsula del Tiempo</div>
-        <div class="barometer-progress">
-          <div class="barometer-fill" id="barometer-fill"></div>
+        <div class="barometer-title">Progreso de la Comunidad</div>
+        <div class="barometer-wrapper" style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%;">
+          <div class="barometer">
+            <div class="barometer-fill" id="barometerFill"></div>
+            <div class="barometer-bulb">
+              <span id="barometerCount">--</span>
+            </div>
+          </div>
+          <div class="barometer-goals">
+            <div class="barometer-goal stretch">
+              Meta Extendida:<br>
+              2,000 entradas<br>
+              <div class="goal-subtitle">(+$50,000 para Protocol Guild)</div>
+            </div>
+            <div class="barometer-goal" style="top: 180px;">
+              Meta: 500 entradas
+            </div>
+          </div>
         </div>
         <div class="barometer-stats">
-          <span class="barometer-current">
-            <span id="current-count">Cargando...</span> entradas
-          </span>
-          <span class="barometer-goal">Meta: 500 entradas</span>
-        </div>
-        <div class="barometer-percentage" id="barometer-percentage">0%</div>
-        <div class="barometer-stretch">
-          🎯 Meta extendida: 2000 entradas para donación adicional a Protocol Guild
+          <div class="barometer-stat">
+            <div class="barometer-stat-number" id="progressPercentage">--%</div>
+            <div class="barometer-stat-label">Completo</div>
+          </div>
+          <div class="barometer-stat">
+            <div class="barometer-stat-number" id="remainingCount">--</div>
+            <div class="barometer-stat-label">Para Meta</div>
+          </div>
         </div>
       </div>
 
@@ -1330,21 +1486,25 @@
         const goal = 500;
         const stretchGoal = 2000;
         const percentage = Math.min((currentCount / goal) * 100, 100);
+        const fillHeight = Math.min((currentCount / goal) * 100, 100);
         
         // Update the barometer elements
-        document.getElementById('current-count').textContent = currentCount;
-        document.getElementById('barometer-fill').style.width = `${percentage}%`;
-        document.getElementById('barometer-percentage').textContent = `${percentage.toFixed(1)}%`;
+        document.getElementById('barometerCount').textContent = currentCount;
+        document.getElementById('barometerFill').style.height = `${fillHeight}%`;
+        document.getElementById('progressPercentage').textContent = `${percentage.toFixed(1)}%`;
+        document.getElementById('remainingCount').textContent = Math.max(0, goal - currentCount);
         
         // Update stretch goal message if we've reached the main goal
-        const stretchDiv = document.querySelector('.barometer-stretch');
-        if (currentCount >= goal) {
+        const stretchGoalElement = document.querySelector('.barometer-goal.stretch');
+        if (currentCount >= goal && stretchGoalElement) {
           const stretchPercentage = Math.min((currentCount / stretchGoal) * 100, 100);
-          stretchDiv.innerHTML = `🎉 ¡Meta alcanzada! Progreso hacia meta extendida: ${stretchPercentage.toFixed(1)}%`;
+          stretchGoalElement.innerHTML = `🎉 ¡Meta alcanzada!<br>Progreso extendido: ${stretchPercentage.toFixed(1)}%<div class="goal-subtitle">(+$50,000 para Protocol Guild)</div>`;
         }
       } catch (error) {
         console.error('Error loading barometer data:', error);
-        document.getElementById('current-count').textContent = 'Error';
+        document.getElementById('barometerCount').textContent = '--';
+        document.getElementById('progressPercentage').textContent = 'Error';
+        document.getElementById('remainingCount').textContent = '--';
       }
     }
 

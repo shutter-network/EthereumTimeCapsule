@@ -745,15 +745,16 @@
 
     /* Barometer styles */
     .barometer-container {
-      padding: 0 40px;
+      padding: 0 20px;
       display: flex;
       flex-direction: column;
       gap: 16px;
       align-items: center;
       justify-content: center;
       width: 100%;
-      margin: 40px 0;
+      margin: 40px auto;
       position: relative;
+      max-width: 400px;
     }
 
     .barometer {
@@ -765,6 +766,16 @@
       border: 3px solid #333;
       overflow: hidden;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      margin: 0 auto;
+    }
+
+    .barometer-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      width: 100%;
+      min-height: 320px;
     }
 
     .barometer-fill {
@@ -800,11 +811,12 @@
 
     .barometer-goals {
       position: absolute;
-      right: -80px;
+      right: -120px;
       top: 0;
       display: flex;
       flex-direction: column;
       gap: 8px;
+      width: 100px;
     }
 
     .barometer-goal {
@@ -883,15 +895,24 @@
 
     @media (max-width: 420px) {
       .barometer-container {
-        padding: 0 20px;
+        padding: 0 10px;
+        max-width: 100%;
       }
       
       .barometer-goals {
-        right: -60px;
+        position: static;
+        margin-top: 20px;
+        width: 100%;
+        align-items: center;
       }
       
       .barometer-goal {
         font-size: 10px;
+        text-align: center;
+      }
+      
+      .barometer-goal::before {
+        display: none;
       }
       
       .barometer-stats {
@@ -955,7 +976,7 @@
       <!-- Progress Barometer -->
       <div class="barometer-container">
         <div class="barometer-title">Community Progress</div>
-        <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+        <div class="barometer-wrapper" style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%;">
           <div class="barometer">
             <div class="barometer-fill" id="barometerFill"></div>
             <div class="barometer-bulb">
