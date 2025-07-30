@@ -1118,10 +1118,10 @@
         <div class="barometer-title">Community Progress</div>
         <div class="barometer-wrapper">
           <div class="barometer-scale">
-            <div class="barometer-tick">1,000</div>
-            <div class="barometer-tick">750</div>
             <div class="barometer-tick goal-500">500</div>
+            <div class="barometer-tick">375</div>
             <div class="barometer-tick">250</div>
+            <div class="barometer-tick">125</div>
             <div class="barometer-tick current" id="currentTick" style="display: none;">
               <span id="currentTickValue">0</span>
             </div>
@@ -1582,8 +1582,8 @@
       document.getElementById('currentCount').textContent = currentCount;
       document.getElementById('remainingCount').textContent = Math.max(0, goal - currentCount);
       
-      // Fill height based on goal (scale from 0-1000 for better visual scaling)
-      const maxScale = 1000;
+      // Fill height based on goal (scale from 0-500 for accurate visual representation)
+      const maxScale = 500;
       const fillHeight = Math.min((currentCount / maxScale) * 100, 100);
       document.getElementById('barometerFill').style.height = `${fillHeight}%`;
       
@@ -1594,7 +1594,7 @@
         currentTick.style.display = 'flex';
         currentTickValue.textContent = currentCount;
         
-        // Position the current tick based on the count (scale from 0-1000)
+        // Position the current tick based on the count (scale from 0-500)
         const tickPosition = Math.min((currentCount / maxScale) * 100, 100);
         currentTick.style.bottom = `${tickPosition}%`;
         currentTick.style.transform = 'translateY(50%)';
