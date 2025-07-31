@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ethereum Time Capsule | Be Part of Ethereum’s Living History</title>
+  <meta name="description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.">
+
+  <!-- OpenGraph meta tags -->
+  <meta property="og:title" content="Ethereum Time Capsule | Be Part of Ethereum’s Living History">
+  <meta property="og:description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.
+">
+  <meta property="og:image" content="https://ethtimecapsule.com/media_preview.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="">
+
+  <!-- Twitter meta tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ethereum Time Capsule | Be Part of Ethereum’s Living History">
+  <meta name="twitter:description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.
+">
+  <meta name="twitter:image" content="https://ethtimecapsule.com/media_preview.png">
+
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="matomo.js"></script>
+  <style>
+    /* Figma-inspired design variables - consistent with index.html */
+    :root {
+      /* Colors */
+      --eth1: #ffffff;
+      --eth2: #ececec;
+      --eth3: #232323;
+      --eth4: #c0c0c0;
+      --eth5: #242ae0;
+      --d9d9d9: #d9d9d9;
+
+      /* Fonts */
+      --eth1-font-family: 'Inter', sans-serif;
+      --eth1-font-size: 12px;
+      --eth1-font-weight: 500;
+      --button-font-family: 'Inter', sans-serif;
+      --button-font-size: 20px;
+      --button-font-weight: 600;
+      --intro-copy-font-family: 'Inter', sans-serif;
+      --intro-copy-font-size: 20px;
+      --intro-copy-font-weight: 400;
+      --slogan-mobile-font-family: 'Space Grotesk', sans-serif;
+      --slogan-mobile-font-size: 40px;
+      --slogan-mobile-line-height: 48px;
+      --slogan-mobile-font-weight: 700;
+      --tinx-font-family: 'Inter', sans-serif;
+      --tinx-font-size: 10px;
+      --tinx-font-weight: 400;
+      --tinx-light-font-family: 'Inter', sans-serif;
+      --tinx-light-font-size: 11px;
+      --tinx-light-font-weight: 300;
+      --small-button-font-family: 'Inter', sans-serif;
+      --small-button-font-size: 16px;
+      --small-button-font-weight: 600;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--eth1-font-family);
+      background: var(--eth1);
+      color: var(--eth3);
+      line-height: 1.4;
+    }
+
+    /* Mobile Container - consistent with index.html */
+    .mobile-container {
+      background: var(--eth1);
+      border-radius: 24px;
+      border: 1px solid #000000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      max-width: 400px;
+      margin: 0 auto;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Header - consistent with index.html */
+    .header {
+      background: var(--eth2);
+      padding: 12px 20px 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 68px;
+      min-width: 272px;
+      position: relative;
+    }
+
+    .logo {
+      font-family: var(--small-button-font-family);
+      font-size: 18px;
+      font-weight: var(--small-button-font-weight);
+      color: var(--eth3);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      font-size: 24px;
+    }
+
+    .menu {
+      width: 52px;
+      height: 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--d9d9d9);
+      border-radius: 12px;
+      cursor: pointer;
+      gap: 4px;
+      padding: 14px 12px;
+      transition: all 0.3s ease;
+    }
+
+    .menu:hover {
+      background: #c5c5c5;
+    }
+
+    .menu-line {
+      width: 28px;
+      height: 2px;
+      background-color: var(--eth3);
+      border-radius: 1px;
+      transition: all 0.3s ease;
+    }
+
+    /* Menu dropdown - consistent with index.html */
+    .menu-dropdown {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--eth2);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--eth1-font-family);
+      font-size: 24px;
+      font-weight: 400;
+      transform: translateY(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .menu-dropdown.show {
+      transform: translateY(0);
+    }
+
+    .menu-dropdown a {
+      display: block;
+      padding: 20px 0;
+      text-decoration: none;
+      color: var(--eth3);
+      text-align: center;
+      width: 100%;
+      transition: opacity 0.2s ease;
+    }
+
+    .menu-dropdown a:hover {
+      opacity: 0.7;
+    }
+
+    /* Add a back button */
+    .menu-back {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 24px;
+      color: var(--eth3);
+    }
+
+    /* Progress Section */
+    .progress-section {
+      padding: 24px 0px;
+      width: 100%;
+      overflow: visible;
+    }
+
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      position: relative;
+      padding: 0 15px;
+      width: calc(100% + 10px);
+      margin-left: -5px;
+      margin-right: -5px;
+    }
+
+    .progress-steps::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: 45px;
+      right: 45px;
+      height: 2px;
+      background: #e0e0e0;
+      z-index: 1;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .step-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #e0e0e0;
+      color: #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .step.active .step-circle {
+      background: #4F46E5;
+      color: white;
+    }
+
+    .step.completed .step-circle {
+      background: #4F46E5;
+      color: white;
+    }
+
+    .step-label {
+      font-size: 11px;
+      font-weight: 400;
+      color: #666;
+      text-align: center;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: visible;
+      width: 100%;
+    }
+
+    .step-title {
+      text-align: center;
+    }
+
+    .step-number-text {
+      color: #4F46E5;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .step-description {
+      color: #333;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    /* Form Section */
+    .form-section {
+      background: #f5f5f5;
+      margin: 0 20px;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #4F46E5;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .upload-area {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+    }
+
+    .upload-area:hover {
+      border-color: #4F46E5;
+    }
+
+    .upload-text {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .upload-subtext {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .upload-input {
+      display: none;
+    }
+
+    /* Info Section */
+    .info-section {
+      background: #E8F2FF;
+      margin: 0 20px;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .info-icon {
+      width: 20px;
+      height: 20px;
+      background: #4F46E5;
+      border-radius: 50%;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .info-content {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #333;
+    }
+
+    .info-highlight {
+      color: #4F46E5;
+      font-weight: 600;
+    }
+
+    /* Primary Button */
+    .primary-button {
+      background: #4F46E5;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: calc(100% - 40px);
+      margin: 0 20px 20px 20px;
+      transition: background-color 0.3s ease;
+    }
+
+    .primary-button:hover {
+      background: #4338CA;
+    }
+
+    .primary-button:disabled {
+      background: #9CA3AF;
+      cursor: not-allowed;
+    }
+
+    /* Secondary Button */
+    .secondary-button {
+      background: #6C757D;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .secondary-button:hover {
+      background: #5A6268;
+    }
+
+    /* Button Group */
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin: 0 20px 20px 20px;
+    }
+
+    .button-group button {
+      flex: 1;
+      margin: 0;
+      width: auto;
+    }    /* Step Containers */
+    .step-container {
+      display: none;
+      flex: 1;
+      width: 100%;
+      min-height: 500px;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .step-container.active {
+      display: flex;
+    }/* Preview Styles */
+    .preview-card {
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      margin: 0 20px 20px 20px;
+      overflow: hidden;
+    }    .preview-image-container {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .issuer-tag {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .preview-content {
+      padding: 20px;
+    }
+
+    .preview-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }    .preview-meta {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .meta-icon {
+      font-size: 14px;
+      margin-top: 1px;
+      color: #666;
+    }
+
+    .meta-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .meta-label {
+      font-size: 10px;
+      color: #666;
+      font-weight: 400;
+      line-height: 1.2;
+    }
+
+    .meta-value {
+      font-size: 11px;
+      color: #333;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    .preview-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      background: #E8F2FF;
+      color: #4F46E5;
+      border: 1px solid #D1E7FF;
+      border-radius: 16px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* Progress Bar Styles */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #4F46E5;
+      transition: width 0.3s ease;
+      border-radius: 4px;
+    }
+
+    /* Status Text */
+    .status-text {
+      font-size: 14px;
+      color: #666;
+      margin: 12px 0;
+    }
+
+    /* Process Section */
+    .process-section {
+      background: #f5f5f5;
+      margin: 0 20px;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .process-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+
+    /* Completion Styles */
+    .completion-card {
+      background: #f5f5f5;
+      margin: 0 20px;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .completion-details {
+      text-align: center;
+    }
+
+    .completion-details h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+
+    .capsule-info {
+      text-align: left;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .info-label {
+      font-weight: 500;
+      color: #666;
+    }
+
+    .info-value {
+      color: #333;
+      font-weight: 500;
+    }
+
+    .info-value.hash {
+      font-family: monospace;
+      font-size: 12px;
+      word-break: break-all;
+    }
+
+    /* Share Section */
+    .share-section {
+      background: #f5f5f5;
+      margin: 0 20px;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .share-section h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+    }
+
+    .share-url-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .share-url-input {
+      flex: 1;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .share-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-social {
+      background: #1DA1F2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }    /* Completion Actions Styles */
+    .completion-actions {
+      margin: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Shareable Link Styles */
+    .shareable-link-section {
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 8px;
+    }
+
+    .link-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .link-container {
+      display: flex;
+      gap: 8px;
+    }
+
+    .link-input {
+      flex: 1;
+      background: white;
+      border: 1px solid #d0d0d0;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .copy-link-btn {
+      background: var(--eth5);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.3s ease;
+    }
+
+    .copy-link-btn:hover {
+      background: #1e22b3;
+    }    .copy-link-btn.copied {
+      background: #10b981;
+    }
+
+    /* Follow and Share Button Styles */
+    .follow-button, .share-button {
+      color: #666;
+      font-style: italic;
+    }
+
+    .follow-button {
+      background: #f5f5f5;
+      color: #333;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+
+    .follow-button:hover {
+      background: #ebebeb;
+    }
+
+    .share-button {
+      background: #FFD700;
+      color: #333;
+      border: none;
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+
+    .share-button:hover {
+      background: #F0C814;
+    }
+
+    .gallery-button {
+      background: #f5f5f5;
+      color: #333;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+
+    .gallery-button:hover {
+      background: #ebebeb;
+    }
+
+    .encrypt-another-button {
+      background: transparent;
+      color: #666;
+      border: none;
+      padding: 16px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      text-decoration: underline;
+      transition: color 0.3s ease;
+    }    .encrypt-another-button:hover {
+      color: #4F46E5;
+    }
+
+    /* Footer - consistent with index.html */
+    .footer {
+      background: var(--eth2);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 58px;
+    }
+
+    .learn-more {
+      color: #000000;
+      text-align: center;
+      font-family: var(--eth1-font-family);
+      font-size: var(--eth1-font-size);
+      font-weight: var(--eth1-font-weight);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .learn-more:hover {
+      text-decoration: underline;
+    }    /* Responsive adjustments - consistent with index.html */
+    @media (max-width: 420px) {
+      .mobile-container {
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
+        min-height: 100vh;
+      }
+
+      .progress-section {
+        padding: 20px 16px;
+      }
+        .progress-steps {
+        padding: 0;
+        margin-left: -8px;
+        margin-right: -8px;
+      }
+
+      .progress-steps::before {
+        left: 22px;
+        right: 22px;
+      }
+
+      .step-label {
+        font-size: 10px;
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form-group label {
+        font-size: 14px;
+      }
+      .upload-area {
+        height: 120px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .mobile-container {
+        max-width: 500px;
+        margin: 20px auto;
+        min-height: calc(100vh - 40px);
+      }
+    }
+
+    /* Wallet Modal Styles */
+    .wallet-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .wallet-modal-content {
+      background: var(--eth1);
+      border-radius: 16px;
+      border: 1px solid var(--eth2);
+      padding: 24px;
+      width: 90%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .wallet-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .wallet-modal-header h3 {
+      margin: 0;
+      color: var(--eth3);
+      font-family: var(--small-button-font-family);
+      font-size: 20px;
+      font-weight: var(--small-button-font-weight);
+    }
+
+    .wallet-modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--eth3);
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wallet-modal-body p {
+      margin-bottom: 16px;
+      color: var(--eth3);
+      font-family: var(--intro-copy-font-family);
+      font-size: 16px;
+    }
+
+    .wallet-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .wallet-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--eth2);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: var(--eth1);
+    }
+
+    .wallet-option:hover {
+      background: var(--eth2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .wallet-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
+    .wallet-icon-fallback {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: var(--eth2);
+      border-radius: 8px;
+    }    .wallet-name {
+      color: var(--eth3);
+      font-family: var(--small-button-font-family);
+      font-size: 16px;
+      font-weight: var(--small-button-font-weight);
+    }
+
+    /* Tags Dropdown Styles */
+    .tags-dropdown-container {
+      position: relative;
+    }
+
+    .tags-dropdown {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 44px;
+      transition: border-color 0.3s ease;
+    }
+
+    .tags-dropdown:hover {
+      border-color: #4F46E5;
+    }
+
+    .tags-dropdown.active {
+      border-color: #4F46E5;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .selected-tags {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .tags-placeholder {
+      color: #999;
+      font-size: 14px;
+    }
+
+    .tag-bubble {
+      background: #4F46E5;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag-remove {
+      cursor: pointer;
+      font-weight: bold;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+    }
+
+    .tag-remove:hover {
+      opacity: 1;
+    }
+
+    .dropdown-arrow {
+      font-size: 12px;
+      color: #666;
+      transition: transform 0.3s ease;
+    }
+
+    .tags-dropdown.active .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #4F46E5;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      border-bottom: none;
+      max-height: 240px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 12px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      font-size: 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .dropdown-item:hover {
+      background: #f8f9ff;
+    }
+
+    .dropdown-item.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #f9f9f9;
+    }
+
+    .dropdown-item.disabled:hover {
+      background: #f9f9f9;
+    }
+
+    /* Tag option styles */
+    .tag-option {
+      padding: 12px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      font-size: 14px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag-option:hover {
+      background: #f8f9ff;
+    }
+
+    .tag-option.selected {
+      background: var(--eth5);
+      color: white;
+    }
+
+    .tag-section-header {
+      padding: 12px 16px 12px 28px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #4a5568;
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      border-bottom: 2px solid #e2e8f0;
+      border-top: 1px solid #e2e8f0;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .tag-section-header:first-child {
+      margin-top: 0;
+      border-top: none;
+    }
+
+    .tag-section-header::before {
+      content: '';
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 14px;
+      background: var(--eth5);
+      border-radius: 2px;
+    }
+
+    .tag-emoji {
+      font-size: 16px;
+    }
+
+    .selected-tag {
+      background: var(--eth5);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin: 2px;
+    }
+
+    .remove-tag {
+      cursor: pointer;
+      font-weight: bold;
+      padding: 0 2px;
+      border-radius: 50%;
+    }
+
+    .remove-tag:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-container">    <!-- Header -->    <div class="header">
+      <a href="/" class="logo">
+        <img src="logo.svg" alt="Time Capsule" class="logo-icon" style="width: 60px; height: auto;">
+        <img src="headertext.png" alt="Time Capsule" style="height: 45px; width: auto;">
+      </a>
+
+      <div class="menu" id="menuButton">
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+      </div>
+    </div>
+      <!-- Progress Section -->
+    <div class="progress-section">
+      <div class="progress-steps">
+        <div class="step progress-step active">
+          <div class="step-circle">1</div>
+          <div class="step-label">Fill story</div>
+        </div>
+        <div class="step progress-step">
+          <div class="step-circle">2</div>
+          <div class="step-label">Preview</div>
+        </div>
+        <div class="step progress-step">
+          <div class="step-circle">3</div>
+          <div class="step-label">Submit</div>
+        </div>
+        <div class="step progress-step">
+          <div class="step-circle">4</div>
+          <div class="step-label">Complete</div>
+        </div>
+      </div>
+
+      <div class="step-title">
+        <div class="step-number-text">Step 1</div>
+        <div class="step-description">Fill up your entry</div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content" style="flex: 1; width: 100%; display: flex; flex-direction: column;">
+    <!-- Step 1: Fill Your Entry -->
+    <div id="step-1" class="step-container active">
+      <div class="form-section">
+        <form id="capsule-form">
+          <div class="form-group">
+            <label class="form-label">Title of your entry</label>
+            <input type="text" id="entry-title" class="form-input" placeholder="Give your entry a short title." maxlength="200" required>
+          </div>
+            <div class="form-group">
+            <label class="form-label">Your Message</label>
+            <textarea id="entry-story" class="form-textarea" placeholder="Write a message to be sealed in the time capsule." maxlength="280" required></textarea>
+            <div class="character-counter">
+              <span id="story-char-count">0</span>/280 characters
+            </div>
+          </div><div class="form-group">
+            <label class="form-label">Upload an image to be sealed (Optional)</label>
+            <div class="upload-area" onclick="document.getElementById('entry-image').click()">
+              <div class="upload-text">Upload an image</div>
+              <div class="upload-subtext">max 2Mb, png, 16:9 - or we'll use a default image</div>
+            </div>
+            <input type="file" id="entry-image" class="upload-input" accept="image/*">
+          </div>          <div class="form-group">
+            <label class="form-label">Tags (up to 2)</label>
+            <div class="tags-dropdown-container">
+              <div class="tags-dropdown" id="tags-dropdown">
+                <div class="selected-tags" id="selected-tags">
+                  <span class="tags-placeholder">Select tags...</span>
+                </div>
+                <div class="dropdown-arrow">▼</div>
+              </div>              <div class="dropdown-menu" id="dropdown-menu">
+                <!-- Tags will be populated dynamically from config -->
+              </div>
+            </div>
+            <input type="hidden" id="entry-actual-tags" value="">
+          </div>
+        </form>
+      </div>
+
+      <div class="info-section">
+        <div class="info-icon">i</div>
+        <div class="info-content">
+          Encrypting an entry costs <span class="info-highlight">0.001 ETH</span>, which will be donated to <span class="info-highlight">Protocol Guild</span>.<br><br>
+          This entry will be decrypted on <span class="info-highlight">July 30th, 2026</span>
+        </div>
+      </div>
+
+      <button type="button" id="step1-next-btn" class="primary-button">PREVIEW YOUR ENTRY</button>
+    </div>    <!-- Step 2: Preview -->
+    <div id="step-2" class="step-container">
+      <div class="preview-card">
+        <div class="preview-image-container">
+          <canvas id="preview-canvas" class="preview-image"></canvas>
+          <div class="issuer-tag">issued by <span id="preview-issuer">xyz</span></div>
+        </div>
+
+        <div class="preview-content">
+          <h2 id="preview-title" class="preview-title">My amazing entry to the Ethereum time capsule</h2>
+
+          <div class="preview-meta">
+            <div class="meta-item">
+              <div class="meta-icon">🔒</div>
+              <div class="meta-text">
+                <div class="meta-label">encrypted until</div>
+                <div class="meta-value" id="preview-unlock-date">July 1st 2025</div>
+              </div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-icon">📄</div>
+              <div class="meta-text">
+                <div class="meta-label">copy</div>
+                <div class="meta-value" id="copy-ciphertext-btn" style="cursor: pointer; color: #4F46E5;">cyphertext</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="preview-tags">
+            <span class="tag">#lol</span>
+            <span class="tag">#OnChainValues</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Encryption Status Section - moved outside preview card -->
+      <div class="encryption-status-section" id="encryption-status-section" style="margin: 20px; padding: 16px; background: #f8f9fa; border-radius: 12px; display: none;">
+        <div class="encryption-progress">
+          <div class="progress-bar">
+            <div id="preview-encryption-progress" class="progress-fill" style="width: 0%;"></div>
+          </div>
+          <div id="preview-encryption-status" class="status-text">Starting encryption...</div>
+        </div>
+        <div style="margin-top: 12px; padding: 8px; background: #e3f2fd; border-radius: 6px; font-size: 14px; color: #1565c0;">
+          Need help or found a bug? DM us on X <a href="https://x.com/ethtimecapsule" target="_blank" style="color: #1565c0; text-decoration: underline;">https://x.com/ethtimecapsule</a>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-icon">i</div>
+        <div class="info-content">
+          Encrypting an entry costs <span class="info-highlight">0.001 ETH</span>, which will be donated to <span class="info-highlight">Protocol Guild</span>.<br><br>
+          This entry will be decrypted on <span class="info-highlight">July 30th, 2026</span>
+        </div>
+      </div>
+        <button type="button" id="step2-confirm-btn" class="primary-button">SUBMIT TO BLOCKCHAIN</button>
+    </div>
+
+    <!-- Step 3: Blockchain Submission -->
+    <div id="step-3" class="step-container">
+      <div class="process-section">
+        <div class="step-title" style="margin-bottom: 20px;">
+          <div class="step-number-text">Step 3</div>
+          <div class="step-description">Submitting to Blockchain</div>
+        </div>
+
+        <!-- Wallet Connection Status -->
+        <div class="wallet-connection-section" id="wallet-connection-section">
+          <h3>🔗 Connect Your Wallet</h3>
+          <div id="wallet-connection-status" class="status-text">Please connect your wallet to continue...</div>
+          <button id="connect-wallet-for-submission" class="primary-button">CONNECT WALLET</button>
+        </div>
+
+        <!-- Blockchain Submission Progress -->
+        <div class="blockchain-submission-section" id="blockchain-submission-section" style="display: none;">
+          <h3>⛓️ Blockchain Submission</h3>
+          <div class="progress-bar">
+            <div id="submission-progress" class="progress-fill" style="width: 0%;"></div>
+          </div>
+          <div id="submission-status" class="status-text">Preparing transaction...</div>
+          <div class="submission-status">
+            <p id="submission-message">Please confirm the transaction in your wallet...</p>
+          </div>
+        </div>
+      </div>
+    </div>      <!-- Step 4: Completion -->
+    <div id="step-4" class="step-container">
+      <!-- Updated step title to match screenshot -->
+      <div class="step-title" style="margin-bottom: 20px;">
+        <div class="step-number-text">Step 4</div>
+        <div class="step-description">Preview your entry</div>
+      </div>
+
+      <!-- Preview card showing the completed entry -->
+      <div class="preview-card">
+        <div class="preview-image-container">
+          <canvas id="final-preview-canvas" class="preview-image"></canvas>
+          <div class="issuer-tag">issued by <span id="final-preview-issuer">xyz</span></div>
+        </div>
+
+        <div class="preview-content">
+          <h2 id="final-preview-title" class="preview-title">My amazing entry to the Ethereum time capsule</h2>
+
+          <div class="preview-meta">
+            <div class="meta-item">
+              <div class="meta-icon">🔒</div>
+              <div class="meta-text">
+                <div class="meta-label">encrypted until</div>
+                <div class="meta-value" id="final-unlock-date">July 1st 2025</div>
+              </div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-icon">📄</div>
+              <div class="meta-text">
+                <div class="meta-label">copy</div>
+                <div class="meta-value" id="final-copy-ciphertext-btn" style="cursor: pointer; color: #4F46E5;">cyphertext</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="preview-tags" id="final-preview-tags">
+            <span class="tag">#lol</span>
+            <span class="tag">#OnChainValues</span>
+          </div>
+        </div>
+      </div>
+        <!-- Action buttons section matching screenshot -->      <div class="completion-actions">
+        <!-- Shareable link section -->
+        <div class="shareable-link-section">
+          <div class="link-label">Your shareable link:</div>
+          <div class="link-container">
+            <input type="text" id="shareable-link-input" class="link-input" readonly>
+            <button id="copy-link-btn" class="copy-link-btn">Copy Link</button>
+          </div>
+        </div>
+
+        <button id="follow-x-btn" class="follow-button">Follow us on X</button>
+        <button id="share-x-btn" class="share-button">📋 Share on X (copies image)</button>
+        <button id="gallery-btn" class="gallery-button">See your entry in the gallery</button>
+        <button id="encrypt-another-btn" class="encrypt-another-button">Encrypt another entry</button></div>
+    </div>
+
+    </div> <!-- Close main-content -->
+
+    <!-- Footer - consistent with index.html -->
+    <div class="footer">
+      <a href="/faq.html" class="learn-more">LEARN MORE</a>
+    </div>
+
+  </div>  <!-- Scripts -->
+  <script src="public_config_loader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@shutter-network/blst@0.1.7/dist/blst.min.js"></script>
+  <script src="blst.js?v=2025062004"></script>
+  <script type="module" src="encryptDataBlst.js?v=2025062004"></script>
+  <script type="module" src="main.js?v=2025062004"></script>
+  <script src="app.js?v=2025012016"></script>
+
+  <script>
+    // Menu toggle functionality - consistent with index.html
+    function toggleMenu() {
+      // Remove existing menu if present
+      const existingMenu = document.querySelector('.menu-dropdown');
+      if (existingMenu) {
+        existingMenu.classList.remove('show');
+        setTimeout(() => {
+          existingMenu.remove();
+        }, 300);
+        return;
+      }
+
+      // Create new full-screen menu
+      const menu = document.createElement('div');
+      menu.className = 'menu-dropdown';      const links = [
+        { text: 'gallery', href: '/gallery.html' },
+        { text: 'home', href: '/' },
+        { text: 'documentation', href: 'https://github.com/shutter-network/EthereumTimeCapsule' },
+        { text: 'faq', href: '/faq.html' },
+        { text: 'imprint', href: '/imprint.html' }
+      ];
+
+      links.forEach((link, index) => {
+        const a = document.createElement('a');
+        a.href = link.href;
+        a.textContent = link.text;
+        menu.appendChild(a);
+      });
+
+      // Add language selector section
+      const langSeparator = document.createElement('div');
+      langSeparator.style.cssText = 'width: 80%; height: 1px; background: #ccc; margin: 30px auto;';
+      menu.appendChild(langSeparator);
+
+      const langTitle = document.createElement('div');
+      langTitle.textContent = 'Language / 语言';
+      langTitle.style.cssText = 'text-align: center; font-size: 18px; color: #666; margin-bottom: 20px;';
+      menu.appendChild(langTitle);
+
+      const languages = [
+        { text: 'English', href: 'create.html', current: true },
+        { text: '中文', href: 'chinese/create.html' },
+        { text: 'Español', href: 'spanish/create.html' }
+      ];
+
+      languages.forEach(lang => {
+        const a = document.createElement('a');
+        a.href = lang.href;
+        a.textContent = lang.text;
+        if (lang.current) {
+          a.style.cssText = 'color: #242ae0; font-weight: 600;';
+        }
+        menu.appendChild(a);
+      });
+
+      // Add back button
+      const backButton = document.createElement('div');
+      backButton.className = 'menu-back';
+      backButton.innerHTML = '&lt;';
+      backButton.addEventListener('click', toggleMenu);
+      menu.appendChild(backButton);
+
+      // Append to body for full-screen overlay
+      document.body.appendChild(menu);
+
+      // Trigger animation
+      setTimeout(() => {
+        menu.classList.add('show');
+      }, 10);
+        // Remove menu when clicking outside or on links
+      menu.addEventListener('click', (e) => {
+        if (e.target === menu || e.target.tagName === 'A') {
+          if (e.target.tagName === 'A') {
+            const href = e.target.href;
+            // Handle different types of links
+            if (href.startsWith('#')) {
+              // Prevent navigation for placeholder links
+              e.preventDefault();
+              toggleMenu();
+            } else {
+              // Internal links - prevent default and navigate in same tab
+              e.preventDefault();
+              toggleMenu();
+              setTimeout(() => {
+                window.location.href = href;
+              }, 300); // Wait for menu to close
+            }
+          } else {
+            toggleMenu();
+          }
+        }
+      });
+    }
+
+    // Handle file upload change event
+    document.addEventListener('DOMContentLoaded', function() {      // Add event listener for menu button
+      document.getElementById('menuButton').addEventListener('click', toggleMenu);
+
+      const fileInput = document.querySelector('#entry-image');
+      const uploadArea = document.querySelector('.upload-area');
+
+      if (fileInput && uploadArea) {
+        fileInput.addEventListener('change', function(e) {
+          if (e.target.files && e.target.files[0]) {
+            const fileName = e.target.files[0].name;
+            uploadArea.querySelector('.upload-text').textContent = fileName;
+            uploadArea.querySelector('.upload-subtext').textContent = 'File selected';
+          }
+        });
+      }
+
+      // Initialize wallet discovery when page loads
+      initWalletDiscovery();
+    });
+  </script>
+
+  <!-- Wallet Selection Modal -->
+  <div id="walletModal" class="wallet-modal" style="display: none;">
+    <div class="wallet-modal-content">
+      <div class="wallet-modal-header">
+        <h3>Connect Wallet</h3>
+        <button class="wallet-modal-close" onclick="closeWalletModal()">×</button>
+      </div>
+      <div class="wallet-modal-body">
+        <p>Choose your preferred wallet to connect:</p>
+        <div id="walletList" class="wallet-list">
+          <!-- Wallet options will be populated here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

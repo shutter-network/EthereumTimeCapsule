@@ -1,21 +1,21 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ethereum Time Capsule | Be Part of Ethereum’s Living History</title>
-  <meta name="description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.">
+  <title>Ethereum Time Capsule | Be Part of Ethereumâ€™s Living History</title>
+  <meta name="description" content="To celebrate Ethereumâ€™s 10th anniversary, we created the Ethereum Time Capsule â€” privately sealed now, revealed one year later, and immutably recorded onchain forever.">
 
   <!-- OpenGraph meta tags -->
-  <meta property="og:title" content="Ethereum Time Capsule | Be Part of Ethereum’s Living History">
-  <meta property="og:description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.">
+  <meta property="og:title" content="Ethereum Time Capsule | Be Part of Ethereumâ€™s Living History">
+  <meta property="og:description" content="To celebrate Ethereumâ€™s 10th anniversary, we created the Ethereum Time Capsule â€” privately sealed now, revealed one year later, and immutably recorded onchain forever.">
   <meta property="og:image" content="https://ethtimecapsule.com/media_preview.png">
   <meta property="og:type" content="website">
   <meta property="og:url" content="">
 
   <!-- Twitter meta tags -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ethereum Time Capsule | Be Part of Ethereum’s Living History">
-  <meta name="twitter:description" content="To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule — privately sealed now, revealed one year later, and immutably recorded onchain forever.
+  <meta name="twitter:title" content="Ethereum Time Capsule | Be Part of Ethereumâ€™s Living History">
+  <meta name="twitter:description" content="To celebrate Ethereumâ€™s 10th anniversary, we created the Ethereum Time Capsule â€” privately sealed now, revealed one year later, and immutably recorded onchain forever.
 ">
   <meta name="twitter:image" content="https://ethtimecapsule.com/media_preview.png">
 
@@ -409,6 +409,74 @@
       box-shadow: 0 8px 25px rgba(36, 42, 224, 0.3);
     }
 
+    .button-add-your-entry.disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .button-add-your-entry.disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Countdown Styles */
+    .countdown-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 30px 0;
+      padding: 24px;
+      background: #f8f9fa;
+      border-radius: 16px;
+      border: 2px solid var(--eth5);
+      margin-left: 20px;
+      margin-right: 20px;
+    }
+
+    .countdown-title {
+      font-family: var(--small-button-font-family);
+      font-size: 18px;
+      font-weight: var(--small-button-font-weight);
+      color: var(--eth5);
+      margin-bottom: 16px;
+    }
+
+    .countdown-timer {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .countdown-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--eth1);
+      border-radius: 12px;
+      padding: 12px 8px;
+      min-width: 60px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .countdown-unit span {
+      font-family: var(--slogan-mobile-font-family);
+      font-size: 24px;
+      font-weight: var(--slogan-mobile-font-weight);
+      color: var(--eth3);
+      line-height: 1;
+    }
+
+    .countdown-unit label {
+      font-family: var(--tinx-font-family);
+      font-size: var(--tinx-font-size);
+      font-weight: var(--tinx-font-weight);
+      color: #666;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
     .add-your-entry {
       color: var(--eth1);
       text-align: center;
@@ -558,7 +626,7 @@
     }
 
     .section-list li::before {
-      content: "•";
+      content: "â€¢";
       color: var(--eth3);
       font-size: 20px;
       position: absolute;
@@ -1055,19 +1123,41 @@
       <!-- Copy section -->
       <div class="copy">
         <div class="main-heading">
-          Be part<br />
-          of Ethereum's<br />
-          living history
+          The Ethereum<br />
+          Time Capsule<br />
+          is now SEALED
         </div>
 
         <div class="intro-copy">
-          To celebrate Ethereum’s 10th anniversary, we created the Ethereum Time Capsule<br />
-          — privately sealed now, revealed one year later, and immutably recorded onchain forever.
+          The Ethereum Time Capsule is now sealed! All entries submitted during July 2025 are privately encrypted and will be revealed exactly one year later on July 30th, 2026. Thank you to everyone who participated in creating this piece of Ethereum history.
         </div>
       </div>
 
-      <a href="/create.html" class="button-add-your-entry">
-        <div class="add-your-entry">ADD YOUR ENTRY</div>
+      <!-- Countdown Section -->
+      <div class="countdown-container">
+        <div class="countdown-title">Reveals in:</div>
+        <div class="countdown-timer" id="countdownTimer">
+          <div class="countdown-unit">
+            <span id="countdownDays">000</span>
+            <label>Days</label>
+          </div>
+          <div class="countdown-unit">
+            <span id="countdownHours">00</span>
+            <label>Hours</label>
+          </div>
+          <div class="countdown-unit">
+            <span id="countdownMinutes">00</span>
+            <label>Minutes</label>
+          </div>
+          <div class="countdown-unit">
+            <span id="countdownSeconds">00</span>
+            <label>Seconds</label>
+          </div>
+        </div>
+      </div>
+
+      <a href="/create.html" class="button-add-your-entry disabled">
+        <div class="add-your-entry">ENTRY CREATION CLOSED</div>
       </a>
 
       <img class="section-image" src="opened_capsule_with_flares.svg"></img>
@@ -1076,7 +1166,7 @@
       <div class="section-container">
         <div class="section-heading">Open to all</div>
         <div class="section-text">
-          Every builder, user, artist, and dreamer is invited to leave their mark: stories of building dApps, funny memories, alpha drops, timeless memes, project shills, visions for Ethereum’s future — even riddles to solve or hidden treasures to unlock in the future.
+          Every builder, user, artist, and dreamer is invited to leave their mark: stories of building dApps, funny memories, alpha drops, timeless memes, project shills, visions for Ethereumâ€™s future â€” even riddles to solve or hidden treasures to unlock in the future.
         </div>
         <a href="/gallery.html" class="button-secondary">
           <div class="button-text">SEE ALL ENTRIES</div>
@@ -1090,9 +1180,9 @@
       <div class="section-container">
         <div class="section-heading">How it works</div>
         <ul class="section-list">
-          <li>Submit entry: 30 June – 30 July</li>
+          <li>Submit entry: 30 June â€“ 30 July</li>
           <li>Sealed until: 30 July 2026 at 00:00</li>
-          <li>Entries are sealed with Shutter API’s threshold encryption</li>
+          <li>Entries are sealed with Shutter APIâ€™s threshold encryption</li>
         </ul>
         <a href="https://www.shutter.network/shutter-api" class="button-secondary">
           <div class="button-text">ABOUT SHUTTER API</div>
@@ -1161,10 +1251,10 @@
       <div class="section-container" style="margin-top: 80px; margin-bottom: 60px;">
         <div class="section-content centered">
           <div class="section-heading" style="color: var(--eth5);">
-            Are you ready to be part of Ethereum's living history ?
+            The Time Capsule is now sealed - entries will be revealed July 30th, 2026!
           </div>
-          <a href="/create.html" class="button-primary-large">
-            <div class="button-text">SUBMIT ENTRY</div>
+          <a href="/gallery.html" class="button-primary-large">
+            <div class="button-text">VIEW ALL ENTRIES</div>
           </a>
         </div>
       </div>
@@ -1313,7 +1403,7 @@
         const loadingIndicator = document.getElementById('carouselLoading');
         loadingIndicator.style.display = 'flex';
 
-        console.log('🔄 Loading capsules for homepage carousel...');
+        console.log('ðŸ”„ Loading capsules for homepage carousel...');
 
         // Load public config to check for custom capsule IDs
         const config = await loadPublicConfig();
@@ -1322,7 +1412,7 @@
         let capsules = [];
 
         if (customCapsuleIds.length > 0) {
-          console.log('📋 Using configured capsule IDs:', customCapsuleIds);
+          console.log('ðŸ“‹ Using configured capsule IDs:', customCapsuleIds);
 
           // Load specific capsules by ID using the individual capsule endpoint
           for (const capsuleId of customCapsuleIds) {
@@ -1331,16 +1421,16 @@
 
               if (response.data.success && response.data.capsule) {
                 capsules.push(response.data.capsule);
-                console.log(`✅ Loaded capsule ${capsuleId}:`, response.data.capsule.title);
+                console.log(`âœ… Loaded capsule ${capsuleId}:`, response.data.capsule.title);
               } else {
-                console.warn(`⚠️ Capsule ${capsuleId} not found`);
+                console.warn(`âš ï¸ Capsule ${capsuleId} not found`);
               }
             } catch (error) {
-              console.warn(`⚠️ Failed to load capsule ${capsuleId}:`, error.message);
+              console.warn(`âš ï¸ Failed to load capsule ${capsuleId}:`, error.message);
             }
           }
         } else {
-          console.log('📋 No custom capsule IDs configured, loading latest capsules');
+          console.log('ðŸ“‹ No custom capsule IDs configured, loading latest capsules');
 
           // Load up to 9 capsules from the API (fallback behavior)
           const response = await axios.get(`${getApiBaseUrl()}/api/capsules`, {
@@ -1358,7 +1448,7 @@
           capsules = response.data.capsules;
         }
 
-        console.log(`✅ Loaded ${capsules.length} capsules for carousel`);
+        console.log(`âœ… Loaded ${capsules.length} capsules for carousel`);
 
         if (capsules.length > 0) {
           const carousel = document.getElementById('thumbCarousel');
@@ -1446,7 +1536,7 @@
         </div>
         <img class="image-cropped" src="${imageSrc}" alt="Capsule image" loading="lazy"
              onerror="handleImageError(this, '${pixelatedCID}', ${capsule.id})" />
-        <div class="image-placeholder" style="display: none;">🔒</div>
+        <div class="image-placeholder" style="display: none;">ðŸ”’</div>
       `;
 
       // Add click handler to view capsule in gallery
@@ -1489,14 +1579,14 @@
       menu.appendChild(langSeparator);
 
       const langTitle = document.createElement('div');
-      langTitle.textContent = 'Language / 语言';
+      langTitle.textContent = 'Language / è¯­è¨€';
       langTitle.style.cssText = 'text-align: center; font-size: 18px; color: #666; margin-bottom: 20px;';
       menu.appendChild(langTitle);
 
       const languages = [
         { text: 'English', href: 'index.html', current: true },
-        { text: '中文', href: 'chinese/index.html' },
-        { text: 'Español', href: 'spanish/index.html' }
+        { text: 'ä¸­æ–‡', href: 'chinese/index.html' },
+        { text: 'EspaÃ±ol', href: 'spanish/index.html' }
       ];
 
       languages.forEach(lang => {
@@ -1549,9 +1639,39 @@
     }
 
     // =============  BAROMETER FUNCTIONALITY  =============
+    // =============  COUNTDOWN FUNCTIONS  =============
+    
+    function updateCountdown() {
+      const revealDate = new Date('July 30, 2026 00:00:00 UTC');
+      const now = new Date();
+      const timeDiff = revealDate - now;
+      
+      if (timeDiff <= 0) {
+        // Time capsule has been revealed
+        document.getElementById('countdownTimer').innerHTML = '<div style="color: var(--eth5); font-size: 24px; font-weight: 700;">TIME CAPSULE REVEALED!</div>';
+        return;
+      }
+      
+      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+      
+      document.getElementById('countdownDays').textContent = days.toString().padStart(3, '0');
+      document.getElementById('countdownHours').textContent = hours.toString().padStart(2, '0');
+      document.getElementById('countdownMinutes').textContent = minutes.toString().padStart(2, '0');
+      document.getElementById('countdownSeconds').textContent = seconds.toString().padStart(2, '0');
+    }
+    
+    // Start countdown timer
+    function startCountdown() {
+      updateCountdown(); // Initial update
+      setInterval(updateCountdown, 1000); // Update every second
+    }
+
     async function loadBarometerData() {
       try {
-        console.log('🎯 Loading barometer data...');
+        console.log('ðŸŽ¯ Loading barometer data...');
         
         // Fetch total capsule count from API
         const response = await axios.get(`${getApiBaseUrl()}/api/capsules/count`);
@@ -1560,7 +1680,7 @@
           const currentCount = response.data.count;
           const goal = 500;
           
-          console.log(`📊 Current capsules: ${currentCount}, Goal: ${goal}`);
+          console.log(`ðŸ“Š Current capsules: ${currentCount}, Goal: ${goal}`);
           
           updateBarometer(currentCount, goal);
         } else {
@@ -1609,9 +1729,14 @@
 
     // Load sample capsules and barometer data when page loads
     document.addEventListener('DOMContentLoaded', () => {
+      startCountdown();
       loadSampleCapsules();
       loadBarometerData();
     });
   </script>
 </body>
 </html>
+
+
+
+
