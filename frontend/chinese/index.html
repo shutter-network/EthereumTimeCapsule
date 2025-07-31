@@ -1020,6 +1020,68 @@
         min-height: calc(100vh - 40px);
       }
     }
+
+    .button-add-your-entry.disabled {
+      background: rgba(128, 128, 128, 0.2);
+      border: 2px solid rgba(128, 128, 128, 0.3);
+      cursor: not-allowed;
+    }
+
+    .button-add-your-entry.disabled .add-your-entry {
+      color: rgba(128, 128, 128, 0.7);
+    }
+
+    .countdown-container {
+      margin: 30px 0;
+      text-align: center;
+    }
+
+    .countdown-title {
+      font-size: 1.2em;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .countdown-timer {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .countdown-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 60px;
+    }
+
+    .countdown-unit span {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #007bff;
+      font-family: 'Courier New', monospace;
+      min-width: 1.5em;
+      text-align: center;
+    }
+
+    .countdown-unit label {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 5px;
+      font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+      .countdown-unit span {
+        font-size: 2em;
+      }
+      
+      .countdown-timer {
+        gap: 15px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1047,19 +1109,52 @@
       <!-- Copy section -->
       <div class="copy">
         <div class="main-heading">
-          成为<br />
           以太坊<br />
-          活历史的一部分
+          时间胶囊<br />
+          已密封
         </div>
 
         <div class="intro-copy">
-          为庆祝以太坊十周年，我们创建了以太坊时间胶囊<br />
-          — 现在私密封存，一年后揭晓，永久记录在链上。
+          以太坊时间胶囊已经密封！所有在2025年7月提交的记录都已私密加密，将在一年后的2026年7月30日准确揭晓。感谢所有参与创造这段以太坊历史的人们。
         </div>
       </div>
 
-      <a href="create.html" class="button-add-your-entry">
-        <div class="add-your-entry">添加您的记录</div>
+      <!-- Countdown Section -->
+      <div class="countdown-container">
+        <div class="countdown-title">揭晓倒计时：</div>
+        <div class="countdown-timer" id="countdownTimer">
+          <div class="countdown-unit">
+            <span id="countdownDays">000</span>
+            <label>天</label>
+          </div>
+          <div class="countdown-unit">
+            <span id="countdownHours">00</span>
+            <label>时</label>
+          </div>
+          <div class="countdown-unit">
+            <span id="countdownMinutes">00</span>
+            <label>分</label>
+          </div>
+          <div class="countdown-unit">
+            <span id="countdownSeconds">00</span>
+            <label>秒</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- POAP Section -->
+      <div class="section-container" style="margin: 30px 0; text-align: center;">
+        <img src="../poap.png" alt="以太坊时间胶囊 POAP" style="width: 150px; height: 150px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
+        <div class="section-text" style="text-align: center; max-width: 320px; margin: 0 auto;">
+          所有提交记录的用户都将获得纪念性POAP（出席证明协议）NFT！
+        </div>
+        <a href="https://poap.gallery/drops/193287" target="_blank" rel="noopener noreferrer" class="button-secondary" style="margin-top: 15px;">
+          <div class="button-text">查看 POAP</div>
+        </a>
+      </div>
+
+      <a href="create.html" class="button-add-your-entry disabled">
+        <div class="add-your-entry">记录创建已关闭</div>
       </a>
 
       <img class="section-image" src="../opened_capsule_with_flares.svg"></img>
@@ -1543,6 +1638,31 @@
     // Expose functions globally for HTML onclick handlers
     window.handleImageError = handleImageError;
 
+    // =============  COUNTDOWN FUNCTIONALITY  =============
+    function updateCountdown() {
+      const revealDate = new Date('2026-07-30T00:00:00Z');
+      const now = new Date();
+      const timeDiff = revealDate - now;
+
+      if (timeDiff <= 0) {
+        document.getElementById('countdownDays').textContent = '000';
+        document.getElementById('countdownHours').textContent = '00';
+        document.getElementById('countdownMinutes').textContent = '00';
+        document.getElementById('countdownSeconds').textContent = '00';
+        return;
+      }
+
+      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+      document.getElementById('countdownDays').textContent = days.toString().padStart(3, '0');
+      document.getElementById('countdownHours').textContent = hours.toString().padStart(2, '0');
+      document.getElementById('countdownMinutes').textContent = minutes.toString().padStart(2, '0');
+      document.getElementById('countdownSeconds').textContent = seconds.toString().padStart(2, '0');
+    }
+
     // =============  BAROMETER FUNCTIONALITY  =============
     async function loadBarometerData() {
       try {
@@ -1606,6 +1726,10 @@
     document.addEventListener('DOMContentLoaded', function() {
       loadSampleCapsules();
       loadBarometerData();
+      
+      // Start countdown timer
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
     });
   </script>
 </body>

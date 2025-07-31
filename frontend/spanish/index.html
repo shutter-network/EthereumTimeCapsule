@@ -408,6 +408,74 @@
       box-shadow: 0 8px 25px rgba(36, 42, 224, 0.3);
     }
 
+    .button-add-your-entry.disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .button-add-your-entry.disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Countdown Styles */
+    .countdown-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 30px 0;
+      padding: 24px;
+      background: #f8f9fa;
+      border-radius: 16px;
+      border: 2px solid var(--eth5);
+      margin-left: 20px;
+      margin-right: 20px;
+    }
+
+    .countdown-title {
+      font-family: var(--small-button-font-family);
+      font-size: 18px;
+      font-weight: var(--small-button-font-weight);
+      color: var(--eth5);
+      margin-bottom: 16px;
+    }
+
+    .countdown-timer {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .countdown-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--eth1);
+      border-radius: 12px;
+      padding: 12px 8px;
+      min-width: 60px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .countdown-unit span {
+      font-family: var(--slogan-mobile-font-family);
+      font-size: 24px;
+      font-weight: var(--slogan-mobile-font-weight);
+      color: var(--eth3);
+      line-height: 1;
+    }
+
+    .countdown-unit label {
+      font-family: var(--tinx-font-family);
+      font-size: var(--tinx-font-size);
+      font-weight: var(--tinx-font-weight);
+      color: #666;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
     .add-your-entry {
       color: var(--eth1);
       text-align: center;
@@ -1071,19 +1139,52 @@
       <!-- Copy section -->
       <div class="copy">
         <div class="main-heading">
-          Sé parte<br />
-          de la historia<br />
-          de Ethereum
+          La Cápsula del Tiempo<br />
+          de Ethereum<br />
+          está SELLADA
         </div>
 
         <div class="intro-copy">
-          Para celebrar los 10 años de Ethereum, creamos la Cápsula del Tiempo de Ethereum<br />
-          — sellada de forma privada hoy, revelada en un año y guardada onchain para siempre.
+          ¡La Cápsula del Tiempo de Ethereum ya está sellada! Todas las entradas enviadas durante julio de 2025 están encriptadas de forma privada y se revelarán exactamente un año después, el 30 de julio de 2026. Gracias a todos los que participaron en la creación de esta pieza de la historia de Ethereum.
         </div>
       </div>
 
-      <a href="create.html" class="button-add-your-entry">
-        <div class="add-your-entry">AÑADE TU ENTRADA</div>
+      <!-- Countdown Section -->
+      <div class="countdown-container">
+        <div class="countdown-title">Se revela en:</div>
+        <div class="countdown-timer" id="countdownTimer">
+          <div class="countdown-unit">
+            <span id="countdownDays">000</span>
+            <label>Días</label>
+          </div>
+          <div class="countdown-unit">
+            <span id="countdownHours">00</span>
+            <label>Horas</label>
+          </div>
+          <div class="countdown-unit">
+            <span id="countdownMinutes">00</span>
+            <label>Minutos</label>
+          </div>
+          <div class="countdown-unit">
+            <span id="countdownSeconds">00</span>
+            <label>Segundos</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- POAP Section -->
+      <div class="section-container" style="margin: 30px 0; text-align: center;">
+        <img src="../poap.png" alt="POAP Cápsula del Tiempo de Ethereum" style="width: 150px; height: 150px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
+        <div class="section-text" style="text-align: center; max-width: 320px; margin: 0 auto;">
+          ¡Todos los que enviaron una entrada recibirán un NFT POAP (Protocolo de Prueba de Asistencia) conmemorativo!
+        </div>
+        <a href="https://poap.gallery/drops/193287" target="_blank" rel="noopener noreferrer" class="button-secondary" style="margin-top: 15px;">
+          <div class="button-text">VER POAP</div>
+        </a>
+      </div>
+
+      <a href="create.html" class="button-add-your-entry disabled">
+        <div class="add-your-entry">CREACIÓN DE ENTRADAS CERRADA</div>
       </a>
 
       <img class="section-image" src="../opened_capsule_with_flares.svg"></img>
@@ -1571,6 +1672,36 @@
     document.getElementById('menuButton').addEventListener('click', toggleMenu);
 
     // =============  BAROMETER FUNCTIONALITY  =============
+    // =============  COUNTDOWN FUNCTIONS  =============
+    
+    function updateCountdown() {
+      const revealDate = new Date('July 30, 2026 00:00:00 UTC');
+      const now = new Date();
+      const timeDiff = revealDate - now;
+      
+      if (timeDiff <= 0) {
+        // Time capsule has been revealed
+        document.getElementById('countdownTimer').innerHTML = '<div style="color: var(--eth5); font-size: 24px; font-weight: 700;">¡CÁPSULA DEL TIEMPO REVELADA!</div>';
+        return;
+      }
+      
+      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+      
+      document.getElementById('countdownDays').textContent = days.toString().padStart(3, '0');
+      document.getElementById('countdownHours').textContent = hours.toString().padStart(2, '0');
+      document.getElementById('countdownMinutes').textContent = minutes.toString().padStart(2, '0');
+      document.getElementById('countdownSeconds').textContent = seconds.toString().padStart(2, '0');
+    }
+    
+    // Start countdown timer
+    function startCountdown() {
+      updateCountdown(); // Initial update
+      setInterval(updateCountdown, 1000); // Update every second
+    }
+
     async function loadBarometerData() {
       try {
         console.log('🎯 Loading barometer data...');
@@ -1631,6 +1762,7 @@
 
     // Load sample capsules and barometer data when page loads
     document.addEventListener('DOMContentLoaded', function() {
+      startCountdown();
       loadSampleCapsules();
       loadBarometerData();
     });
